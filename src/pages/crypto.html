@@ -1,0 +1,567 @@
+---
+title: Cryptographic design
+description: The whole cryptographic design of sealctl on one page: derivation tree, one approval as a sequence, who sees what, key lifetimes and primitives.
+---
+<div class="wrap">
+  <header class="page-head">
+    <p class="eyebrow">Cryptographic design</p>
+    <h1>Every key from 24 words. <em>Only the phone holds the root.</em></h1>
+    <p class="lede">Every key comes from 24 words. The phone holds the root and derives a key per object. A machine gets a key only after the phone approves, sealed so that only that machine's one-time key opens it. The relay carries sealed messages and sees no keys.</p>
+    <p class="src">Describes <a href="{{protocol.base}}">protocol version 1</a> at revision <a href="https://github.com/sealctl/sealctl/commit/{{protocol.sha}}"><code>{{protocol.rev}}</code></a>, for the phone version of sealctl ({{release.phoneVersion}}, in development). The current release, {{release.current}}, uses a Ledger and a different derivation: <a href="https://github.com/sealctl/sealctl/blob/main/docs/derived-keys.md">derived-keys.md</a>. Items the protocol marks as planned carry a <span class="pill pill-planned">Planned</span> pill.</p>
+  </header>
+
+  <nav class="toc" aria-label="On this page">
+    <ol>
+      <li><a href="#tree">Derivation tree</a></li>
+      <li><a href="#approval">One approval</a></li>
+      <li><a href="#relay-view">What the relay sees</a></li>
+      <li><a href="#who">Who sees what</a></li>
+      <li><a href="#levels">Confirmation levels</a></li>
+      <li><a href="#lifetimes">Key lifetimes</a></li>
+      <li><a href="#primitives">Primitives and libraries</a></li>
+      <li><a href="#not-protected">Deliberately not protected</a></li>
+      <li><a href="#check">Where to check</a></li>
+    </ol>
+  </nav>
+
+  <section class="section-tight" id="tree" aria-labelledby="tree-h">
+    <h2 id="tree-h">Derivation tree</h2>
+    <p class="prose"><code>derive(root, label)</code> is HKDF-SHA256 of the root with <code>"sealctl/v1/"</code> and the label. Keys in sealing-wax colour open data; keys in ink sign or identify.</p>
+    <figure class="diagram">
+<svg class="dg dg-wide" viewBox="0 0 960 626" width="960" height="626" role="img" aria-labelledby="tree-w-t tree-w-d">
+<title id="tree-w-t">Derivation tree: every key from the 24 words</title>
+<desc id="tree-w-d">The 24 words give the BIP39 seed, and the seed gives the root with HKDF-SHA256. From the root, derive(root, label) gives one key per purpose: phone identity (phone:identity), phone box key (phone:box), store key (secrets:&lt;store-id&gt;), own-approval key (secret:&lt;file-id&gt;), volume key (volume:&lt;volume-id&gt;), backup key (backup:&lt;repository-id&gt;), state key (state) and the words fingerprint (fingerprint). Under the store key, each file key is HKDF of the store key with sealctl/v1/file:&lt;file-id&gt;, computed on the machine. Separately, the machine's pairing key, machine box key and per-request one-time key are random and made on the machine; they never come from the words.</desc>
+<rect x="20" y="20" width="290" height="62" rx="8" class="box-secret"/>
+<text x="36" y="47" class="t-l t-accent">24 words</text>
+<text x="36" y="70" class="t-s t-ink2 t-sans">BIP39 English, on paper</text>
+<rect x="20" y="150" width="290" height="62" rx="8" class="box-secret"/>
+<text x="36" y="177" class="t-l t-accent">seed</text>
+<text x="36" y="200" class="t-s t-ink2 t-sans">computed, then wiped</text>
+<rect x="20" y="280" width="290" height="62" rx="8" class="box-secret"/>
+<text x="36" y="307" class="t-l t-accent">root</text>
+<text x="36" y="330" class="t-s t-ink2 t-sans">on the phone only</text>
+<line x1="60" y1="82" x2="60" y2="142" class="line-secret"/>
+<polygon points="60,150 53,140.2 67,140.2" class="arrowhead-secret"/>
+<text x="76" y="120" class="t-s">PBKDF2 (BIP39)</text>
+<line x1="60" y1="212" x2="60" y2="272" class="line-secret"/>
+<polygon points="60,280 53,270.2 67,270.2" class="arrowhead-secret"/>
+<text x="76" y="250" class="t-s">HKDF "sealctl/v1/root"</text>
+<line x1="310" y1="311" x2="340" y2="311" class="line-secret"/>
+<line x1="340" y1="49" x2="340" y2="577" class="line"/>
+<line x1="340" y1="49" x2="362" y2="49" class="line"/>
+<polygon points="370,49 360.2,42 360.2,56" class="arrowhead"/>
+<rect x="370" y="20" width="570" height="58" rx="8" class="box"/>
+<text x="384" y="44" class="t-m">derive(root, "phone:identity")</text>
+<text x="384" y="66" class="t-s t-ink2 t-sans">Phone identity · Ed25519, signs replies and calls</text>
+<line x1="340" y1="115" x2="362" y2="115" class="line-secret"/>
+<polygon points="370,115 360.2,108 360.2,122" class="arrowhead-secret"/>
+<rect x="370" y="86" width="570" height="58" rx="8" class="box-secret"/>
+<text x="384" y="110" class="t-m">derive(root, "phone:box")</text>
+<text x="384" y="132" class="t-s t-ink2 t-sans">Phone box key · X25519, opens requests to the phone</text>
+<line x1="340" y1="181" x2="362" y2="181" class="line-secret"/>
+<polygon points="370,181 360.2,174 360.2,188" class="arrowhead-secret"/>
+<rect x="370" y="152" width="570" height="58" rx="8" class="box-secret"/>
+<text x="384" y="176" class="t-m">derive(root, "secrets:&lt;store-id&gt;")</text>
+<text x="384" y="198" class="t-s t-ink2 t-sans">Store key · opens the secret store</text>
+<path d="M 390 210 V 247 H 402" class="line-secret"/>
+<polygon points="410,247 400.2,240 400.2,254" class="arrowhead-secret"/>
+<rect x="410" y="218" width="530" height="58" rx="8" class="box-secret"/>
+<text x="424" y="242" class="t-m">HKDF(store key, "sealctl/v1/file:&lt;file-id&gt;")</text>
+<text x="424" y="264" class="t-s t-ink2 t-sans">File key · one .sealed file, computed on the machine</text>
+<line x1="340" y1="313" x2="362" y2="313" class="line-secret"/>
+<polygon points="370,313 360.2,306 360.2,320" class="arrowhead-secret"/>
+<rect x="370" y="284" width="570" height="58" rx="8" class="box-secret"/>
+<text x="384" y="308" class="t-m">derive(root, "secret:&lt;file-id&gt;")</text>
+<text x="384" y="330" class="t-s t-ink2 t-sans">Own-approval key · one --own-approval secret</text>
+<line x1="340" y1="379" x2="362" y2="379" class="line-secret"/>
+<polygon points="370,379 360.2,372 360.2,386" class="arrowhead-secret"/>
+<rect x="370" y="350" width="570" height="58" rx="8" class="box-secret"/>
+<text x="384" y="374" class="t-m">derive(root, "volume:&lt;volume-id&gt;")</text>
+<text x="384" y="396" class="t-s t-ink2 t-sans">Volume key · the volume passphrase</text>
+<line x1="340" y1="445" x2="362" y2="445" class="line-secret"/>
+<polygon points="370,445 360.2,438 360.2,452" class="arrowhead-secret"/>
+<rect x="370" y="416" width="570" height="58" rx="8" class="box-secret"/>
+<text x="384" y="440" class="t-m">derive(root, "backup:&lt;repository-id&gt;")</text>
+<text x="384" y="462" class="t-s t-ink2 t-sans">Backup key · the restic password</text>
+<line x1="340" y1="511" x2="362" y2="511" class="line-secret"/>
+<polygon points="370,511 360.2,504 360.2,518" class="arrowhead-secret"/>
+<rect x="370" y="482" width="570" height="58" rx="8" class="box-secret"/>
+<text x="384" y="506" class="t-m">derive(root, "state")</text>
+<text x="384" y="528" class="t-s t-ink2 t-sans">State key · seals the phone's backup on the relay</text>
+<line x1="340" y1="577" x2="362" y2="577" class="line"/>
+<polygon points="370,577 360.2,570 360.2,584" class="arrowhead"/>
+<rect x="370" y="548" width="570" height="58" rx="8" class="box"/>
+<text x="384" y="572" class="t-m">derive(root, "fingerprint")</text>
+<text x="384" y="594" class="t-s t-ink2 t-sans">Words fingerprint · 4 characters, not secret</text>
+<rect x="20" y="400" width="290" height="190" rx="8" class="box-planned"/>
+<text x="36" y="428" class="t-s t-b t-sans">random, made on the machine</text>
+<text x="36" y="458" class="t-m">Pairing key</text>
+<text x="36" y="477" class="t-s t-ink2 t-sans">Ed25519, signs requests</text>
+<text x="36" y="502" class="t-m t-accent">Machine box key</text>
+<text x="36" y="521" class="t-s t-ink2 t-sans">X25519, opens phone messages</text>
+<text x="36" y="546" class="t-m t-accent">One-time key</text>
+<text x="36" y="565" class="t-s t-ink2 t-sans">X25519, one per request</text>
+</svg>
+<svg class="dg dg-narrow" viewBox="0 0 320 1094" width="320" height="1094" role="img" aria-labelledby="tree-n-t tree-n-d">
+<title id="tree-n-t">Derivation tree: every key from the 24 words</title>
+<desc id="tree-n-d">The 24 words give the BIP39 seed, and the seed gives the root with HKDF-SHA256. From the root, derive(root, label) gives one key per purpose: phone identity (phone:identity), phone box key (phone:box), store key (secrets:&lt;store-id&gt;), own-approval key (secret:&lt;file-id&gt;), volume key (volume:&lt;volume-id&gt;), backup key (backup:&lt;repository-id&gt;), state key (state) and the words fingerprint (fingerprint). Under the store key, each file key is HKDF of the store key with sealctl/v1/file:&lt;file-id&gt;, computed on the machine. Separately, the machine's pairing key, machine box key and per-request one-time key are random and made on the machine; they never come from the words.</desc>
+<rect x="8" y="8" width="304" height="56" rx="8" class="box-secret"/>
+<text x="22" y="33" class="t-l t-accent">24 words</text>
+<text x="22" y="54" class="t-m t-ink2 t-sans">BIP39, on paper</text>
+<line x1="38" y1="64" x2="38" y2="98" class="line-secret"/>
+<polygon points="38,106 31,96.2 45,96.2" class="arrowhead-secret"/>
+<text x="56" y="91" class="t-m">PBKDF2 (BIP39)</text>
+<rect x="8" y="106" width="304" height="56" rx="8" class="box-secret"/>
+<text x="22" y="131" class="t-l t-accent">seed</text>
+<text x="22" y="152" class="t-m t-ink2 t-sans">computed, then wiped</text>
+<line x1="38" y1="162" x2="38" y2="196" class="line-secret"/>
+<polygon points="38,204 31,194.2 45,194.2" class="arrowhead-secret"/>
+<text x="56" y="189" class="t-m">HKDF "sealctl/v1/root"</text>
+<rect x="8" y="204" width="304" height="56" rx="8" class="box-secret"/>
+<text x="22" y="229" class="t-l t-accent">root</text>
+<text x="22" y="250" class="t-m t-ink2 t-sans">on the phone only</text>
+<text x="8" y="290" class="t-m t-b">derive(root, label):</text>
+<line x1="22" y1="324" x2="34" y2="324" class="line"/>
+<polygon points="42,324 32.2,317 32.2,331" class="arrowhead"/>
+<rect x="42" y="304" width="270" height="52" rx="8" class="box"/>
+<text x="52" y="328" class="t-m">"phone:identity"</text>
+<text x="52" y="350" class="t-m t-ink2 t-sans">Phone identity</text>
+<line x1="22" y1="384" x2="34" y2="384" class="line-secret"/>
+<polygon points="42,384 32.2,377 32.2,391" class="arrowhead-secret"/>
+<rect x="42" y="364" width="270" height="52" rx="8" class="box-secret"/>
+<text x="52" y="388" class="t-m">"phone:box"</text>
+<text x="52" y="410" class="t-m t-ink2 t-sans">Phone box key</text>
+<line x1="22" y1="444" x2="34" y2="444" class="line-secret"/>
+<polygon points="42,444 32.2,437 32.2,451" class="arrowhead-secret"/>
+<rect x="42" y="424" width="270" height="52" rx="8" class="box-secret"/>
+<text x="52" y="448" class="t-m">"secrets:&lt;store-id&gt;"</text>
+<text x="52" y="470" class="t-m t-ink2 t-sans">Store key</text>
+<path d="M 54 476 V 504 H 58" class="line-secret"/>
+<polygon points="66,504 56.2,497 56.2,511" class="arrowhead-secret"/>
+<rect x="66" y="484" width="246" height="96" rx="8" class="box-secret"/>
+<text x="76" y="508" class="t-m">HKDF(store key,</text>
+<text x="76" y="530" class="t-m">"sealctl/v1/file:</text>
+<text x="76" y="552" class="t-m">&lt;file-id&gt;")</text>
+<text x="76" y="574" class="t-m t-ink2 t-sans">File key</text>
+<line x1="22" y1="608" x2="34" y2="608" class="line-secret"/>
+<polygon points="42,608 32.2,601 32.2,615" class="arrowhead-secret"/>
+<rect x="42" y="588" width="270" height="52" rx="8" class="box-secret"/>
+<text x="52" y="612" class="t-m">"secret:&lt;file-id&gt;"</text>
+<text x="52" y="634" class="t-m t-ink2 t-sans">Own-approval key</text>
+<line x1="22" y1="668" x2="34" y2="668" class="line-secret"/>
+<polygon points="42,668 32.2,661 32.2,675" class="arrowhead-secret"/>
+<rect x="42" y="648" width="270" height="52" rx="8" class="box-secret"/>
+<text x="52" y="672" class="t-m">"volume:&lt;volume-id&gt;"</text>
+<text x="52" y="694" class="t-m t-ink2 t-sans">Volume key</text>
+<line x1="22" y1="728" x2="34" y2="728" class="line-secret"/>
+<polygon points="42,728 32.2,721 32.2,735" class="arrowhead-secret"/>
+<rect x="42" y="708" width="270" height="52" rx="8" class="box-secret"/>
+<text x="52" y="732" class="t-m">"backup:&lt;repository-id&gt;"</text>
+<text x="52" y="754" class="t-m t-ink2 t-sans">Backup key</text>
+<line x1="22" y1="788" x2="34" y2="788" class="line-secret"/>
+<polygon points="42,788 32.2,781 32.2,795" class="arrowhead-secret"/>
+<rect x="42" y="768" width="270" height="52" rx="8" class="box-secret"/>
+<text x="52" y="792" class="t-m">"state"</text>
+<text x="52" y="814" class="t-m t-ink2 t-sans">State key</text>
+<line x1="22" y1="848" x2="34" y2="848" class="line"/>
+<polygon points="42,848 32.2,841 32.2,855" class="arrowhead"/>
+<rect x="42" y="828" width="270" height="52" rx="8" class="box"/>
+<text x="52" y="852" class="t-m">"fingerprint"</text>
+<text x="52" y="874" class="t-m t-ink2 t-sans">Words fingerprint</text>
+<line x1="22" y1="300" x2="22" y2="848" class="line"/>
+<rect x="8" y="898" width="304" height="186" rx="8" class="box-planned"/>
+<text x="22" y="926" class="t-m t-b t-sans">random, made on the machine</text>
+<text x="22" y="956" class="t-m">Pairing key</text>
+<text x="22" y="976" class="t-m t-ink2 t-sans">Ed25519, signs requests</text>
+<text x="22" y="1000" class="t-m t-accent">Machine box key</text>
+<text x="22" y="1020" class="t-m t-ink2 t-sans">X25519, opens phone messages</text>
+<text x="22" y="1044" class="t-m t-accent">One-time key</text>
+<text x="22" y="1064" class="t-m t-ink2 t-sans">X25519, one per request</text>
+</svg>
+      <div class="legend" aria-hidden="true"><span class="lg-secret">opens data</span><span>signs or identifies</span><span class="lg-planned">made on the machine</span></div>
+    </figure>
+    <p class="prose">The id is generated and read from the object itself; no hostnames, users or labels enter the derivation. An encrypted object plus the 24 words is enough to open it.</p>
+    <p class="src">Source: <a href="{{protocol.base}}#derivation-and-test-vectors">Derivation and test vectors</a> · <a href="{{protocol.base}}#keys-at-a-glance">Keys at a glance</a> · <a href="{{protocol.base}}#store-format">Store format</a> · <a href="{{protocol.base}}#pairing-qr-code-and-proof">Pairing QR code and proof</a></p>
+  </section>
+
+  <section class="section-tight" id="approval" aria-labelledby="approval-h">
+    <h2 id="approval-h">One approval, as a sequence</h2>
+    <figure class="diagram">
+<svg class="dg dg-wide" viewBox="0 0 960 818" width="960" height="818" role="img" aria-labelledby="seq-w-t seq-w-d">
+<title id="seq-w-t">One approval as a sequence: machine, relay, push services (planned) and phone</title>
+<desc id="seq-w-d">1. The machine makes a one-time key, signs the request with its pairing key, seals it with HPKE to the phone's box key, signs the relay call and opens a WebSocket wait. The relay sees the machine key, request id, sealed size, time and network address, not which key or command. 2. The relay checks the signature and pairing, holds the sealed request in memory and tells the phone over its socket; push through APNs and FCM is planned and carries only type, id and expiry. 3. The phone opens the request, shows the card, and derives the key after the tap; the relay sees nothing of this. 4. The phone seals the key with HPKE to the machine's one-time key, signs the reply with its identity key and posts it; the relay sees the phone key, request id, size, time and network address, not the key. 5. The relay passes the sealed reply to the waiting socket and forgets both. 6. The machine checks the phone's signature, opens the reply with its one-time key, wipes the one-time key and keeps the key in memory.</desc>
+<line x1="130" y1="56" x2="130" y2="808" class="life"/>
+<rect x="40" y="12" width="180" height="44" rx="8" class="box"/>
+<text x="130" y="40" class="t-m t-b t-sans" text-anchor="middle">Machine</text>
+<line x1="400" y1="56" x2="400" y2="808" class="life"/>
+<rect x="310" y="12" width="180" height="44" rx="8" class="box"/>
+<text x="400" y="40" class="t-m t-b t-sans" text-anchor="middle">Relay</text>
+<line x1="615" y1="56" x2="615" y2="808" class="life"/>
+<rect x="525" y="12" width="180" height="44" rx="8" class="box-planned"/>
+<text x="615" y="40" class="t-m t-b t-sans" text-anchor="middle">Push services</text>
+<line x1="830" y1="56" x2="830" y2="808" class="life"/>
+<rect x="740" y="12" width="180" height="44" rx="8" class="box"/>
+<text x="830" y="40" class="t-m t-b t-sans" text-anchor="middle">Phone</text>
+<text x="615" y="74" class="t-s t-ink2 t-sans" text-anchor="middle">planned</text>
+<rect x="16" y="144" width="928" height="30" rx="6" class="box-soft"/>
+<text x="28" y="164" class="t-s t-sans">Relay sees: nothing yet.</text>
+<rect x="16" y="84" width="290" height="48" rx="8" class="box"/>
+<text x="50" y="102" class="t-s t-sans">one-time key; sign; HPKE-seal</text>
+<text x="50" y="120" class="t-s t-sans">to the phone box key</text>
+<circle cx="33" cy="97" r="11" class="box-secret"/>
+<text x="33" y="102" class="t-s t-b" text-anchor="middle">1</text>
+<rect x="16" y="248" width="928" height="30" rx="6" class="box-soft"/>
+<text x="28" y="268" class="t-s t-sans">Relay sees: machine key, request id, sealed size, time, network address. Not which key or command.</text>
+<line x1="130" y1="220" x2="391" y2="220" class="line"/>
+<polygon points="400,220 390.2,213 390.2,227" class="arrowhead"/>
+<rect x="154" y="192" width="222" height="22" rx="4" class="box-soft"/>
+<text x="265" y="208" class="t-s" text-anchor="middle">wait socket: {id, sealed}</text>
+<circle cx="146" cy="220" r="11" class="box-secret"/>
+<text x="146" y="225" class="t-s t-b" text-anchor="middle">1</text>
+<rect x="16" y="352" width="928" height="30" rx="6" class="box-soft"/>
+<text x="28" y="372" class="t-s t-sans">Relay holds the sealed request in memory only. Push carries only type, id and expiry (planned).</text>
+<line x1="400" y1="324" x2="821" y2="324" class="line"/>
+<polygon points="830,324 820.2,317 820.2,331" class="arrowhead"/>
+<rect x="462" y="296" width="306" height="22" rx="4" class="box-soft"/>
+<text x="615" y="312" class="t-s" text-anchor="middle">phone socket: {id, machine, sealed}</text>
+<circle cx="416" cy="324" r="11" class="box-secret"/>
+<text x="416" y="329" class="t-s t-b" text-anchor="middle">2</text>
+<line x1="400" y1="340" x2="606" y2="340" class="line-dash"/>
+<polygon points="615,340 605.2,333 605.2,347" class="arrowhead"/>
+<line x1="615" y1="340" x2="821" y2="340" class="line-dash"/>
+<polygon points="830,340 820.2,333 820.2,347" class="arrowhead"/>
+<rect x="16" y="456" width="928" height="30" rx="6" class="box-soft"/>
+<text x="28" y="476" class="t-s t-sans">Relay sees: nothing. Opening and deriving happen on the phone.</text>
+<rect x="654" y="396" width="290" height="48" rx="8" class="box"/>
+<text x="688" y="414" class="t-s t-sans">open request; show card;</text>
+<text x="688" y="432" class="t-s t-sans">you tap Allow; derive key</text>
+<circle cx="671" cy="409" r="11" class="box-secret"/>
+<text x="671" y="414" class="t-s t-b" text-anchor="middle">3</text>
+<rect x="16" y="560" width="928" height="30" rx="6" class="box-soft"/>
+<text x="28" y="580" class="t-s t-sans">Relay sees: phone key, request id, sealed reply size, time, network address. Not the key.</text>
+<line x1="830" y1="532" x2="409" y2="532" class="line"/>
+<polygon points="400,532 409.8,525 409.8,539" class="arrowhead"/>
+<rect x="457.79999999999995" y="504" width="314.40000000000003" height="22" rx="4" class="box-soft"/>
+<text x="615" y="520" class="t-s" text-anchor="middle">reply sealed to one-time key, signed</text>
+<circle cx="814" cy="532" r="11" class="box-secret"/>
+<text x="814" y="537" class="t-s t-b" text-anchor="middle">4</text>
+<rect x="16" y="664" width="928" height="30" rx="6" class="box-soft"/>
+<text x="28" y="684" class="t-s t-sans">Relay passes the reply on and forgets both; the approval path writes nothing to storage.</text>
+<line x1="400" y1="636" x2="139" y2="636" class="line"/>
+<polygon points="130,636 139.8,629 139.8,643" class="arrowhead"/>
+<rect x="158.2" y="608" width="213.60000000000002" height="22" rx="4" class="box-soft"/>
+<text x="265" y="624" class="t-s" text-anchor="middle">reply on the wait socket</text>
+<circle cx="384" cy="636" r="11" class="box-secret"/>
+<text x="384" y="641" class="t-s t-b" text-anchor="middle">5</text>
+<rect x="16" y="768" width="928" height="30" rx="6" class="box-soft"/>
+<text x="28" y="788" class="t-s t-sans">Relay sees: nothing.</text>
+<rect x="16" y="708" width="290" height="48" rx="8" class="box"/>
+<text x="50" y="726" class="t-s t-sans">check signature; open with</text>
+<text x="50" y="744" class="t-s t-sans">one-time key; key in memory</text>
+<circle cx="33" cy="721" r="11" class="box-secret"/>
+<text x="33" y="726" class="t-s t-b" text-anchor="middle">6</text>
+</svg>
+<svg class="dg dg-narrow" viewBox="0 0 320 1146" width="320" height="1146" role="img" aria-labelledby="seq-n-t seq-n-d">
+<title id="seq-n-t">One approval as a sequence: machine, relay, push services (planned) and phone</title>
+<desc id="seq-n-d">1. The machine makes a one-time key, signs the request with its pairing key, seals it with HPKE to the phone's box key, signs the relay call and opens a WebSocket wait. The relay sees the machine key, request id, sealed size, time and network address, not which key or command. 2. The relay checks the signature and pairing, holds the sealed request in memory and tells the phone over its socket; push through APNs and FCM is planned and carries only type, id and expiry. 3. The phone opens the request, shows the card, and derives the key after the tap; the relay sees nothing of this. 4. The phone seals the key with HPKE to the machine's one-time key, signs the reply with its identity key and posts it; the relay sees the phone key, request id, size, time and network address, not the key. 5. The relay passes the sealed reply to the waiting socket and forgets both. 6. The machine checks the phone's signature, opens the reply with its one-time key, wipes the one-time key and keeps the key in memory.</desc>
+<rect x="8" y="8" width="304" height="198" rx="8" class="box"/>
+<circle cx="30" cy="32" r="13" class="box-secret"/>
+<text x="30" y="38" class="t-m t-b" text-anchor="middle">1</text>
+<text x="52" y="38" class="t-m t-b t-sans">Machine → Relay</text>
+<text x="20" y="66" class="t-m t-sans">Makes a one-time key, signs</text>
+<text x="20" y="88" class="t-m t-sans">with its pairing key, seals</text>
+<text x="20" y="110" class="t-m t-sans">to the phone box key (HPKE),</text>
+<text x="20" y="132" class="t-m t-sans">opens a signed wait socket.</text>
+<rect x="16" y="146" width="288" height="54" rx="6" class="box-soft"/>
+<text x="24" y="164" class="t-m t-sans">Relay sees: machine key, id,</text>
+<text x="24" y="186" class="t-m t-sans">size, time, network address.</text>
+<rect x="8" y="216" width="304" height="198" rx="8" class="box"/>
+<circle cx="30" cy="240" r="13" class="box-secret"/>
+<text x="30" y="246" class="t-m t-b" text-anchor="middle">2</text>
+<text x="52" y="246" class="t-m t-b t-sans">Relay → Phone</text>
+<text x="20" y="274" class="t-m t-sans">Checks signature and pairing,</text>
+<text x="20" y="296" class="t-m t-sans">holds the sealed request in</text>
+<text x="20" y="318" class="t-m t-sans">memory, tells the phone's</text>
+<text x="20" y="340" class="t-m t-sans">socket. Push: planned.</text>
+<rect x="16" y="354" width="288" height="54" rx="6" class="box-soft"/>
+<text x="24" y="372" class="t-m t-sans">Relay never sees which key</text>
+<text x="24" y="394" class="t-m t-sans">or which command.</text>
+<rect x="8" y="424" width="304" height="154" rx="8" class="box"/>
+<circle cx="30" cy="448" r="13" class="box-secret"/>
+<text x="30" y="454" class="t-m t-b" text-anchor="middle">3</text>
+<text x="52" y="454" class="t-m t-b t-sans">On the phone</text>
+<text x="20" y="482" class="t-m t-sans">Opens the request, shows the</text>
+<text x="20" y="504" class="t-m t-sans">card; after your tap derives</text>
+<text x="20" y="526" class="t-m t-sans">the key.</text>
+<rect x="16" y="540" width="288" height="32" rx="6" class="box-soft"/>
+<text x="24" y="558" class="t-m t-sans">Relay sees: nothing.</text>
+<rect x="8" y="588" width="304" height="176" rx="8" class="box"/>
+<circle cx="30" cy="612" r="13" class="box-secret"/>
+<text x="30" y="618" class="t-m t-b" text-anchor="middle">4</text>
+<text x="52" y="618" class="t-m t-b t-sans">Phone → Relay</text>
+<text x="20" y="646" class="t-m t-sans">Seals the key to the one-time</text>
+<text x="20" y="668" class="t-m t-sans">key (HPKE), signs the reply</text>
+<text x="20" y="690" class="t-m t-sans">with its identity key, posts.</text>
+<rect x="16" y="704" width="288" height="54" rx="6" class="box-soft"/>
+<text x="24" y="722" class="t-m t-sans">Relay sees: phone key, id,</text>
+<text x="24" y="744" class="t-m t-sans">size, time. Not the key.</text>
+<rect x="8" y="774" width="304" height="176" rx="8" class="box"/>
+<circle cx="30" cy="798" r="13" class="box-secret"/>
+<text x="30" y="804" class="t-m t-b" text-anchor="middle">5</text>
+<text x="52" y="804" class="t-m t-b t-sans">Relay → Machine</text>
+<text x="20" y="832" class="t-m t-sans">Passes the sealed reply to</text>
+<text x="20" y="854" class="t-m t-sans">the waiting socket, then</text>
+<text x="20" y="876" class="t-m t-sans">forgets both.</text>
+<rect x="16" y="890" width="288" height="54" rx="6" class="box-soft"/>
+<text x="24" y="908" class="t-m t-sans">Nothing is written to</text>
+<text x="24" y="930" class="t-m t-sans">storage on this path.</text>
+<rect x="8" y="960" width="304" height="176" rx="8" class="box"/>
+<circle cx="30" cy="984" r="13" class="box-secret"/>
+<text x="30" y="990" class="t-m t-b" text-anchor="middle">6</text>
+<text x="52" y="990" class="t-m t-b t-sans">On the machine</text>
+<text x="20" y="1018" class="t-m t-sans">Checks the phone's signature,</text>
+<text x="20" y="1040" class="t-m t-sans">opens with the one-time key,</text>
+<text x="20" y="1062" class="t-m t-sans">wipes it, keeps the key in</text>
+<text x="20" y="1084" class="t-m t-sans">memory for the session.</text>
+<rect x="16" y="1098" width="288" height="32" rx="6" class="box-soft"/>
+<text x="24" y="1116" class="t-m t-sans">Relay sees: nothing.</text>
+</svg>
+    </figure>
+    <div class="table-wrap wide" tabindex="0">
+      <table>
+        <caption class="sr-only">The six hops of one approval and what the relay sees at each</caption>
+        <thead><tr><th scope="col">Hop</th><th scope="col">What happens</th><th scope="col">Relay sees</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>The machine makes a one-time key, signs the request with its pairing key and seals it with HPKE to the phone's box key; signs the relay call; opens a WebSocket <code>wait</code>.</td><td>Machine public key, request id, size, time, network address</td></tr>
+          <tr><td>2</td><td>The relay checks the signature and the pairing, holds the sealed request in memory, and tells the phone over its socket. Push through APNs and FCM <span class="pill pill-planned">Planned</span> carries only the type, the request id and its expiry.</td><td>Which phone it goes to; the sealed string</td></tr>
+          <tr><td>3</td><td>The phone opens the request, shows the card, and derives the key after the tap.</td><td>Nothing</td></tr>
+          <tr><td>4</td><td>The phone seals the key with HPKE to the machine's one-time key, signs the reply with its identity key, and posts it.</td><td>Phone public key, request id, size, time, network address</td></tr>
+          <tr><td>5</td><td>The relay passes the sealed reply to the waiting socket and forgets both. The approval path writes nothing to storage.</td><td>That a reply was delivered</td></tr>
+          <tr><td>6</td><td>The machine checks the phone's signature, opens the reply with its one-time key, wipes the one-time key, and keeps the key in memory.</td><td>Nothing</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="prose">Because the one-time key lives only in memory until the reply arrives, a machine stolen later cannot open a reply someone recorded. The relay never sees the request content or the key.</p>
+    <p class="src">Source: <a href="{{protocol.base}}#request-and-reply-encryption">Request and reply encryption</a> · <a href="{{protocol.base}}#requests-and-replies">Relay API → Requests and replies</a> · <a href="{{protocol.base}}#push-planned">Push (planned)</a></p>
+  </section>
+
+  <section class="section-tight" id="relay-view" aria-labelledby="relay-view-h">
+    <h2 id="relay-view-h">What the relay sees</h2>
+    <div class="scene top">
+      <div class="prose">
+        <p>The relay routes sealed strings by public key. Everything that says what is being done sits inside HPKE ciphertext sealed to the phone's box key or to a one-time key.</p>
+        <p>The network address is used in memory while serving a call. Comparing the phone's and the machine's addresses, as keyed hashes, gives the <code>near</code> flag <span class="pill pill-planned">Planned</span>; no address is stored.</p>
+        <p>The phone's backup on the relay is sealed with the state key, which comes from the root.</p>
+        <p class="src">Source: <a href="{{protocol.base}}#request-and-reply-encryption">Request and reply encryption</a> · <a href="{{protocol.base}}#state-blob">State blob</a> · <a href="{{protocol.base}}#requests-and-replies">Requests and replies</a> · <a href="/privacy#relay">Privacy: the relay</a></p>
+      </div>
+      <figure class="diagram dg-box-single">
+<svg class="dg dg-single" viewBox="0 0 320 400" width="320" height="400" role="img" aria-labelledby="relay-t relay-d">
+<title id="relay-t">What the relay sees and what it never sees</title>
+<desc id="relay-d">Outside the seal the relay sees machine public keys, the phone's public key, machine names from pairing, request ids, sizes and times, and the network address while serving a call. Inside the HPKE ciphertext, which it cannot open, are which key is asked for, the key values, the command, the working directory, the agent and the repository.</desc>
+<text x="8" y="28" class="t-m t-b t-sans">Relay sees (outside)</text>
+<rect x="8" y="42" width="150" height="32" rx="16" class="box"/>
+<text x="83" y="63" class="t-m" text-anchor="middle">machine keys</text>
+<rect x="162" y="42" width="150" height="32" rx="16" class="box"/>
+<text x="237" y="63" class="t-m" text-anchor="middle">phone key</text>
+<rect x="8" y="82" width="150" height="32" rx="16" class="box"/>
+<text x="83" y="103" class="t-m" text-anchor="middle">machine names</text>
+<rect x="162" y="82" width="150" height="32" rx="16" class="box"/>
+<text x="237" y="103" class="t-m" text-anchor="middle">request ids</text>
+<rect x="8" y="122" width="150" height="32" rx="16" class="box"/>
+<text x="83" y="143" class="t-m" text-anchor="middle">sizes, times</text>
+<rect x="162" y="122" width="150" height="32" rx="16" class="box"/>
+<text x="237" y="143" class="t-m" text-anchor="middle">IP address</text>
+<rect x="8" y="180" width="304" height="210" rx="12" class="box-planned"/>
+<text x="20" y="208" class="t-m t-b t-sans">Inside the seal: HPKE</text>
+<text x="20" y="230" class="t-m t-ink2 t-sans">which the relay can't open</text>
+<rect x="18" y="246" width="138" height="34" rx="17" class="box-secret"/>
+<text x="87" y="268" class="t-m" text-anchor="middle">which key</text>
+<rect x="164" y="246" width="138" height="34" rx="17" class="box-secret"/>
+<text x="233" y="268" class="t-m t-accent" text-anchor="middle">key values</text>
+<rect x="18" y="290" width="138" height="34" rx="17" class="box-soft"/>
+<text x="87" y="312" class="t-m" text-anchor="middle">the command</text>
+<rect x="164" y="290" width="138" height="34" rx="17" class="box-soft"/>
+<text x="233" y="312" class="t-m" text-anchor="middle">working dir</text>
+<rect x="18" y="334" width="138" height="34" rx="17" class="box-soft"/>
+<text x="87" y="356" class="t-m" text-anchor="middle">agent</text>
+<rect x="164" y="334" width="138" height="34" rx="17" class="box-soft"/>
+<text x="233" y="356" class="t-m" text-anchor="middle">repository</text>
+</svg>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section-tight" id="who" aria-labelledby="who-h">
+    <h2 id="who-h">Who sees what</h2>
+    <div class="table-wrap wide" tabindex="0">
+      <table>
+        <caption class="sr-only">Who can read each kind of material</caption>
+        <thead>
+          <tr><th scope="col">Who</th><th scope="col">Root</th><th scope="col">Store and purpose keys</th><th scope="col">Secret values</th><th scope="col">Request content</th><th scope="col">Metadata</th><th scope="col">Encrypted phone state</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Machine, Open</th><td class="no">no</td><td class="yes">in memory while Open</td><td class="yes">in memory while Open¹</td><td>its own</td><td>its own</td><td class="no">no</td></tr>
+          <tr><th scope="row">Machine, Locked</th><td class="no">no</td><td class="no">no</td><td>sealed only</td><td>its own</td><td>its own</td><td class="no">no</td></tr>
+          <tr><th scope="row">Relay</th><td class="no">no</td><td class="no">no</td><td class="no">no</td><td class="no">no</td><td>yes²</td><td>sealed only</td></tr>
+          <tr><th scope="row">Push services <span class="pill pill-planned">Planned</span></th><td class="no">no</td><td class="no">no</td><td class="no">no</td><td class="no">no</td><td>request id and expiry³</td><td class="no">no</td></tr>
+          <tr><th scope="row">Phone, unlocked</th><td class="yes">yes</td><td class="yes">yes</td><td class="no">no⁴</td><td>yes</td><td>yes</td><td class="yes">yes</td></tr>
+          <tr><th scope="row">Phone, locked</th><td class="no">no⁵</td><td class="no">no</td><td class="no">no⁴</td><td>yes⁵</td><td>yes</td><td class="no">no⁵</td></tr>
+          <tr><th scope="row">Paper card</th><td class="yes">yes</td><td class="yes">yes</td><td>with the objects⁶</td><td class="no">no</td><td class="no">no</td><td>with the relay's copy⁶</td></tr>
+          <tr><th scope="row">Attacker with the laptop</th><td class="no">no</td><td>in memory while Open⁷</td><td>sealed only⁷</td><td>its own</td><td>its own</td><td class="no">no</td></tr>
+          <tr><th scope="row">Attacker with the relay database</th><td class="no">no</td><td class="no">no</td><td class="no">no</td><td class="no">no</td><td>stored part²</td><td>sealed only</td></tr>
+          <tr><th scope="row">Attacker with the 24 words</th><td class="yes">yes</td><td class="yes">yes</td><td>with the objects⁶</td><td class="no">no</td><td class="no">no</td><td>with the relay's copy⁶</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ol class="small muted prose">
+      <li>A value is opened when a command uses it and goes into that command's environment; the store key stays in memory for the session.</li>
+      <li>Public keys, machine names, OS and model, when each machine last called, request ids, sizes and times. The network address only in memory while serving a call; it is not stored.</li>
+      <li>A push carries only the type, the request id and its expiry; the app fetches and opens the sealed request itself.</li>
+      <li>The phone hands out keys; secret values live in sealed files on the machines.</li>
+      <li>The root is readable only while the phone is unlocked. The phone keys are readable after the first unlock, so a locked phone can open a request to show it on the lock screen, but they cannot make any derived key. <a href="https://github.com/sealctl/app/blob/main/SPEC.md#72-iphone">App spec, key storage</a>.</li>
+      <li>The words open an object when they have the object: a sealed file, a volume, a repository, or the phone's state blob from the relay.</li>
+      <li>Locked or powered off, the laptop holds only sealed files. During an open session, past the screen lock, keys in memory are usable.</li>
+    </ol>
+  </section>
+
+  <section class="section-tight" id="levels" aria-labelledby="levels-h">
+    <h2 id="levels-h">Confirmation levels</h2>
+    <div class="scene top">
+      <div class="prose">
+        <p>The level of asking says <em>when</em> the phone is asked; the confirmation level says <em>how hard</em> the approval is. The phone computes the level and applies the higher of its own and the machine's; a machine can raise its level, never lower it.</p>
+        <p>Levels don't change which keys a machine can get. They make deliberate the steps that remove sealctl's protection or are hard to undo.</p>
+        <p>The number match: the terminal shows a two-digit number exported from the request's HPKE context; the phone offers three. A wrong pick holds that machine's sensitive requests for an hour. The relay holds a delayed approval for its hour <span class="pill pill-planned">Planned</span>.</p>
+        <p class="src">Source: <a href="{{protocol.base}}#confirmation-levels">Confirmation levels</a> · <a href="{{protocol.base}}#number-match">Number match</a> · <a href="{{protocol.base}}#delayed-approvals">Delayed approvals</a></p>
+      </div>
+      <figure class="diagram dg-box-single">
+<svg class="dg dg-single" viewBox="0 0 320 572" width="320" height="572" role="img" aria-labelledby="levels-t levels-d">
+<title id="levels-t">Confirmation levels 1 to 3</title>
+<desc id="levels-d">Level 1, Routine: sealctl run, SSH signing, opening a volume; one tap, or automatic at a trusted place. Level 2, Sensitive: pairing a machine, unseal of one object, sealctl seal of an existing object, rewrap; biometrics every time with no passcode fallback, the exact objects listed, and the phone near the machine. Level 3, Leaving: unseal --all, Leave sealctl, showing the 24 words, deleting the phone's relay data; everything in level 2 plus the number match, a signed plan, a one-hour delay away from a trusted place, and a report.</desc>
+<rect x="8" y="8" width="304" height="150" rx="8" class="box"/>
+<text x="22" y="36" class="t-l t-sans">1 · Routine</text>
+<text x="22" y="62" class="t-m">sealctl run, SSH signing,</text>
+<text x="22" y="83" class="t-m">opening a volume</text>
+<text x="22" y="112" class="t-m t-ink2 t-sans">One tap; Automatic at a</text>
+<text x="22" y="133" class="t-m t-ink2 t-sans">trusted place</text>
+<rect x="14" y="168" width="298" height="192" rx="8" class="box"/>
+<line x1="32" y1="158" x2="32" y2="168" class="line"/>
+<text x="28" y="196" class="t-l t-sans">2 · Sensitive</text>
+<text x="28" y="222" class="t-m">Pairing, unseal &lt;object&gt;,</text>
+<text x="28" y="243" class="t-m">seal of an existing object,</text>
+<text x="28" y="264" class="t-m">rewrap</text>
+<text x="28" y="293" class="t-m t-ink2 t-sans">Biometrics every time, no</text>
+<text x="28" y="314" class="t-m t-ink2 t-sans">passcode; objects listed;</text>
+<text x="28" y="335" class="t-m t-ink2 t-sans">phone near the machine</text>
+<rect x="20" y="370" width="292" height="192" rx="8" class="box"/>
+<line x1="38" y1="360" x2="38" y2="370" class="line"/>
+<text x="34" y="398" class="t-l t-sans">3 · Leaving</text>
+<text x="34" y="424" class="t-m">unseal --all, Leave sealctl,</text>
+<text x="34" y="445" class="t-m">showing the words, deleting</text>
+<text x="34" y="466" class="t-m">the phone's relay data</text>
+<text x="34" y="495" class="t-m t-ink2 t-sans">Level 2 plus number match,</text>
+<text x="34" y="516" class="t-m t-ink2 t-sans">signed plan, 1 h delay away</text>
+<text x="34" y="537" class="t-m t-ink2 t-sans">from a trusted place, report</text>
+</svg>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section-tight" id="lifetimes" aria-labelledby="lifetimes-h">
+    <h2 id="lifetimes-h">Key lifetimes</h2>
+    <div class="table-wrap wide" tabindex="0">
+      <table>
+        <caption class="sr-only">Each key, how it is made, where it lives and for how long</caption>
+        <thead><tr><th scope="col">Key</th><th scope="col">Made how</th><th scope="col">Lives where</th><th scope="col">How long</th></tr></thead>
+        <tbody>
+          <tr><td>Root</td><td>From the 24 words (BIP39, then HKDF)</td><td>Phone keychain, readable only while the phone is unlocked; a synced backup item</td><td>Until the words change</td></tr>
+          <tr><td>Phone identity</td><td><code>derive(root, "phone:identity")</code></td><td>Phone, readable after first unlock</td><td>Until the words change</td></tr>
+          <tr><td>Pairing key</td><td>Random, on the machine</td><td>OS keychain or a 0600 file</td><td>Until unpaired</td></tr>
+          <tr><td>One-time key</td><td>Random, per request</td><td>Machine memory</td><td>One request</td></tr>
+          <tr><td>Store key and file keys</td><td><code>derive(root, "secrets:&lt;store-id&gt;")</code>; file keys from the store key</td><td>Machine memory</td><td>The session: idle allowance, hard stop at 02:00 or 14 h</td></tr>
+          <tr><td>Own-approval key</td><td><code>derive(root, "secret:&lt;file-id&gt;")</code></td><td>Machine memory</td><td>One command</td></tr>
+          <tr><td>Volume key</td><td><code>derive(root, "volume:&lt;volume-id&gt;")</code></td><td>Machine memory</td><td>While mounted</td></tr>
+          <tr><td>Backup key</td><td><code>derive(root, "backup:&lt;repository-id&gt;")</code></td><td>Machine memory</td><td>While the session is Open, for backups</td></tr>
+          <tr><td>State key</td><td><code>derive(root, "state")</code></td><td>Phone</td><td>Until the words change</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <figure class="diagram dg-box-single">
+<svg class="dg dg-single" viewBox="0 0 320 204" width="320" height="204" role="img" aria-labelledby="day-t day-d">
+<title id="day-t">When the store key exists in machine memory over one workday</title>
+<desc id="day-d">Locked until 09:00. One tap at 09:00 opens the session and the store key is in machine memory from 09:00 to 14:00. Leaving for lunch at 14:00 locks it. Back at the desk at 15:00 it reopens by itself and stays until going home at 19:00, which locks it. The 02:00 hard stop resets the credit.</desc>
+<text x="16" y="22" class="t-m t-b t-sans">Store key in machine memory</text>
+<rect x="16" y="40" width="288" height="30" rx="4" class="bar-off"/>
+<rect x="57.14285714285714" y="40" width="68.57142857142857" height="30" rx="4" class="bar"/>
+<rect x="139.42857142857142" y="40" width="54.85714285714286" height="30" rx="4" class="bar"/>
+<text x="91.42857142857142" y="92" class="t-m" text-anchor="middle">Open</text>
+<text x="166.85714285714283" y="92" class="t-m" text-anchor="middle">Open</text>
+<line x1="16" y1="70" x2="16" y2="76" class="tick"/>
+<text x="16" y="116" class="t-m t-ink2" text-anchor="middle">06</text>
+<line x1="57.14285714285714" y1="70" x2="57.14285714285714" y2="76" class="tick"/>
+<text x="57.14285714285714" y="116" class="t-m t-ink2" text-anchor="middle">09</text>
+<line x1="98.28571428571428" y1="70" x2="98.28571428571428" y2="76" class="tick"/>
+<text x="98.28571428571428" y="116" class="t-m t-ink2" text-anchor="middle">12</text>
+<line x1="139.42857142857142" y1="70" x2="139.42857142857142" y2="76" class="tick"/>
+<text x="139.42857142857142" y="116" class="t-m t-ink2" text-anchor="middle">15</text>
+<line x1="180.57142857142856" y1="70" x2="180.57142857142856" y2="76" class="tick"/>
+<text x="180.57142857142856" y="116" class="t-m t-ink2" text-anchor="middle">18</text>
+<line x1="221.71428571428572" y1="70" x2="221.71428571428572" y2="76" class="tick"/>
+<text x="221.71428571428572" y="116" class="t-m t-ink2" text-anchor="middle">21</text>
+<line x1="262.85714285714283" y1="70" x2="262.85714285714283" y2="76" class="tick"/>
+<text x="262.85714285714283" y="116" class="t-m t-ink2" text-anchor="middle">00</text>
+<line x1="304" y1="70" x2="304" y2="76" class="tick"/>
+<text x="304" y="116" class="t-m t-ink2" text-anchor="middle">03</text>
+<line x1="290.2857142857143" y1="32" x2="290.2857142857143" y2="78" class="line-secret"/>
+<text x="290.2857142857143" y="28" class="t-m t-accent" text-anchor="end">02:00</text>
+<text x="16" y="148" class="t-m t-ink2 t-sans">09:00 one tap · 14:00 lunch locks</text>
+<text x="16" y="170" class="t-m t-ink2 t-sans">15:00 reopens · 19:00 home locks</text>
+<text x="16" y="192" class="t-m t-ink2 t-sans">02:00 hard stop resets credit</text>
+</svg>
+      <figcaption>One workday from <a href="/how-it-works#day">How it works</a>.</figcaption>
+    </figure>
+    <p class="src">Source: <a href="{{protocol.base}}#keys-at-a-glance">Keys at a glance</a> · <a href="{{protocol.base}}#reply-body">Reply body</a> (allowance and hard stop)</p>
+  </section>
+
+  <section class="section-tight" id="primitives" aria-labelledby="primitives-h">
+    <h2 id="primitives-h">Primitives and libraries</h2>
+    <div class="table-wrap wide" tabindex="0">
+      <table>
+        <caption class="sr-only">Cryptographic primitives, their standards, where they are used and which implementation provides them</caption>
+        <thead><tr><th scope="col">Primitive</th><th scope="col">Standard</th><th scope="col">Where used</th><th scope="col">Implementation</th></tr></thead>
+        <tbody>
+          <tr><td>BIP39</td><td><a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki">BIP-0039</a></td><td>Words to seed (PBKDF2-HMAC-SHA512, empty passphrase)</td><td rowspan="5">Rust core <code>sealctl-core</code>, shared by the CLI and both apps <span class="pill pill-planned">Planned</span>. Crates and versions are listed here from its <code>Cargo.lock</code> when it ships.</td></tr>
+          <tr><td>HKDF-SHA256</td><td><a href="https://www.rfc-editor.org/rfc/rfc5869">RFC 5869</a></td><td>Root, every derived key, file keys, key checks</td></tr>
+          <tr><td>HPKE</td><td><a href="https://www.rfc-editor.org/rfc/rfc9180">RFC 9180</a>, X25519 (<a href="https://www.rfc-editor.org/rfc/rfc7748">RFC 7748</a>)</td><td>Requests, replies, machine status and messages; the number match</td></tr>
+          <tr><td>ChaCha20-Poly1305</td><td><a href="https://www.rfc-editor.org/rfc/rfc8439">RFC 8439</a></td><td>The AEAD of <code>.sealed</code> files and the state blob</td></tr>
+          <tr><td>Ed25519</td><td><a href="https://www.rfc-editor.org/rfc/rfc8032">RFC 8032</a></td><td>Relay calls, requests, replies, pairing moves</td></tr>
+          <tr><td>Ed25519 verify, SHA-256</td><td>RFC 8032, <a href="https://csrc.nist.gov/pubs/fips/180-4/upd1/final">FIPS 180-4</a></td><td>Relay checks signed calls</td><td>Relay: WebCrypto (<code>crypto.subtle</code>) on Cloudflare Workers</td></tr>
+          <tr><td>HMAC-SHA256</td><td><a href="https://www.rfc-editor.org/rfc/rfc2104">RFC 2104</a></td><td>Paddle webhook signatures; the pairing proof</td><td>Relay: WebCrypto; pairing proof: Rust core</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="src">The test vectors in <a href="{{protocol.base}}#appendix-a-test-vectors">Appendix A</a> were computed by a dependency-free Node.js script (<a href="{{protocol.base}}#appendix-b-how-the-vectors-were-computed">Appendix B</a>) that checks its HKDF and HPKE against Node's own HKDF and RFC 9180's published vectors. The script and the relay signing vectors are in <a href="https://github.com/sealctl/sealctl/tree/{{protocol.sha}}/docs/vectors"><code>docs/vectors/</code></a>. Cross-implementation tests against these vectors <span class="pill pill-planned">Planned</span> arrive with the Rust core.</p>
+  </section>
+
+  <section class="section-tight" id="not-protected" aria-labelledby="not-protected-h">
+    <h2 id="not-protected-h">What is deliberately not protected</h2>
+    <ul class="prose">
+      <li>A process given a key can leak it.</li>
+      <li>Malware can use what is open while the session is open.</li>
+      <li>A thief who gets past the screen lock during an open session.</li>
+      <li>A thief with the phone and its passcode.</li>
+      <li>Copies an attacker already took before a change of words.</li>
+      <li>The relay operator can see metadata (which machines ask, when, from which network address) and can withhold or delay messages, but cannot forge a phone's reply or read a key.</li>
+      <li>No independent audit yet.</li>
+    </ul>
+  </section>
+
+  <section class="section-tight" id="check" aria-labelledby="check-h">
+    <h2 id="check-h">Where to check</h2>
+    <ul class="prose">
+      <li><a href="{{protocol.base}}">docs/protocol.md</a> at <code>{{protocol.rev}}</code></li>
+      <li>Test vectors: <a href="{{protocol.base}}#appendix-a-test-vectors">Appendix A</a> and <a href="https://github.com/sealctl/sealctl/tree/{{protocol.sha}}/docs/vectors"><code>docs/vectors/</code></a></li>
+      <li><a href="{{github.securityPolicy}}">SECURITY.md</a> and <a href="/security">Security</a></li>
+      <li><a href="{{github.releases}}">Releases</a> and their <code>SHA256SUMS</code></li>
+    </ul>
+  </section>
+</div>
