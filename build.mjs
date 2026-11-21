@@ -137,6 +137,8 @@ function render({ urlPath, outFile, meta, body, where }) {
   const filledBody = fill(body, { ...ctx, ...(meta.vars || {}) }, where);
   let html = fill(layout.replace("{{body}}", "\u0000BODY\u0000"), vars, "layout.html").replace("\u0000BODY\u0000", filledBody);
   for (const [from, to] of assetMap) html = html.split(`"${from}"`).join(`"${to}"`);
+  // Scrollable regions must be reachable by keyboard.
+  html = html.replace(/<div class="table-wrap( wide)?">/g, '<div class="table-wrap$1" tabindex="0">').replace(/<pre>/g, '<pre tabindex="0">').replace(/<div class="cmd"><code>/g, '<div class="cmd"><code tabindex="0">');
   write(outFile, html);
   pages.set(urlPath, { file: outFile, html, noindex: meta.noindex === true });
 }
@@ -207,7 +209,7 @@ function sidebar(current) {
             const href = `/docs/${p.slug}`;
             return `<li><a href="${href}"${href === current ? ' aria-current="page"' : ""}>${p.title}</a></li>`;
           }
-          return `<li class="planned-item">${p.title}</li>`;
+          return `<li class="planned-item">${p.title} <span class="soon">soon</span></li>`;
         })
         .join("");
       return `<h2>${sec.section}</h2><ul>${items}</ul>`;
