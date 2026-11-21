@@ -1,0 +1,102 @@
+---
+title: Privacy
+description: What the sealctl website, relay and payments process, why, for how long, and your rights. No accounts, no analytics, no trackers.
+bodyClass: legal
+---
+<div class="wrap">
+  <header class="page-head">
+    <h1>Privacy</h1>
+    <p class="legal-meta">Draft for launch. Version <span class="placeholder">[date of this version — set at launch]</span>. Items in highlighted brackets are filled in by the seller before launch.</p>
+  </header>
+
+  <div class="prose">
+    <section aria-labelledby="who-h">
+      <h2 id="who-h">1. Who we are</h2>
+      <p>sealctl is made and sold by <span class="placeholder">{{seller.legalName}}</span>, <span class="placeholder">{{seller.tradingName}}</span>, <span class="placeholder">{{seller.address}}</span>. <span class="placeholder">{{seller.registration}}</span>. Email: <code>{{email.privacy}}</code>.</p>
+      <p>We are the controller of the personal data described here under the EU General Data Protection Regulation (GDPR).</p>
+    </section>
+
+    <section aria-labelledby="short-h">
+      <h2 id="short-h">2. The short version</h2>
+      <p>No accounts, no analytics, no trackers, no advertising. The website sets no cookies. The relay stores public keys, machine names and an encrypted backup it cannot open. It stores no IP address and logs none.</p>
+    </section>
+
+    <section aria-labelledby="web-h">
+      <h2 id="web-h">3. The website</h2>
+      <p>The website is served by Cloudflare, which processes IP addresses to deliver pages and stop attacks; we get no logs of visitors. The website sets no cookies and loads nothing from other sites.</p>
+      <p>The exception is the payment page (<code>/pay</code>), which loads Paddle.js. Paddle sets the cookies and storage it needs for checkout and fraud checks.</p>
+      <p>The <a href="/status">status page</a> asks the relay whether it is up, directly from your browser.</p>
+    </section>
+
+    <section aria-labelledby="relay">
+      <h2 id="relay">4. The relay</h2>
+      <p>The relay carries sealed messages between your machines and your phone. Everything it keeps is listed here.</p>
+      <div class="table-wrap wide" tabindex="0">
+        <table>
+          <caption class="sr-only">What the relay keeps, why, and for how long</caption>
+          <thead><tr><th scope="col">Item</th><th scope="col">Why</th><th scope="col">Kept</th></tr></thead>
+          <tbody>
+            <tr><td>Phone identity public key</td><td>Identifies your phone; holds the licence</td><td>Until you delete your data</td></tr>
+            <tr><td>Machine pairing public keys; machine name (<code>user@host</code>), OS and model; pairing time</td><td>Routes requests; shows your machines on your phone</td><td>Until unpaired</td></tr>
+            <tr><td>When each machine last called the relay, to the hour</td><td>Shows "seen 2 h ago" on your phone</td><td>Until unpaired</td></tr>
+            <tr><td>Pairing proof</td><td>Lets the machine confirm the pairing</td><td>Until unpaired</td></tr>
+            <tr><td>Push token, platform and a random device id per phone app install</td><td>Wakes the app when a machine asks</td><td>Until replaced, removed, rejected by Apple or Google, or you delete your data</td></tr>
+            <tr><td>Encrypted phone state (pairings, places, answers, inventory)</td><td>Restores your phone</td><td>Until replaced or deleted; we cannot open it</td></tr>
+            <tr><td>Sealed requests and replies</td><td>Carries approvals</td><td>In memory, at most 5 minutes; never written to disk or logs</td></tr>
+            <tr><td>Sealed machine status and lock messages</td><td>Shows time left and locks machines from your phone</td><td>The latest status per machine; messages for an offline machine at most 24 hours; we cannot open them</td></tr>
+            <tr><td>Network address of phone and machine</td><td>Says whether the phone is near the machine; flood limits</td><td>Used in memory while serving the call, as a keyed hash; never stored or logged</td></tr>
+            <tr><td>Days with use (count), the last week the phone was seen, daily call count</td><td>The request to pay; deleting data after 2 years without use; the abuse limit</td><td>Count and week kept; daily counter in memory</td></tr>
+            <tr><td>Licence state, seat codes, Paddle transaction ids (last 100)</td><td>Your licence</td><td>As long as the licence exists, also after you delete your other data, so that restoring from your words keeps it. Ask us to erase it too</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Location never leaves the phone. The relay never learns which key was used, which command ran or what the agent did. A phone that makes no call for 2 years has its data deleted; a licence record stays.</p>
+      <p class="small muted">The relay is not yet in public use. Some items above (push tokens, machine status, last-seen times, the near check, deletion after 2 years) belong to relay features that are specified but not yet shipped; this list describes the relay as it will run at launch.</p>
+    </section>
+
+    <section aria-labelledby="pay-h">
+      <h2 id="pay-h">5. Payments</h2>
+      <p>Paddle is the merchant of record and a separate controller for payment data; see <a href="https://www.paddle.com/legal/privacy">Paddle's privacy notice</a>. Paddle shares with us what we need to support you and keep tax records: name, email, country, company name and VAT ID if given, and what was bought. We never see card details.</p>
+    </section>
+
+    <section aria-labelledby="email-h">
+      <h2 id="email-h">6. Email</h2>
+      <p>If you write to us, we keep the conversation to answer you and for <span class="placeholder">[retention period, e.g. 2 years — to be filled before launch]</span>.</p>
+    </section>
+
+    <section aria-labelledby="stores-h">
+      <h2 id="stores-h">7. App stores and push</h2>
+      <p>Apple and Google distribute the app under their own privacy terms. Push notifications go through Apple Push Notification service and Firebase Cloud Messaging; they carry no request content.</p>
+    </section>
+
+    <section aria-labelledby="proc-h">
+      <h2 id="proc-h">8. Processors</h2>
+      <p>Cloudflare (website, relay hosting, email forwarding), Apple and Google (app distribution and push notifications), Paddle (payments, as merchant of record and separate controller), <span class="placeholder">[email provider, if any — to be filled before launch]</span>. Where data leaves the European Economic Area, it does so under the EU–US Data Privacy Framework or standard contractual clauses.</p>
+    </section>
+
+    <section aria-labelledby="bases-h">
+      <h2 id="bases-h">9. Legal bases</h2>
+      <ul>
+        <li>Contract: the relay service and the licence.</li>
+        <li>Legal obligation: tax records.</li>
+        <li>Legitimate interest: security, the abuse limit, answering email.</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="rights-h">
+      <h2 id="rights-h">10. Your rights</h2>
+      <p>You have the right to access, correct, delete, restrict and port your data, and to object. You can complain to the Polish supervisory authority, the President of the Personal Data Protection Office (UODO), or to the authority in your own country.</p>
+      <p>To delete your relay data: in the app, Settings, Delete my relay data, or Leave sealctl (when available); or write to <code>{{email.privacy}}</code> with your phone's identity fingerprint. Machines unpair from the phone or with <code>sealctl unpair</code>.</p>
+    </section>
+
+    <section aria-labelledby="kids-h">
+      <h2 id="kids-h">11. Children</h2>
+      <p>sealctl is not meant for people under 16.</p>
+    </section>
+
+    <section aria-labelledby="changes-h">
+      <h2 id="changes-h">12. Changes</h2>
+      <p>Each version of this notice is dated. Material changes are announced on this page 30 days before they take effect.</p>
+    </section>
+  </div>
+</div>
