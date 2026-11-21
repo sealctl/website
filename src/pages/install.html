@@ -1,0 +1,91 @@
+---
+title: Install
+description: Install the sealctl command line tool on macOS or Linux with Homebrew, a .deb or .rpm package, Arch, Nix, a tarball, or from source.
+scripts: [copy]
+---
+<div class="wrap">
+  <header class="page-head">
+    <p class="eyebrow">Install</p>
+    <h1>Install the command line tool</h1>
+    <p class="lede">Every command below installs the <a href="{{github.releases}}">latest release</a>. Today that is {{release.current}}, which keeps keys on a Ledger; the phone version ({{release.phoneVersion}}) installs the same way.</p>
+  </header>
+
+  <nav class="toc" aria-label="Systems">
+    <ol>
+      <li><a href="#macos">macOS (Homebrew)</a></li>
+      <li><a href="#debian">Debian and Ubuntu</a></li>
+      <li><a href="#rpm">Fedora, RHEL, Rocky and openSUSE</a></li>
+      <li><a href="#arch">Arch Linux</a></li>
+      <li><a href="#nix">Nix</a></li>
+      <li><a href="#tarball">Any Linux (tarball)</a></li>
+      <li><a href="#source">From source</a></li>
+      <li><a href="#verify">Verify a download</a></li>
+      <li><a href="#after">Completions, upgrade, uninstall, next step</a></li>
+    </ol>
+  </nav>
+
+  <div class="prose">
+    <section id="macos" aria-labelledby="macos-h">
+      <h2 id="macos-h">macOS (Homebrew)</h2>
+      <div class="cmd"><code>brew install sealctl/tap/sealctl</code><button class="copy-btn" type="button" data-copy="brew install sealctl/tap/sealctl" hidden>Copy</button></div>
+      <p class="small muted">Also works with Homebrew on Linux. Apple silicon and Intel.</p>
+    </section>
+
+    <section id="debian" aria-labelledby="debian-h">
+      <h2 id="debian-h">Debian and Ubuntu (.deb)</h2>
+      <p>Download <code>sealctl_&lt;version&gt;-1_amd64.deb</code> (or <code>_arm64.deb</code>) from the <a href="{{github.releases}}">latest release</a>, then:</p>
+      <div class="cmd"><code>sudo apt install ./sealctl_*_amd64.deb</code><button class="copy-btn" type="button" data-copy="sudo apt install ./sealctl_*_amd64.deb" hidden>Copy</button></div>
+    </section>
+
+    <section id="rpm" aria-labelledby="rpm-h">
+      <h2 id="rpm-h">Fedora, RHEL, Rocky and openSUSE (.rpm)</h2>
+      <p>Download <code>sealctl-&lt;version&gt;-1.x86_64.rpm</code> (or <code>.aarch64.rpm</code>) from the <a href="{{github.releases}}">latest release</a>, then:</p>
+      <div class="cmd"><code>sudo dnf install ./sealctl-*.x86_64.rpm</code><button class="copy-btn" type="button" data-copy="sudo dnf install ./sealctl-*.x86_64.rpm" hidden>Copy</button></div>
+      <p>openSUSE:</p>
+      <div class="cmd"><code>sudo zypper install --allow-unsigned-rpm ./sealctl-*.x86_64.rpm</code><button class="copy-btn" type="button" data-copy="sudo zypper install --allow-unsigned-rpm ./sealctl-*.x86_64.rpm" hidden>Copy</button></div>
+    </section>
+
+    <section id="arch" aria-labelledby="arch-h">
+      <h2 id="arch-h">Arch Linux (PKGBUILD)</h2>
+      <p>Each release carries a <code>PKGBUILD</code>. Download it from the <a href="{{github.releases}}">latest release</a> into an empty folder, then:</p>
+      <div class="cmd"><code>makepkg -si</code><button class="copy-btn" type="button" data-copy="makepkg -si" hidden>Copy</button></div>
+    </section>
+
+    <section id="nix" aria-labelledby="nix-h">
+      <h2 id="nix-h">Nix</h2>
+      <div class="cmd"><code>nix profile install github:sealctl/sealctl</code><button class="copy-btn" type="button" data-copy="nix profile install github:sealctl/sealctl" hidden>Copy</button></div>
+    </section>
+
+    <section id="tarball" aria-labelledby="tarball-h">
+      <h2 id="tarball-h">Any Linux (tarball)</h2>
+      <p>Download <code>sealctl-&lt;version&gt;-x86_64-unknown-linux-gnu.tar.gz</code> (or <code>aarch64-unknown-linux-gnu</code>) from the <a href="{{github.releases}}">latest release</a>, then:</p>
+      <div class="cmd"><code>tar -xzf sealctl-*-unknown-linux-gnu.tar.gz &amp;&amp; sudo install -m 0755 sealctl /usr/local/bin/</code><button class="copy-btn" type="button" data-copy="tar -xzf sealctl-*-unknown-linux-gnu.tar.gz &amp;&amp; sudo install -m 0755 sealctl /usr/local/bin/" hidden>Copy</button></div>
+      <p class="small muted">Linux binaries are built on Rocky Linux 9 (glibc 2.34) for x86_64 and aarch64. Backups need <a href="https://restic.net">restic</a>; Linux volumes need <code>cryptsetup</code>.</p>
+    </section>
+
+    <section id="source" aria-labelledby="source-h">
+      <h2 id="source-h">From source</h2>
+      <div class="cmd"><code>cargo install --locked --git https://github.com/sealctl/sealctl sealctl</code><button class="copy-btn" type="button" data-copy="cargo install --locked --git https://github.com/sealctl/sealctl sealctl" hidden>Copy</button></div>
+      <p class="small muted">On Linux, building needs <code>libudev-dev libdbus-1-dev pkg-config</code>.</p>
+    </section>
+
+    <section id="verify" aria-labelledby="verify-h">
+      <h2 id="verify-h">Verify a download</h2>
+      <p>Each release has <code>SHA256SUMS</code>. Put it next to what you downloaded:</p>
+      <pre><code>shasum -a 256 -c SHA256SUMS --ignore-missing      # macOS
+sha256sum -c SHA256SUMS --ignore-missing          # Linux</code></pre>
+    </section>
+
+    <section id="after" aria-labelledby="after-h">
+      <h2 id="after-h">Completions, upgrade, uninstall</h2>
+      <ul>
+        <li>Shell completions: <code>sealctl completions zsh</code> (or <code>bash</code>, <code>fish</code>) prints a script for your shell's completion folder.</li>
+        <li>Upgrade: <code>brew upgrade sealctl</code>, or install the newer package the same way.</li>
+        <li>Uninstall: <code>brew uninstall sealctl/tap/sealctl</code>, <code>sudo apt remove sealctl</code> or <code>sudo dnf remove sealctl</code>. To hand your data back first, see <a href="/docs/leaving">Leaving sealctl</a>.</li>
+      </ul>
+      <h2 id="next-h">Next step</h2>
+      <p>With the phone version: install the app (iPhone and Android, coming soon), then run <code>sealctl pair</code> and scan the code.</p>
+      <p>With the current release: the <a href="https://github.com/sealctl/sealctl#readme">README</a> covers setup with a Ledger. If you use it today, read <a href="/docs/from-ledger">Moving from the Ledger version</a>.</p>
+    </section>
+  </div>
+</div>

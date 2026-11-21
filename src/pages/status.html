@@ -1,0 +1,22 @@
+---
+title: Status
+description: Whether the sealctl relay answers, what an outage means, and past incidents.
+scripts: [status]
+---
+<div class="wrap">
+  <header class="page-head">
+    <p class="eyebrow">Status</p>
+    <h1>Relay status</h1>
+  </header>
+  <div class="prose">
+    <div class="card status-box" id="live-check" data-url="{{relay}}/v1/health">
+      <span class="dot" aria-hidden="true"></span>
+      <p class="m0" data-text>Checking the relay from your browser… (needs JavaScript)</p>
+    </div>
+    <h2 id="outage">What an outage means</h2>
+    <p>When the relay is down, open sessions keep working and keys already in memory stay usable. New approvals wait until it is back. <code>sealctl recover</code> with your 24 words never needs the relay.</p>
+    <h2 id="incidents">Incidents</h2>
+    {{incidents}}
+    <p class="small muted">Newest first, kept for 12 months: date, duration, what users saw, cause and fix. We publish no uptime percentage unless a named external monitor measures it.</p>
+  </div>
+</div>
