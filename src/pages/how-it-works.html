@@ -1,0 +1,151 @@
+---
+title: How it works
+description: The approval, a working day, the three states, places, setup, the 24 words, and what sealctl is not.
+---
+<div class="wrap">
+  <header class="page-head">
+    <p class="eyebrow">How it works</p>
+    <h1>One tap in the morning. <em>Keys only where they're used.</em></h1>
+    <p class="lede">This page describes the phone version of sealctl ({{release.phoneVersion}}), which is in development. Screens are rendered from the app and command line specs until real screenshots exist.</p>
+  </header>
+
+  <nav class="toc" aria-label="On this page">
+    <ol>
+      <li><a href="#approval">The approval</a></li>
+      <li><a href="#day">Your day</a></li>
+      <li><a href="#states">States and asking</a></li>
+      <li><a href="#places">Places</a></li>
+      <li><a href="#setup">Setup</a></li>
+      <li><a href="#words">The 24 words</a></li>
+      <li><a href="#not">What it is not</a></li>
+    </ol>
+  </nav>
+
+  <section class="section-tight" id="approval" aria-labelledby="approval-h">
+    <h2 id="approval-h">1. The approval</h2>
+    <div class="scene">
+      <div class="prose">
+        <p>An agent runs a command that needs a key. The machine asks your phone. The phone shows who asks: the agent, the repository, the command, <code>user@host</code> and the key.</p>
+        <p>You tap <strong>Allow</strong>. The phone derives the key, seals it to that one request and sends it back. The key goes into the command's environment and stays in the machine's memory for the session. The agent's view of the output is masked: values print as <code>****</code>.</p>
+        <p>An agent's first use of a key in a repository asks once, and the answer is remembered for that agent, key and repository. You at the keyboard are never asked inside an open session.</p>
+      </div>
+      <figure>
+        <div class="phone">
+          <div class="phone-notch" aria-hidden="true"></div>
+          <div class="approval">
+            <p class="approval-state">WAITING · 0:12</p>
+            <h3>Allow <code>OPENAI_API_KEY</code>?</h3>
+            <dl class="facts">
+              <dt>For</dt><dd>npm test</dd>
+              <dt>In</dt><dd>~/dev/shop</dd>
+              <dt>From</dt><dd>dev@mbp.example.com · claude</dd>
+            </dl>
+            <span class="btn btn-primary fake-btn">Allow for this session</span>
+            <span class="btn btn-ghost fake-btn">Allow once</span>
+            <span class="text-btn">Deny</span>
+            <p class="note">First use of this key by claude in shop. Allow is remembered.</p>
+          </div>
+        </div>
+        <figcaption>The approval card, from the app spec.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section-tight" id="day" aria-labelledby="day-h">
+    <h2 id="day-h">2. Your day</h2>
+    <p class="prose">One tap in the morning covers a workday with three hours of meetings. Lunch outside costs one tap, or none when you return to the same desk with the phone unlocked.</p>
+    <div class="table-wrap" tabindex="0">
+      <table>
+        <caption class="sr-only">A day with sealctl</caption>
+        <thead><tr><th scope="col">Time</th><th scope="col">What happens</th><th scope="col">Session</th></tr></thead>
+        <tbody>
+          <tr><td>09:00</td><td>Unlock the phone, one tap</td><td>Open, allowance 30 minutes</td></tr>
+          <tr><td>09:00 to 11:00</td><td>Coding with agents</td><td>Allowance reaches 4 hours</td></tr>
+          <tr><td>11:00 to 14:00</td><td>Meetings in the building</td><td>Open</td></tr>
+          <tr><td>14:00</td><td>Lunch outside; the phone leaves the place</td><td>Locked, credit kept</td></tr>
+          <tr><td>15:00</td><td>Back at the desk</td><td>Reopens on its own, allowance 4 hours</td></tr>
+          <tr><td>19:00</td><td>Go home</td><td>Locked</td></tr>
+          <tr><td>02:00</td><td>Hard stop</td><td>Credit resets</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small muted">The idle allowance is 30 minutes plus 2 minutes per minute worked today, up to 4 hours at a trusted place and 10 minutes elsewhere. The hard stop is 02:00 or 14 hours after the first approval, whichever comes first. Screen lock and sleep keep the session; <code>sealctl lock</code> or Lock on the phone ends it at once.</p>
+  </section>
+
+  <section class="section-tight" id="states" aria-labelledby="states-h">
+    <h2 id="states-h">3. States and asking</h2>
+    <div class="grid grid-2">
+      <div class="table-wrap">
+        <table>
+          <caption class="sr-only">Machine states</caption>
+          <thead><tr><th scope="col">State</th><th scope="col">Means</th><th scope="col">Where you see it</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Locked</strong></td><td>No keys in memory; volumes unmounted</td><td>Phone list, <code>sealctl status</code></td></tr>
+            <tr><td><strong>Open</strong></td><td>Keys in memory; you and known agents use them without asking</td><td>Phone list with time left, <code>sealctl status</code></td></tr>
+            <tr><td><strong>Waiting</strong></td><td>A request is on the phone</td><td>One terminal line, "Waiting for your phone", which the agent reads too; it gives up after 5 minutes</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <caption class="sr-only">Levels of asking</caption>
+          <thead><tr><th scope="col">Level</th><th scope="col">When</th><th scope="col">You do</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Automatic</strong></td><td>Reopening at the place of today's first approval, with the phone on the same network as the machine and unlocked</td><td>Nothing</td></tr>
+            <tr><td><strong>One tap</strong></td><td>First approval of the day; reopening anywhere else; an agent's first use of a key in a repository; every use of an <code>--own-approval</code> secret</td><td>Tap the notification; a locked phone asks for its own unlock first</td></tr>
+            <tr><td><strong>In the app</strong></td><td>Showing the words, changing them, typing old words, pairing, handing objects back</td><td>Face ID or a fingerprint</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="small muted">None of this is a setting. A file in the repository never grants anything, because a malicious repository would write one. Steps that remove sealctl's protection, such as <code>sealctl unseal --all</code>, also need the number shown on the terminal and, away from a trusted place, wait an hour: see <a href="/crypto#levels">confirmation levels</a>.</p>
+  </section>
+
+  <section class="section-tight" id="places" aria-labelledby="places-h">
+    <h2 id="places-h">4. Places</h2>
+    <ul class="prose">
+      <li><strong>Learned, not drawn.</strong> After first approvals on three different days at the same spot, the phone asks once: "Trust this place?" There is no map; you name the place.</li>
+      <li><strong>Locations never leave the phone.</strong> Places reach the relay only inside the phone's encrypted backup, which the relay cannot open.</li>
+      <li><strong>Leaving locks.</strong> The phone's region monitoring notices when you leave and locks the machines you opened there. The day's credit is kept.</li>
+      <li><strong>Near means the same network.</strong> The phone counts as near a machine when both reach the relay from the same network address and the phone is on Wi-Fi. On mobile data or a VPN it falls back to one tap.</li>
+      <li><strong>No permission, no places.</strong> Without location access, a session stays open up to 1 hour and reopening always takes a tap.</li>
+    </ul>
+  </section>
+
+  <section class="section-tight" id="setup" aria-labelledby="setup-h">
+    <h2 id="setup-h">5. Setup</h2>
+    <ol class="prose">
+      <li><a href="/install">Install</a> the command line tool: <code>brew install sealctl/tap/sealctl</code>, or a package for your Linux.</li>
+      <li>Install the app, write your 24 words on the card, then run <code>sealctl pair</code> and scan the QR code.</li>
+      <li><code>sealctl scan</code> finds keys in <code>.env</code> files, shell rc files, shell history and <code>~/.aws</code>, moves them into the store and leaves references behind.</li>
+      <li><code>sealctl ai install</code> sets up Claude Code, Codex, Gemini CLI, Qwen Code, Copilot and Cursor: skills, hooks, refusals and masking.</li>
+    </ol>
+  </section>
+
+  <section class="section-tight" id="words" aria-labelledby="words-h">
+    <h2 id="words-h">6. The 24 words</h2>
+    <div class="table-wrap">
+      <table>
+        <caption class="sr-only">When the card is written or checked</caption>
+        <thead><tr><th scope="col">Procedure</th><th scope="col">Card step</th></tr></thead>
+        <tbody>
+          <tr><td>First start</td><td>Print a blank card, write the 24 words by hand, then pick 3 of them by number from 4 choices each</td></tr>
+          <tr><td>Restore from words</td><td>Type the words, completed after four letters; nothing new to write</td></tr>
+          <tr><td>Changing words</td><td>A new card, written and checked the same way; the old card is marked retired</td></tr>
+          <tr><td>Yearly check</td><td>The phone asks for 2 words by number; a wrong answer offers to show the words again</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="prose">When you change words, each machine moves its keys to the new words the next time it talks to the phone; <code>sealctl migrate</code> re-encrypts volumes and backups when you start it. The printable blank card (A4 and Letter) will be published here with the app.</p>
+  </section>
+
+  <section class="section-tight" id="not" aria-labelledby="not-h">
+    <h2 id="not-h">7. What it is not</h2>
+    <ul class="prose">
+      <li>Not a password manager. Website passwords stay in 1Password, Bitwarden or the browser.</li>
+      <li>Not a team vault. There are no shared stores; teams keep shared keys where they keep them today.</li>
+      <li>Not for regulated production work through bastion hosts or air-gapped sites.</li>
+      <li>Volumes and backups keep your own folders under the same 24 words; they don't replace FileVault or a backup service.</li>
+    </ul>
+  </section>
+</div>

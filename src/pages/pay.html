@@ -1,0 +1,50 @@
+---
+title: Payment
+description: Opens the Paddle checkout started by sealctl buy.
+noindex: true
+scripts: [pay]
+strip: false
+---
+<div class="wrap">
+  <div class="pay" id="pay" data-env="{{paddleEnv}}" data-token="{{paddleToken}}" data-script="{{paddle.script}}" aria-live="polite">
+    {{sandboxNote}}
+    <noscript><p><strong>Paddle&#39;s checkout needs JavaScript.</strong></p></noscript>
+    <section data-state="none">
+      <h1>No payment to open</h1>
+      <p>This page opens a checkout started by <code>sealctl buy</code>. Run it in your terminal, or ask whoever sent you here for a new link.</p>
+    </section>
+    <section data-state="loading" hidden>
+      <div class="spinner" aria-hidden="true"></div>
+      <h1 data-loading-text>Opening Paddle checkout…</h1>
+      <p>Payments by Paddle. We never see your card.</p>
+    </section>
+    <section data-state="paid" hidden>
+      <h1>Paid. Thank you.</h1>
+      <p>The licence reaches the phone that asked for it within a minute. <code>sealctl status</code> shows <code>Paid</code>. Paddle emails your receipt and invoice.</p>
+      <p class="muted">If someone sent you this link, the licence goes to them.</p>
+    </section>
+    <section data-state="paid-seats" hidden>
+      <h1>Paid. Thank you.</h1>
+      <p>The seat code appears in <code>sealctl status</code> on the machine that started the purchase. Share it with your team: <code>sealctl buy --code XXXX-XXXX</code>.</p>
+      <p class="muted">If someone sent you this link, the licence goes to them.</p>
+    </section>
+    <section data-state="closed" hidden>
+      <h1>Checkout closed</h1>
+      <p>Nothing was charged.</p>
+      <button class="btn btn-primary" type="button" data-reopen>Reopen checkout</button>
+    </section>
+    <section data-state="noload" hidden>
+      <h1>Paddle's checkout didn't load</h1>
+      <p>A content blocker or the network may have stopped it. Allow <code>cdn.paddle.com</code> and reload, or open this link in another browser.</p>
+      <button class="btn btn-primary" type="button" data-reload>Reload</button>
+    </section>
+    <section data-state="invalid" hidden>
+      <h1>This payment link can't be used</h1>
+      <p>It was already paid, or it expired. Run <code>sealctl buy</code> again for a new link.</p>
+    </section>
+    <section data-state="unconfigured" hidden>
+      <h1>Checkout isn't set up here</h1>
+      <p>This copy of the site was built without a Paddle client token, so it can't open a checkout. Nothing was charged.</p>
+    </section>
+  </div>
+</div>

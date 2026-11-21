@@ -1,0 +1,182 @@
+---
+title: Secrets for AI coding agents
+description: sealctl keeps API keys, SSH keys and backup passwords off your disk. Your phone approves each use with one tap; the agent never sees the key.
+scripts: [copy]
+---
+<div class="wrap">
+  <section class="hero" aria-labelledby="hero-title">
+    <div>
+      <p class="eyebrow">Secrets for AI coding agents</p>
+      <h1 id="hero-title">Your agents run the code. <em>Your phone holds the keys.</em></h1>
+      <p class="lede">sealctl keeps API keys, SSH keys and backup passwords off your disk. When an agent needs one, your phone asks, you tap <strong>Allow</strong>, and the key goes into that one command. The agent never sees it, and it never lands in a transcript or a <code>.env</code> file.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="#start">Get started</a>
+        <a class="btn btn-ghost" href="/how-it-works">How it works</a>
+      </div>
+    </div>
+
+    <div class="card start-card" id="start">
+      <h2>Start in two minutes</h2>
+      <ol>
+        <li>
+          <span class="step-n" aria-hidden="true">1</span>
+          <div>
+            <p>Install the command line tool.</p>
+            <div class="cmd"><code>brew install sealctl/tap/sealctl</code><button class="copy-btn" type="button" data-copy="brew install sealctl/tap/sealctl" hidden>Copy</button></div>
+            <p class="small"><a href="/install">Other systems</a></p>
+          </div>
+        </li>
+        <li>
+          <span class="step-n" aria-hidden="true">2</span>
+          <div>
+            <p>Get the phone app, then run <code>sealctl pair</code> and scan the code.</p>
+            <div class="badges">
+              <span class="badge">iPhone · coming soon</span>
+              <span class="badge">Android · coming soon</span>
+            </div>
+          </div>
+        </li>
+      </ol>
+      <p class="fine">Free, no account.</p>
+    </div>
+  </section>
+
+  <section class="scene" aria-label="An approval, step by step">
+    <figure>
+      <div class="terminal">
+        <div class="terminal-bar" aria-hidden="true"><span></span><span></span><span></span><b>claude · ~/dev/shop</b></div>
+<pre><span class="t-prompt">$ </span>sealctl run -- npm test
+<span class="t-dim">sealctl: OPENAI_API_KEY ← shop/openai-api-key</span>
+<span class="t-key">Waiting for your phone</span>
+
+<span class="t-dim">&gt; shop@1.4.0 test</span>
+<span class="t-dim">&gt; vitest run</span>
+
+ <span class="t-ok">✓</span> test/api.test.ts (12 tests)
+ <span class="t-ok">✓</span> test/checkout.test.ts (7 tests)
+
+ Test Files  <span class="t-ok">2 passed</span> (2)
+      Tests  <span class="t-ok">19 passed</span> (19)</pre>
+      </div>
+      <figcaption>An agent runs the tests. sealctl names the key the command gets, waits for your phone, then runs it. Illustration built from the command line and app specs; it is replaced with output from a real run when the phone version ships.</figcaption>
+    </figure>
+
+    <figure>
+      <div class="phone">
+        <div class="phone-notch" aria-hidden="true"></div>
+        <div class="approval">
+          <p class="approval-state">WAITING · 0:12</p>
+          <h3>Allow <code>OPENAI_API_KEY</code>?</h3>
+          <dl class="facts">
+            <dt>For</dt><dd>npm test</dd>
+            <dt>In</dt><dd>~/dev/shop</dd>
+            <dt>From</dt><dd>dev@mbp.example.com · claude</dd>
+          </dl>
+          <span class="btn btn-primary fake-btn">Allow for this session</span>
+          <span class="btn btn-ghost fake-btn">Allow once</span>
+          <span class="text-btn">Deny</span>
+        </div>
+      </div>
+      <figcaption>The approval card, rendered from the app spec's text. A screenshot of the app replaces it once the app exists.</figcaption>
+    </figure>
+  </section>
+
+  <section class="section" aria-labelledby="cards-title">
+    <h2 id="cards-title" class="sr-only">What sealctl does</h2>
+    <div class="grid grid-3">
+      <div class="card feature">
+        <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><path d="M4 4l16 16"/></svg></div>
+        <h3>Agents never see the key</h3>
+        <p>The key goes into the environment of the one command that asked. Output is masked to <code>****</code>, and reading a secret directly is refused inside an agent.</p>
+      </div>
+      <div class="card feature">
+        <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 18h4"/></svg></div>
+        <h3>One tap, or none at your desk</h3>
+        <p>The first approval of the day takes one tap. Back at the same desk, with your phone unlocked and on the same network, the session reopens by itself.</p>
+      </div>
+      <div class="card feature">
+        <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+        <h3>Locked when you leave</h3>
+        <p>Keys live in memory for the session only. Leaving a trusted place, idle time or the 02:00 hard stop locks the machine and unmounts its volumes.</p>
+      </div>
+      <div class="card feature">
+        <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></div>
+        <h3>24 words on paper</h3>
+        <p>Every key comes from 24 words you write by hand on a printed card. With them, <code>sealctl recover</code> opens anything sealctl sealed, with no phone or server.</p>
+      </div>
+      <div class="card feature">
+        <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></div>
+        <h3>Volumes and backups too</h3>
+        <p>Encrypted APFS or LUKS volumes and restic backups open with the same words, mount with the session and lock with it.</p>
+      </div>
+      <div class="card feature">
+        <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg></div>
+        <h3>Nothing goes missing silently</h3>
+        <p>Your phone lists every key it hands out and every use. When you change the words, it shows what moved and what it couldn't find.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<section class="band" aria-labelledby="trust-title">
+  <div class="wrap band-grid">
+    <div>
+      <h2 id="trust-title">If we disappear, <em>your keys don't.</em></h2>
+      <p class="lede">Everything sealctl protects opens from your 24 words with the open-source command line tool. And <code>sealctl unseal --all</code> hands it all back under passwords of your own whenever you want to leave. No server, account or subscription stands between you and your data.</p>
+      <ul class="proofs">
+        <li><strong>Open source</strong>Command line tool under MIT, phone app under AGPL-3.0, protocol public: <a href="https://github.com/sealctl">github.com/sealctl</a>.</li>
+        <li><strong>The relay sees sealed data</strong>It carries messages it cannot open. <a href="/privacy#relay">What it keeps</a>.</li>
+        <li><strong>Security reports</strong>Private GitHub advisories, first answer within three working days. <a href="/security#report">How to report</a>.</li>
+        <li><strong>Payments by Paddle</strong>Paddle is the merchant of record. We never see your card.</li>
+      </ul>
+    </div>
+    <figure>
+      <div class="rcard" role="img" aria-label="A recovery card: 24 numbered lines with the first three words written by hand, a words fingerprint field and a written-on date.">
+        <div class="rcard-head"><span class="wordmark">sealctl</span><span>Recovery card</span></div>
+        <ol aria-hidden="true">
+          <li><span>1</span><span class="hand">orbit</span></li>
+          <li><span>13</span><span></span></li>
+          <li><span>2</span><span class="hand">velvet</span></li>
+          <li><span>14</span><span></span></li>
+          <li><span>3</span><span class="hand">canyon</span></li>
+          <li><span>15</span><span></span></li>
+          <li><span>4</span><span></span></li>
+          <li><span>16</span><span></span></li>
+          <li><span>5</span><span></span></li>
+          <li><span>17</span><span></span></li>
+          <li><span>6</span><span></span></li>
+          <li><span>18</span><span></span></li>
+        </ol>
+        <div class="rcard-foot" aria-hidden="true"><span>Words <span class="mono">····</span></span><span>Written on ____</span></div>
+      </div>
+      <figcaption>The card is printed blank and the words are written by hand. The app never prints, copies or screenshots them.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section class="wrap" aria-labelledby="price-title">
+  <div class="band-grid">
+    <div>
+      <h2 id="price-title">Free to use. <em>$5.99 once</em> if it earns its place.</h2>
+      <p class="lede">The app, the command line tool and the relay are free. After 30 days with use, your terminal asks once a week. Paying changes nothing in the app.</p>
+      <ul class="ticks">
+        <li>Your employer can pay, with a VAT invoice.</li>
+        <li>Teams buy seats and share one code.</li>
+        <li>No subscription, no ads, no trackers.</li>
+      </ul>
+      <div class="actions"><a class="btn btn-ghost" href="/pricing">Pricing</a></div>
+    </div>
+    <figure>
+      <div class="terminal">
+        <div class="terminal-bar" aria-hidden="true"><span></span><span></span><span></span><b>~</b></div>
+<pre><span class="t-prompt">$ </span>sealctl buy
+Who pays?
+  1  Me             <span class="t-dim">card, opens checkout</span>
+  2  My company     <span class="t-dim">invoice with VAT ID, opens checkout</span>
+  3  Someone else   <span class="t-dim">copies a payment link to send</span>
+Choose 1, 2 or 3: <span class="t-key">2</span></pre>
+      </div>
+      <figcaption><code>sealctl buy</code> as specified for the phone version. Nothing can be bought yet.</figcaption>
+    </figure>
+  </div>
+</section>

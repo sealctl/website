@@ -1,0 +1,82 @@
+---
+title: Security
+description: What sealctl protects against and what remains, the standard parts it uses, what the relay sees, and how to report a vulnerability.
+---
+<div class="wrap">
+  <header class="page-head">
+    <p class="eyebrow">Security</p>
+    <h1>What it protects. <em>What remains.</em></h1>
+    <p class="lede">sealctl decides which keys a laptop holds, when and for how long, and shows every use. It cannot stop a program from leaking a key that the program was given. This page describes the phone version ({{release.phoneVersion}}, in development); the current release, {{release.current}}, has its own <a href="https://github.com/sealctl/sealctl/blob/main/docs/threat-model.md">threat model</a>.</p>
+  </header>
+
+  <section class="section-tight" id="threats" aria-labelledby="threats-h">
+    <h2 id="threats-h">What sealctl protects against</h2>
+    <div class="table-wrap wide" tabindex="0">
+      <table>
+        <caption class="sr-only">Threats, sealctl's answer and what remains</caption>
+        <thead><tr><th scope="col">Threat</th><th scope="col">sealctl's answer</th><th scope="col">What remains</th></tr></thead>
+        <tbody>
+          <tr><td>Agent reads key files (<code>.env</code>, <code>~/.aws</code>, shell history)</td><td><code>sealctl scan</code> moves keys out of files on day one; agent hooks refuse reading the store</td><td>Nothing on disk to read</td></tr>
+          <tr><td>Prompt injection asks the agent to print or send a key</td><td>Reading a secret is refused inside agents; values are masked in output</td><td>The agent can still ask to run a command with a key, and that shows on the phone</td></tr>
+          <tr><td>Malicious repository or dependency runs during <code>npm test</code></td><td>Only the keys named for that command are injected; the use is logged</td><td>That process can leak those keys</td></tr>
+          <tr><td>Malware on the laptop during the workday</td><td>Deploy and cloud tokens live in memory only, for the session, never in files</td><td>Malware can use what is open while the session is open</td></tr>
+          <tr><td>Laptop stolen</td><td>Nothing in plain text on disk; volumes unmounted unless the session is open; open keys sit behind the screen lock until idle or the hard stop</td><td>A thief who gets past the screen lock while the session is open</td></tr>
+          <tr><td>Phone lost</td><td>The root is locked behind the phone's own passcode; restore from the keychain backup or the words, then change words</td><td>A thief who also knows the passcode</td></tr>
+          <tr><td>24 words leaked</td><td>Change words: machines rewrap in seconds, then <code>sealctl migrate</code> re-encrypts volumes and backups</td><td>Copies an attacker already took</td></tr>
+          <tr><td>Machine lost or compromised</td><td>Unpair it; the phone's inventory and usage log list what it had open and which secrets it used</td><td>Those secrets must be changed at their providers</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section-tight" id="standard" aria-labelledby="standard-h">
+    <h2 id="standard-h">Standard parts only</h2>
+    <p class="prose">BIP39 for the words, HKDF-SHA256 for every key, HPKE (RFC 9180) to seal requests and replies, ChaCha20-Poly1305 for stored data, Ed25519 for signatures, and the phone's own lock. No custom cryptography. The whole design, with diagrams and links to the protocol, is on <a href="/crypto">Cryptographic design</a>.</p>
+  </section>
+
+  <section class="section-tight" id="relay" aria-labelledby="relay-h">
+    <h2 id="relay-h">What the relay sees</h2>
+    <div class="prose">
+      <p>Sealed requests, replies, machine status and lock messages that it cannot open; public keys; machine names, OS and model; push tokens; when each machine last called; an encrypted phone backup; days with use; licence state.</p>
+      <p>It never sees which key was asked for, which command ran or what the agent did. It never logs what was asked and stores no IP address. The full list, with how long each item is kept, is in the <a href="/privacy#relay">Privacy notice</a>.</p>
+    </div>
+  </section>
+
+  <section class="section-tight" id="closed" aria-labelledby="closed-h">
+    <h2 id="closed-h">The closed part</h2>
+    <p class="prose">The relay is closed source. It runs the paid service and holds nothing that opens your data. Its <a href="https://github.com/sealctl/sealctl/blob/{{protocol.sha}}/docs/protocol.md#relay-api">API is public</a>, every reply it carries is signed by your phone, and your data opens without it.</p>
+  </section>
+
+  <section class="section-tight" id="disappear" aria-labelledby="disappear-h">
+    <h2 id="disappear-h">If we disappear</h2>
+    <ul class="prose">
+      <li><code>sealctl recover &lt;path&gt;</code> with the 24 words opens any secret store, volume or backup with no phone, relay or account.</li>
+      <li><code>sealctl unseal --all</code> hands every volume, backup, SSH key and secret back under passwords of your own, also from the words alone.</li>
+      <li>Volumes are standard APFS or LUKS; backups are standard restic repositories.</li>
+      <li>How to leave, step by step: <a href="/docs/leaving">Leaving sealctl</a>.</li>
+    </ul>
+  </section>
+
+  <section class="section-tight" id="report" aria-labelledby="report-h">
+    <h2 id="report-h">Reporting a vulnerability</h2>
+    <div class="prose">
+      <p>Report privately through a <a href="{{github.advisory}}">GitHub security advisory</a> on the affected repository, or by email to <code>{{email.security}}</code>. Please don't open a public issue.</p>
+      <p>You get a first answer within three working days. Fixed issues are credited in the release notes unless you prefer otherwise. Machine-readable contacts: <a href="/.well-known/security.txt">security.txt</a>. Policy: <a href="{{github.securityPolicy}}">SECURITY.md</a>.</p>
+    </div>
+  </section>
+
+  <section class="section-tight" id="claims" aria-labelledby="claims-h">
+    <h2 id="claims-h">What we don't claim</h2>
+    <p class="prose">No independent audit yet. No certifications. This section changes when that does.</p>
+  </section>
+
+  <section class="section-tight" id="releases" aria-labelledby="releases-h">
+    <h2 id="releases-h">Releases</h2>
+    <div class="prose">
+      <p>Every <a href="{{github.releases}}">release</a> has a <code>SHA256SUMS</code> file. Download it next to the files you downloaded and check them:</p>
+      <pre><code>shasum -a 256 -c SHA256SUMS --ignore-missing      # macOS
+sha256sum -c SHA256SUMS --ignore-missing          # Linux</code></pre>
+      <p>To build from source instead: <code>cargo install --locked --git https://github.com/sealctl/sealctl sealctl</code>. See <a href="/install#source">Install</a>.</p>
+    </div>
+  </section>
+</div>
