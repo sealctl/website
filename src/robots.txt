@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /pay
+Disallow: /p
+
+Sitemap: https://sealctl.com/sitemap.xml
