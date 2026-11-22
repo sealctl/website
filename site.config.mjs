@@ -77,7 +77,7 @@ export default {
   },
 
   paddle: {
-    // Public client-side tokens, read from Pages environment variables at build time.
+    // Public client-side tokens, read at build time from GitHub Actions repository variables.
     liveTokenVar: "PADDLE_CLIENT_TOKEN_LIVE",
     sandboxTokenVar: "PADDLE_CLIENT_TOKEN_SANDBOX",
     script: "https://cdn.paddle.com/paddle/v2/paddle.js",
