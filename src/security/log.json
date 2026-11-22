@@ -1,0 +1,96 @@
+{
+  "note": "Entries are added when a test campaign ends. Details of a finding are published once it is fixed and released; until then the log gives only counts and severities. Severity scale: Critical, High, Medium, Low, Info (see the scale below).",
+  "entries": [
+    {
+      "date": "2026-11-22",
+      "title": "Red team: relay and wire protocol",
+      "scope": "Relay API: request signing and replay windows, phone and machine authorisation, pairing, machine channel, delayed approvals, the near flag, push registration, rate and abuse limits, payment webhook.",
+      "method": "Code review against the protocol, then an attack harness run against a local copy of the deployed relay build; read-only checks against the test deployment.",
+      "tester": "Internal, AI-assisted (Claude)",
+      "findings": {
+        "critical": 0,
+        "high": 0,
+        "medium": 1,
+        "low": 2,
+        "info": 1
+      },
+      "held": "Replayed and expired calls, another phone's key, channel isolation, early release of delayed approvals, forged near headers, push registration for another phone, storage limits, unsigned payment webhooks.",
+      "status": "Fixes in progress"
+    },
+    {
+      "date": "2026-11-22",
+      "title": "Red team: command line tool and core library",
+      "scope": "Agent escape, the daemon socket, leaks to logs and errors, output masking, reply and plan binding, the number match, all parsers.",
+      "method": "Code review and proof-of-concept attacks in throwaway homes; 12 fuzz targets for 10 minutes each with AddressSanitizer: about 49 million inputs, no crashes, hangs or memory errors.",
+      "tester": "Internal, AI-assisted (Claude)",
+      "findings": {
+        "critical": 0,
+        "high": 0,
+        "medium": 1,
+        "low": 2,
+        "info": 2
+      },
+      "held": "Other local users, values in logs and crash output, replies reused for another request, lowered levels, changed plans, early release by the relay, number-match guessing.",
+      "status": "Fixes in progress"
+    },
+    {
+      "date": "2026-11-22",
+      "title": "Red team: Android app",
+      "scope": "Exported components and links, backups, Keystore and biometric binding, requests crafted by a hostile paired machine, notifications, logs and screenshots.",
+      "method": "Review of all app code and the shared Rust core, manifests of the release and debug builds, dynamic tests on an emulator.",
+      "tester": "Internal, AI-assisted (Claude)",
+      "findings": {
+        "critical": 0,
+        "high": 0,
+        "medium": 0,
+        "low": 3,
+        "info": 3
+      },
+      "held": "Level downgrade by a machine, approval without a strong biometric, new fingerprints, backups and device transfer, exported entry points, lock-screen content.",
+      "status": "Fixes in progress"
+    },
+    {
+      "date": "2026-11-22",
+      "title": "Automated code review of the command line tool",
+      "scope": "The full command line tool before its merge to the main branch.",
+      "method": "GitHub Copilot code review, now required on every pull request in every public repository.",
+      "tester": "Automated (GitHub Copilot), triaged internally",
+      "findings": {
+        "critical": 0,
+        "high": 1,
+        "medium": 1,
+        "low": 2,
+        "info": 0
+      },
+      "extra": "Also 5 correctness issues without security impact.",
+      "status": "Fixes in progress"
+    },
+    {
+      "date": "2026-11-22",
+      "title": "Supply chain: relay and website",
+      "scope": "All 308 npm packages in both lockfiles, install scripts, the served QR code library, CI actions, deploy credentials.",
+      "method": "Registry signatures and provenance for every package, osv-scanner (including the OpenSSF list of malicious packages), npm audit, lockfile integrity, a byte comparison of the served script with the published package.",
+      "tester": "Internal, AI-assisted (Claude)",
+      "findings": {
+        "critical": 0,
+        "high": 1,
+        "medium": 1,
+        "low": 4,
+        "info": 6
+      },
+      "held": "No malicious, hijacked or look-alike package; every signature and provenance check passed; the served QR library is byte-identical to the published one.",
+      "fixed": "Install scripts off; new versions must be 7 days old; CI tools pinned in the lockfile; GitHub Actions pinned to commits; CI added to the website.",
+      "status": "Fixes in progress"
+    }
+  ],
+  "continuous": [
+    "GitHub Copilot reviews every pull request; the main branch of every public repository accepts changes only through reviewed pull requests.",
+    "Fuzzing of every parser on each pull request (2 minutes per target) and nightly (1 hour per target).",
+    "cargo deny on every pull request: known advisories, licences, crate sources.",
+    "npm audit signatures in CI: registry signatures and provenance of every package.",
+    "Dependabot alerts and updates, with a 7-day minimum release age.",
+    "Secret scanning with push protection on every repository.",
+    "Shared protocol test vectors checked byte for byte by the core library, the relay and both apps.",
+    "Power-cut tests: unsealing is cut at every step and must resume without losing anything."
+  ]
+}

@@ -144,6 +144,7 @@ for (const f of fs.readdirSync(pageDir).filter((f) => f.endsWith(".html")).sort(
   const { meta, body } = frontMatter(read(path.join(pageDir, f)), where);
   const name = f.replace(/\.html$/, "");
   if (name === "status") continue; // rendered below with the incidents
+  if (name === "security") continue; // rendered below with the security log
   if (name === "pay") {
     for (const env of ["live", "sandbox"]) {
       const tokenVar = env === "live" ? config.paddle.liveTokenVar : config.paddle.sandboxTokenVar;
@@ -261,6 +262,37 @@ for (const s of docSlugs) {
   const where = "src/pages/status.html";
   const page = frontMatter(read(path.join(pageDir, "status.html")), where);
   render({ urlPath: "/status", outFile: "status.html", meta: { ...page.meta, vars: { incidents } }, body: page.body, where });
+}
+
+// ---------- security log ----------
+// The security page body has {{securityLog}} and {{securityChecks}}, from src/security/log.json.
+{
+  const where = "src/security/log.json";
+  const log = JSON.parse(read(path.join(SRC, "security/log.json")));
+  const h = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const sev = ["critical", "high", "medium", "low", "info"];
+  const counts = (f) =>
+    sev.map((k) => `<span class="sev sev-${k}"><b>${f[k] ?? 0}</b> ${k[0].toUpperCase() + k.slice(1)}</span>`).join(" ");
+  const entries = log.entries
+    .slice()
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .map((e) => {
+      if (!e.date || !e.title || !e.findings || !e.status) fail(`${where}: an entry lacks date, title, findings or status`);
+      const rows = [
+        ["Scope", e.scope],
+        ["Method", e.method],
+        ["Tested by", e.tester],
+        ["Defences that held", e.held],
+        ["Fixed", e.fixed],
+      ].filter(([, v]) => v).map(([k, v]) => `<dt>${k}</dt><dd>${h(v)}</dd>`).join("");
+      return `<article class="log-entry"><header><time datetime="${h(e.date)}">${h(e.date)}</time><h3>${h(e.title)}</h3><span class="log-status">${h(e.status)}</span></header><p class="log-counts">${counts(e.findings)}${e.extra ? ` <span class="muted">${h(e.extra)}</span>` : ""}</p><dl class="log-facts">${rows}</dl></article>`;
+    })
+    .join("\n");
+  const securityLog = `<p class="prose">${h(log.note)}</p>\n${entries}`;
+  const securityChecks = `<ul class="ticks">${log.continuous.map((c) => `<li>${h(c)}</li>`).join("")}</ul>`;
+  const pageWhere = "src/pages/security.html";
+  const page = frontMatter(read(path.join(pageDir, "security.html")), pageWhere);
+  render({ urlPath: "/security", outFile: "security.html", meta: { ...page.meta, vars: { securityLog, securityChecks } }, body: page.body, where: pageWhere });
 }
 
 // ---------- generated files ----------
