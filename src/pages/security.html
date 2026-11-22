@@ -1,257 +1,228 @@
 ---
 title: Security
-description: How sealctl keeps your keys safe, in plain words: the 24-word recipe, one key per thing, your phone as the doorbell, what happens if something goes wrong, and how we test it.
+description: Where your sealctl keys are, who can use them, what happens if you lose your phone or laptop, what sealctl can't do, and how to check our claims.
 ---
 <div class="wrap">
   <header class="page-head">
     <p class="eyebrow">Security</p>
-    <h1>Your phone holds the keys. <em>You decide who borrows them.</em></h1>
-    <p class="lede">This page explains how sealctl keeps your keys safe, in everyday words. You don't need to know anything about security to follow it. It also says plainly what sealctl can't protect you from.</p>
-    <p class="src">For specialists: <a href="/crypto">Cryptographic design</a>, with every algorithm, key and message.</p>
+    <h1>Where your keys are, <em>and who can use them.</em></h1>
+    <p class="lede">Your keys are made on your phone from 24 words you write on paper. Your computer gets a key only after you approve on your phone.</p>
+    <p class="src">For specialists: <a href="/crypto">Cryptographic design</a>.</p>
   </header>
 
   <nav class="toc" aria-label="On this page">
     <ol>
-      <li><a href="#keeps">What sealctl keeps safe</a></li>
-      <li><a href="#pictures">How it works, in five pictures</a></li>
+      <li><a href="#where">Where your keys are</a></li>
+      <li><a href="#approve">How your computer gets a key</a></li>
       <li><a href="#threats">What happens if…</a></li>
       <li><a href="#limits">What sealctl can't do</a></li>
-      <li><a href="#log">How we check it</a></li>
+      <li><a href="#proof">How to check this</a></li>
+      <li><a href="#log">Security log</a></li>
       <li><a href="#report">Report a problem</a></li>
-      <li><a href="#specialists">For specialists</a></li>
     </ol>
   </nav>
 
-  <section class="section-tight" id="keeps" aria-labelledby="keeps-h">
-    <h2 id="keeps-h">What sealctl keeps safe</h2>
-    <div class="prose">
-      <p>Programmers' computers are full of secret keys. A key is a long password that lets a program use a service: a cloud server, a payment system, an AI tool. Whoever has a key can use that service as you, and often spend your money.</p>
-      <p>Usually these keys sit in plain files on the computer. Any program can read them, and so can the AI helpers that now write code for us. sealctl moves them into a locked box and lets them out only when you say yes on your phone. It keeps three kinds of things locked:</p>
-      <ul class="ticks">
-        <li>the secret keys your programs use, and the keys you use to log in to other computers (SSH keys);</li>
-        <li>folders you choose to keep locked;</li>
-        <li>backups of those folders.</li>
-      </ul>
-    </div>
+  <section class="section-tight" id="where" aria-labelledby="where-h">
+    <h2 id="where-h">Where your keys are</h2>
+    <p class="prose">A key is a secret that lets a program use a service, open a folder or read a backup. These are all the places a sealctl key can be.</p>
+    <ul class="where">
+      <li>
+        <span class="picto-wrap"><svg class="picto" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><rect x="14" y="5" width="20" height="38" rx="4"/><path d="M21 37 h6"/></svg></span>
+        <span class="where-what"><strong>Your phone</strong>Makes every key. Readable only while the phone is unlocked.</span>
+        <span class="pill pill-ok">yes</span>
+      </li>
+      <li>
+        <span class="picto-wrap"><svg class="picto" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><rect x="8" y="10" width="32" height="22" rx="2"/><path d="M3 37 H45"/></svg></span>
+        <span class="where-what"><strong>Your computer</strong>Only after you approve. In memory, never on disk, until the session ends.</span>
+        <span class="pill pill-wait">while approved</span>
+      </li>
+      <li>
+        <span class="picto-wrap"><svg class="picto" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><rect x="8" y="6" width="32" height="14" rx="3"/><rect x="8" y="26" width="32" height="14" rx="3"/><path d="M14 13 h2 M14 33 h2"/></svg></span>
+        <span class="where-what"><strong>Our relay server</strong>Passes sealed messages between your computer and phone. It cannot open them.</span>
+        <span class="pill pill-no">never</span>
+      </li>
+      <li>
+        <span class="picto-wrap"><svg class="picto" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><path d="M6 42 V14 L24 5 L42 14 V42 Z"/><path d="M18 42 V30 h12 V42 M14 20 h4 M30 20 h4"/></svg></span>
+        <span class="where-what"><strong>sealctl, the company</strong>Has no copy of your keys or your 24 words.</span>
+        <span class="pill pill-no">never</span>
+      </li>
+      <li>
+        <span class="picto-wrap"><svg class="picto" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><rect x="6" y="10" width="36" height="28" rx="3"/><path d="M12 19 h10 M27 19 h10 M12 25 h10 M27 25 h10 M12 31 h10 M27 31 h10"/></svg></span>
+        <span class="where-what"><strong>Your paper card</strong>The 24 words. Every key can be made again from them.</span>
+        <span class="pill pill-ok">words</span>
+      </li>
+    </ul>
   </section>
 
-  <section class="section-tight" id="pictures" aria-labelledby="pictures-h">
-    <h2 id="pictures-h">How it works, in five pictures</h2>
-    <div class="scene top">
-      <ol class="pictures prose">
-        <li>
-          <span class="step-n" aria-hidden="true">1</span>
-          <div>
-            <h3>The 24 words are a recipe</h3>
-            <p>When you start, the phone app gives you 24 ordinary words, and you write them by hand on a paper card. Every key sealctl ever uses is made from these words, the way every loaf comes from one recipe. Keep the card somewhere safe. With it you can get everything back, even without your phone.</p>
+  <section class="section-tight" id="approve" aria-labelledby="approve-h">
+    <h2 id="approve-h">How your computer gets a key</h2>
+    <div class="story">
+      <div class="story-text">
+        <h3>You approve on your phone</h3>
+        <p>Your phone shows which computer asks, for which key and for which command. Nothing is sent until you tap Allow, and the key is sealed so only that computer can open it.</p>
+      </div>
+      <figure class="story-pic">
+        <div class="phone" role="img" aria-label="The approval card in the app: Allow shop/openai? For npm test, in ~/dev/shop, from pairtest@mac-mini. Buttons: Allow for this session, Allow once, Deny.">
+          <div class="phone-notch"></div>
+          <div class="approval">
+            <p class="approval-state">WAITING · 0:08</p>
+            <p class="approval-title">Allow <code>shop/openai</code>?</p>
+            <dl class="facts">
+              <dt>For</dt><dd>npm test</dd>
+              <dt>In</dt><dd>~/dev/shop</dd>
+              <dt>From</dt><dd>pairtest@mac-mini</dd>
+            </dl>
+            <span class="btn btn-primary fake-btn">Allow for this session</span>
+            <span class="btn btn-ghost fake-btn">Allow once</span>
+            <span class="text-btn">Deny</span>
           </div>
-        </li>
-        <li>
-          <span class="step-n" aria-hidden="true">2</span>
-          <div>
-            <h3>One key per thing, made one way only</h3>
-            <p>Each thing sealctl locks gets a label: a random serial number written on it. To make its key, the phone mixes the recipe with that label. A different label gives a different key, so one key opens one thing and nothing else. The mixing only works one way, like a smoothie: easy to blend, impossible to un-blend. A key never gives away the recipe or any other key.</p>
-          </div>
-        </li>
-      </ol>
-      <figure class="diagram dg-box-single">
-<svg class="dg dg-single" viewBox="0 0 340 300" width="340" height="300" role="img" aria-labelledby="recipe-t recipe-d">
-<title id="recipe-t">One recipe, one key per thing</title>
-<desc id="recipe-d">The 24 words, the recipe, are mixed with the label of each thing: the secret store, a folder, a backup. Each mix gives a different key that opens only that thing. The arrows go one way only: a key never leads back to the words or to the other keys.</desc>
-<rect x="70" y="8" width="200" height="58" rx="12" class="box-secret"/>
-<text x="170" y="35" class="t-l t-accent" text-anchor="middle">24 words</text>
-<text x="170" y="56" class="t-s t-ink2 t-sans" text-anchor="middle">the recipe</text>
-<path d="M170 66 V84 H58 V106" class="line-secret"/>
-<path d="M170 66 V106" class="line-secret"/>
-<path d="M170 84 H282 V106" class="line-secret"/>
-<polygon points="52,104 64,104 58,114" class="arrowhead-secret"/>
-<polygon points="164,104 176,104 170,114" class="arrowhead-secret"/>
-<polygon points="276,104 288,104 282,114" class="arrowhead-secret"/>
-<rect x="8" y="116" width="100" height="48" rx="10" class="box"/>
-<text x="58" y="136" class="t-s t-ink2 t-sans" text-anchor="middle">+ label of</text>
-<text x="58" y="155" class="t-s" text-anchor="middle">the store</text>
-<rect x="120" y="116" width="100" height="48" rx="10" class="box"/>
-<text x="170" y="136" class="t-s t-ink2 t-sans" text-anchor="middle">+ label of</text>
-<text x="170" y="155" class="t-s" text-anchor="middle">a folder</text>
-<rect x="232" y="116" width="100" height="48" rx="10" class="box"/>
-<text x="282" y="136" class="t-s t-ink2 t-sans" text-anchor="middle">+ label of</text>
-<text x="282" y="155" class="t-s" text-anchor="middle">a backup</text>
-<path d="M58 164 V186" class="line-secret"/>
-<path d="M170 164 V186" class="line-secret"/>
-<path d="M282 164 V186" class="line-secret"/>
-<polygon points="52,184 64,184 58,194" class="arrowhead-secret"/>
-<polygon points="164,184 176,184 170,194" class="arrowhead-secret"/>
-<polygon points="276,184 288,184 282,194" class="arrowhead-secret"/>
-<rect x="8" y="196" width="100" height="44" rx="22" class="box-secret"/>
-<text x="58" y="223" class="t-s t-b t-accent" text-anchor="middle">store key</text>
-<rect x="120" y="196" width="100" height="44" rx="22" class="box-secret"/>
-<text x="170" y="223" class="t-s t-b t-accent" text-anchor="middle">folder key</text>
-<rect x="232" y="196" width="100" height="44" rx="22" class="box-secret"/>
-<text x="282" y="223" class="t-s t-b t-accent" text-anchor="middle">backup key</text>
-<text x="170" y="270" class="t-s t-ink2 t-sans" text-anchor="middle">One way only: a key never leads</text>
-<text x="170" y="290" class="t-s t-ink2 t-sans" text-anchor="middle">back to the words or to the other keys.</text>
+        </div>
+      </figure>
+    </div>
+    <div class="story flip">
+      <div class="story-text">
+        <h3>Each thing has its own key</h3>
+        <p>Your secrets, each folder and each backup have their own key. Knowing one key does not reveal another, or the 24 words.</p>
+      </div>
+      <figure class="story-pic">
+<svg class="ill" viewBox="0 0 320 236" width="320" height="236" role="img" aria-label="From the 24 words, four separate keys: secrets, folder A, folder B and backup. The arrows go one way only.">
+<rect x="16" y="74" width="80" height="96" rx="10" class="pa"/>
+<path d="M16 86 a10 10 0 0 1 10 -10 h60 a10 10 0 0 1 10 10 v8 h-80 Z" class="acs"/>
+<path d="M28 110 h20 M56 110 h20 M28 124 h20 M56 124 h20 M28 138 h20 M56 138 h20 M28 152 h20 M56 152 h20" class="slot"/>
+<text x="56" y="196" class="lab" text-anchor="middle">24 words</text>
+<path d="M98 122 C140 122 138 36 172 36" class="flow"/><path d="M166 30 l8 6 l-8 6" class="flow"/>
+<path d="M98 122 C140 122 138 90 172 90" class="flow"/><path d="M166 84 l8 6 l-8 6" class="flow"/>
+<path d="M98 122 C140 122 138 144 172 144" class="flow"/><path d="M166 138 l8 6 l-8 6" class="flow"/>
+<path d="M98 122 C140 122 138 198 172 198" class="flow"/><path d="M166 192 l8 6 l-8 6" class="flow"/>
+<g transform="translate(194 36)"><circle r="12" class="ac"/><circle r="4.5" class="hole"/><rect x="9" y="-3.5" width="38" height="7" rx="3.5" class="ac"/><rect x="30" y="3" width="5" height="9" rx="1.5" class="ac"/><rect x="38" y="3" width="5" height="5" rx="1.5" class="ac"/></g>
+<g transform="translate(194 90)"><circle r="12" class="ac"/><circle r="4.5" class="hole"/><rect x="9" y="-3.5" width="38" height="7" rx="3.5" class="ac"/><rect x="28" y="3" width="5" height="6" rx="1.5" class="ac"/><rect x="38" y="3" width="5" height="9" rx="1.5" class="ac"/></g>
+<g transform="translate(194 144)"><circle r="12" class="ac"/><circle r="4.5" class="hole"/><rect x="9" y="-3.5" width="38" height="7" rx="3.5" class="ac"/><rect x="30" y="3" width="5" height="9" rx="1.5" class="ac"/><rect x="37" y="3" width="5" height="9" rx="1.5" class="ac"/></g>
+<g transform="translate(194 198)"><circle r="12" class="ac"/><circle r="4.5" class="hole"/><rect x="9" y="-3.5" width="38" height="7" rx="3.5" class="ac"/><rect x="28" y="3" width="5" height="5" rx="1.5" class="ac"/><rect x="34" y="3" width="5" height="9" rx="1.5" class="ac"/><rect x="41" y="3" width="5" height="6" rx="1.5" class="ac"/></g>
+<text x="250" y="41" class="lab">secrets</text>
+<text x="250" y="95" class="lab">folder A</text>
+<text x="250" y="149" class="lab">folder B</text>
+<text x="250" y="203" class="lab">backup</text>
 </svg>
       </figure>
     </div>
-    <div class="scene top">
-      <ol class="pictures prose" start="3">
-        <li>
-          <span class="step-n" aria-hidden="true">3</span>
-          <div>
-            <h3>Your phone is the doorbell</h3>
-            <p>Your computer never holds the recipe. When it needs a key, it rings your phone. The phone shows who is asking and why: which program, which project, which key. Nothing is handed over until you tap <strong>Allow</strong>. Then the phone makes just that key and sends it. Later the same day, back at the same desk with your phone unlocked and nearby, the door can open again without a tap.</p>
-          </div>
-        </li>
-        <li>
-          <span class="step-n" aria-hidden="true">4</span>
-          <div>
-            <h3>The relay is a postman</h3>
-            <p>Your phone and your computer talk through our server, the relay. Every message travels in a sealed envelope that only the one it is meant for can open, and every reply carries a signature only your phone can make. The postman sees who writes to whom and when. He can't read the letters, and he can't fake one.</p>
-          </div>
-        </li>
-        <li>
-          <span class="step-n" aria-hidden="true">5</span>
-          <div>
-            <h3>Your computer only borrows the key</h3>
-            <p>The computer keeps the key in its memory while you work, and never writes it to its disk. When you stop working for a while, when your phone leaves your trusted place, when you tap Lock, or at 2 at night at the latest, it forgets the key. Next time, it rings again.</p>
-          </div>
-        </li>
-      </ol>
-      <figure class="diagram dg-box-single">
-<svg class="dg dg-single" viewBox="0 0 340 300" width="340" height="300" role="img" aria-labelledby="bell-t bell-d">
-<title id="bell-t">The computer rings, the postman carries, the phone answers</title>
-<desc id="bell-d">1: the computer asks for a key in a sealed envelope. 2: the relay carries the envelope to the phone; it can't open it. 3: you tap Allow on the phone. 4: the phone makes the key and seals it. 5: the relay carries the sealed key back. 6: the computer keeps the key in memory, and forgets it when the work session ends.</desc>
-<rect x="4" y="8" width="104" height="58" rx="12" class="box"/>
-<text x="56" y="34" class="t-m t-b" text-anchor="middle">computer</text>
-<text x="56" y="55" class="t-s t-ink2 t-sans" text-anchor="middle">borrows</text>
-<rect x="118" y="8" width="104" height="58" rx="12" class="box"/>
-<text x="170" y="34" class="t-m t-b" text-anchor="middle">relay</text>
-<text x="170" y="55" class="t-s t-ink2 t-sans" text-anchor="middle">postman</text>
-<rect x="232" y="8" width="104" height="58" rx="12" class="box"/>
-<text x="284" y="34" class="t-m t-b" text-anchor="middle">phone</text>
-<text x="284" y="55" class="t-s t-ink2 t-sans" text-anchor="middle">doorbell</text>
-<line x1="56" y1="66" x2="56" y2="292" class="life"/>
-<line x1="170" y1="66" x2="170" y2="292" class="life"/>
-<line x1="284" y1="66" x2="284" y2="292" class="life"/>
-<text x="113" y="94" class="t-s" text-anchor="middle">1 ask</text>
-<path d="M60 104 H158" class="line"/>
-<polygon points="158,99 168,104 158,109" class="arrowhead"/>
-<text x="227" y="94" class="t-s" text-anchor="middle">2 carry</text>
-<path d="M174 104 H272" class="line"/>
-<polygon points="272,99 282,104 272,109" class="arrowhead"/>
-<rect x="240" y="122" width="88" height="36" rx="18" class="box-secret"/>
-<text x="284" y="145" class="t-m t-b t-accent" text-anchor="middle">3 Allow</text>
-<text x="227" y="182" class="t-s t-accent" text-anchor="middle">4 sealed</text>
-<path d="M280 192 H182" class="line-secret"/>
-<polygon points="182,187 172,192 182,197" class="arrowhead-secret"/>
-<text x="113" y="182" class="t-s t-accent" text-anchor="middle">5 carry</text>
-<path d="M166 192 H68" class="line-secret"/>
-<polygon points="68,187 58,192 68,197" class="arrowhead-secret"/>
-<rect x="120" y="214" width="100" height="34" rx="10" class="box-soft"/>
-<text x="170" y="236" class="t-s" text-anchor="middle">can't open</text>
-<rect x="8" y="214" width="96" height="34" rx="17" class="box-secret"/>
-<text x="56" y="236" class="t-s t-accent" text-anchor="middle">in memory</text>
-<rect x="8" y="258" width="96" height="34" rx="10" class="box-soft"/>
-<text x="56" y="280" class="t-s" text-anchor="middle">6 forgets</text>
-</svg>
-        <figcaption>Keys are drawn in sealing-wax colour. The relay only ever carries them sealed.</figcaption>
-      </figure>
-    </div>
+    <h3 class="session-h">A work session</h3>
+    <ol class="session">
+      <li class="on"><strong>You approve</strong>The key arrives, sealed for this computer.</li>
+      <li class="on"><strong>You work</strong>The key stays in memory. You are not asked again.</li>
+      <li class="on"><strong>The session ends</strong>You lock, stop working, take your phone away, or it is 02:00.</li>
+      <li><strong>The key is gone</strong>The next use asks your phone again.</li>
+    </ol>
   </section>
 
   <section class="section-tight" id="threats" aria-labelledby="threats-h">
     <h2 id="threats-h">What happens if…</h2>
     <div class="grid grid-2 cases">
-      <div class="card">
-        <h3 id="lost-phone">…you lose your phone</h3>
-        <p>The recipe sits inside the phone behind its screen lock, so a finder can't use it without your passcode.</p>
+      <div class="card case">
+        <div class="case-head"><span class="picto-wrap"><svg class="picto" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><rect x="14" y="5" width="20" height="38" rx="4"/><path d="M20 19 a4 4 0 1 1 6 3.5 c-1.5 1 -2 1.8 -2 3.5"/><circle cx="24" cy="32" r="0.8"/></svg></span><h3 id="lost-phone">…you lose your phone</h3></div>
+        <p>The words on it are readable only while it is unlocked, and sensitive steps also need your face or fingerprint.</p>
         <ol>
-          <li>Lock or erase the phone from another device with Apple Find My or Google Find My Device.</li>
-          <li>Put sealctl on a new phone from your iCloud or Google backup, or type the words from your card. Your computers find the new phone by themselves.</li>
-          <li>Change your words in the app, so the old phone can't open anything new.</li>
+          <li>Lock or erase it with Find My or Find My Device.</li>
+          <li>Restore sealctl on a new phone from your backup or card.</li>
+          <li>Your computers reconnect to it by themselves.</li>
         </ol>
-        <p class="small"><a href="/docs#lost-phone">Step by step</a></p>
+        <p class="small"><a href="/docs#lost-phone">Details</a></p>
       </div>
-      <div class="card">
-        <h3 id="lost-laptop">…your laptop is stolen</h3>
-        <p>If it was locked or switched off, the thief finds only locked boxes. No key that opens your things is stored on its disk, and to get one the laptop would have to ring your phone.</p>
-        <p>If you were in the middle of work, the keys are in its memory, behind your screen lock, until the session ends. On your phone, open the laptop under Machines and tap <strong>Lock now</strong>, then <strong>This machine was lost or stolen</strong>. It unpairs the laptop and lists the keys it used, so you can change them. Your 24 words were never on the laptop, so they stay as they are.</p>
-        <p class="small"><a href="/docs#lost-machine">Step by step</a></p>
+      <div class="card case">
+        <div class="case-head"><span class="picto-wrap"><svg class="picto" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><rect x="4" y="12" width="24" height="17" rx="2"/><path d="M1 33 H31"/><path d="M33 22 H46 M41 17 L46 22 L41 27"/></svg></span><h3 id="lost-laptop">…your laptop is stolen</h3></div>
+        <p>Locked or switched off, it holds no key that opens your secrets, folders or backups.</p>
+        <ol>
+          <li>In the app: Machines, the laptop, Lock now.</li>
+          <li>Tap This machine was lost or stolen, then Unpair.</li>
+          <li>Change the keys it lists at their providers.</li>
+        </ol>
+        <p class="small"><a href="/docs#lost-machine">Details</a></p>
       </div>
-      <div class="card">
-        <h3 id="agent">…an AI agent asks for a key</h3>
-        <p>An AI agent is a program that writes code and runs commands for you. With sealctl it can <em>use</em> a key without <em>seeing</em> it: the key goes into the one program the agent runs, and wherever it would show up in the output, the agent sees <code>****</code>.</p>
-        <p>The first time an agent wants a key in a project, your phone asks you, showing the agent, the project, the command and the key. If the agent asks sealctl to show a key, sealctl refuses, and the guards that <code>sealctl ai install</code> adds block the usual tricks, such as printing a key file.</p>
-        <p class="small"><a href="/docs#agents">AI agents in the docs</a></p>
+      <div class="card case">
+        <div class="case-head"><span class="picto-wrap"><svg class="picto" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><rect x="10" y="15" width="28" height="24" rx="6"/><path d="M24 15 V9"/><circle cx="24" cy="7" r="2"/><circle cx="18" cy="25" r="2.5"/><circle cx="30" cy="25" r="2.5"/><path d="M18 33 H30 M6 23 v8 M42 23 v8"/></svg></span><h3 id="agent">…an AI agent asks for a key</h3></div>
+        <p>The program it runs gets the key; the agent sees <code>****</code>, and asking sealctl to show a key is refused.</p>
+        <ol>
+          <li>Its first use in a project asks your phone.</li>
+        </ol>
+        <p class="small"><a href="/docs#agents">Details</a></p>
       </div>
-      <div class="card">
-        <h3 id="unlocked-phone">…someone takes your unlocked phone</h3>
-        <p>A plain tap only answers your own computers, the ones you already paired. Anything sensitive, such as adding a new computer, handing your files back unlocked, or showing your 24 words, needs your face or fingerprint every time. The phone's passcode is not enough, and if someone adds a new face or fingerprint, the app asks for two words from your card.</p>
-        <p>The most sensitive steps also wait <strong>two hours</strong> when they are approved away from your trusted places, such as your home or office. During those two hours every one of your computers shows a warning, and you can cancel from any of them with <code>sealctl cancel</code>. Meanwhile, lock or erase the phone with Find My or Find My Device, set up a new phone and change your words.</p>
-        <p class="small"><a href="/docs#levels">The two-hour wait</a></p>
+      <div class="card case">
+        <div class="case-head"><span class="picto-wrap"><svg class="picto" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><rect x="22" y="4" width="18" height="30" rx="3.5"/><path d="M4 44 L10 36 C12 33 15 32 18 32 H26 a3 3 0 0 0 0 -6 H20"/><path d="M22 22 h-3 a3 3 0 0 0 0 6"/></svg></span><h3 id="unlocked-phone">…someone takes your unlocked phone</h3></div>
+        <p>Pairing a computer or showing the 24 words needs your face or fingerprint; the passcode alone is not enough.</p>
+        <ol>
+          <li>Away from trusted places, showing the words waits two hours.</li>
+          <li>Every computer is told; <code>sealctl cancel</code> stops it.</li>
+          <li>Lock or erase the phone with Find My.</li>
+        </ol>
+        <p class="small"><a href="/docs#levels">Details</a></p>
       </div>
-      <div class="card">
-        <h3 id="card-seen">…someone sees your 24-word card</h3>
-        <p>The words are the recipe for every key, so look after the card like the key to your home. If someone may have seen it, change your words in the app. Each computer moves to the new words the next time it talks to your phone, and <code>sealctl migrate</code> locks your folders and backups again with the new keys.</p>
-        <p>Copies someone made before you changed the words still open with the old words. Changing them protects everything from then on.</p>
-        <p class="small"><a href="/docs#change-words">Change words</a></p>
+      <div class="card case">
+        <div class="case-head"><span class="picto-wrap"><svg class="picto" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><rect x="5" y="14" width="38" height="26" rx="3"/><path d="M11 22 h11 M27 22 h11 M11 28 h11 M27 28 h11 M11 34 h11"/></svg></span><h3 id="card-lost">…you lose your 24-word card</h3></div>
+        <p>Your phone still has the words, so nothing stops working.</p>
+        <ol>
+          <li>Write a new card: Settings, Show words.</li>
+        </ol>
+        <p class="small"><a href="/docs#words">Details</a></p>
       </div>
-      <div class="card" id="disappear">
-        <h3>…the relay stops, or sealctl disappears</h3>
-        <p>Your things never depend on us. With your 24 words, the free, open-source <code>sealctl</code> command opens any secret store, folder or backup it locked, with no phone, no relay and no account: <code>sealctl recover &lt;path&gt;</code>. And <code>sealctl unseal --all</code> hands everything back under passwords of your own, also from the words alone.</p>
-        <p>Locked folders are ordinary encrypted disks (APFS on a Mac, LUKS on Linux), and backups are ordinary restic backups, so common tools still read them. While the relay is down, your phone can't approve new requests; your card still opens everything.</p>
-        <p class="small"><a href="/docs#leaving">Leaving sealctl</a></p>
+      <div class="card case" id="disappear">
+        <div class="case-head"><span class="picto-wrap"><svg class="picto" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><rect x="8" y="6" width="32" height="14" rx="3"/><rect x="8" y="26" width="32" height="14" rx="3"/><path d="M30 10 l6 6 M36 10 l-6 6 M30 30 l6 6 M36 30 l-6 6"/></svg></span><h3 id="relay-gone">…the relay or sealctl disappears</h3></div>
+        <p>With your 24 words, the open-source command line tool opens everything, with no phone, server or account.</p>
+        <ol>
+          <li><code>sealctl recover</code> opens a store, folder or backup.</li>
+          <li><code>sealctl unseal --all --words</code> hands everything back.</li>
+        </ol>
+        <p class="small"><a href="/docs#leaving">Details</a></p>
       </div>
     </div>
-    <p class="prose" id="closed">The relay's own code is not public. It holds nothing that opens your things: the way to talk to it is <a href="https://github.com/sealctl/sealctl/blob/{{protocol.sha}}/docs/protocol.md#relay-api">published</a>, every reply it carries is signed by your phone, and your things open without it. What it keeps is listed in the <a href="/privacy#relay">Privacy notice</a>.</p>
   </section>
 
   <section class="section-tight" id="limits" aria-labelledby="limits-h">
     <h2 id="limits-h">What sealctl can't do</h2>
     <ul class="prose limits">
-      <li><strong>Stop a program from leaking a key you gave it.</strong> When you let a program use a key, that program has it. A bad program, or a bad package hidden in your project, could send it somewhere. sealctl gives each command only the keys named for it, and your phone writes down every use.</li>
-      <li><strong>Beat harmful software that runs as you while you work.</strong> While a session is open, such software can use whatever is unlocked, just as you can. Lock when you step away; sealctl also locks by itself when you stop working.</li>
-      <li><strong>Stop a determined attacker with its AI guards.</strong> The guards catch the usual ways an agent could see a key, by mistake or out of curiosity. Software that sets out to get around them can.</li>
-      <li><strong>Help once someone is past your screen lock</strong> while a session is open, or has your phone and its passcode. Lock the computer from your phone, lock or erase the phone, and change your words.</li>
-      <li><strong>Bring back lost words.</strong> If you lose the card, every copy of the words and your phone, nothing can open your things. There is no reset, not even by us.</li>
-      <li><strong>Make the postman deliver.</strong> The relay can't open or fake messages, but it could hold them back. Then nothing is approved until they arrive.</li>
-      <li id="claims"><strong>Show an outside audit.</strong> No independent company has reviewed sealctl yet, and we hold no certifications. This changes when that does.</li>
+      <li>A program you give a key to can use it, or leak it.</li>
+      <li>Harmful software running as you can use what is unlocked during a session.</li>
+      <li>The AI-agent guards stop mistakes, not a determined attacker.</li>
+      <li>Someone with your unlocked phone, or its passcode, can approve everyday requests.</li>
+      <li>The relay can delay or drop messages. It cannot read or fake them.</li>
+      <li>Changing your 24 words is not in the app yet.</li>
+      <li>If you lose the card, every copy of the words and your phone, nothing can open your things. There is no reset.</li>
+    </ul>
+  </section>
+
+  <section class="section-tight" id="proof" aria-labelledby="proof-h">
+    <h2 id="proof-h">How to check this</h2>
+    <ul class="ticks proof">
+      <li id="closed"><strong>Open source.</strong> The <a href="{{github.cli}}">command line tool</a> (MIT) and the <a href="{{github.app}}">phone app</a> (AGPL-3.0) are public. The relay's code is not, but <a href="{{protocol.base}}#relay-api">how to talk to it</a> is.</li>
+      <li id="standard"><strong>Standard cryptography only.</strong> Published, widely used methods; nothing home-made. <a href="/crypto#primitives">The list</a>.</li>
+      <li><strong>Public protocol.</strong> <a href="{{protocol.base}}">Every message is documented</a>, with <a href="{{protocol.base}}#appendix-a-test-vectors">test values</a> that the core, the relay and both apps check against.</li>
+      <li id="relay"><strong>What the relay keeps</strong> is listed in the <a href="/privacy#relay">Privacy notice</a>.</li>
+      <li id="claims"><strong>What we don't claim.</strong> No independent audit and no certifications yet. Our own tests, done with the help of AI, are listed below; they are not an audit.</li>
     </ul>
   </section>
 
   <section class="section-tight" id="log" aria-labelledby="log-h">
-    <h2 id="log-h">How we check it</h2>
-    <p class="prose">We test sealctl ourselves and list every test here with what we found. These tests are done in-house with the help of AI; that is not an independent audit, and we don't call it one.</p>
-    <h3>Security log</h3>
+    <h2 id="log-h">Security log</h2>
     {{securityLog}}
     <h3 id="checks">Checks that run all the time</h3>
     {{securityChecks}}
-    <h3 id="releases">Check what you download</h3>
+    <h3 id="releases">Check a download</h3>
     <div class="prose">
-      <p>Every <a href="{{github.releases}}">release</a> comes with a <code>SHA256SUMS</code> file: a fingerprint for each file. If a file was changed on the way to you, its fingerprint won't match. Download the list next to your files and check them:</p>
+      <p>Every <a href="{{github.releases}}">release</a> has a <code>SHA256SUMS</code> file. Put it next to your downloads and run:</p>
       <pre><code>shasum -a 256 -c SHA256SUMS --ignore-missing      # macOS
 sha256sum -c SHA256SUMS --ignore-missing          # Linux</code></pre>
-      <p>Or build sealctl yourself from its source code: <code>cargo install --locked --git https://github.com/sealctl/sealctl sealctl</code>. See <a href="/install#source">Install</a>.</p>
+      <p>Or <a href="/install#source">build from source</a>.</p>
     </div>
   </section>
 
   <section class="section-tight" id="report" aria-labelledby="report-h">
     <h2 id="report-h">Report a problem</h2>
     <div class="prose">
-      <p>Found something that looks like a security problem? Tell us privately, so it can be fixed before anyone misuses it: through a <a href="{{github.advisory}}">private GitHub security advisory</a> on the affected repository, or by email to <code>{{email.security}}</code>. Please don't open a public issue.</p>
-      <p>You get a first answer within three working days. Fixed issues are credited in the release notes unless you prefer otherwise. Machine-readable contacts: <a href="/.well-known/security.txt">security.txt</a>. Policy: <a href="{{github.securityPolicy}}">SECURITY.md</a>.</p>
+      <p>Report privately through a <a href="{{github.advisory}}">GitHub security advisory</a> or <code>{{email.security}}</code>, not a public issue. First answer within three working days; fixes are credited in the release notes.</p>
+      <p class="small"><a href="/.well-known/security.txt">security.txt</a> · <a href="{{github.securityPolicy}}">SECURITY.md</a></p>
     </div>
   </section>
 
   <section class="section-tight" id="specialists" aria-labelledby="specialists-h">
     <h2 id="specialists-h">For specialists</h2>
-    <p class="prose">The same design with its real names is on <a href="/crypto">Cryptographic design</a>:</p>
-    <ul class="prose">
-      <li id="standard"><a href="/crypto#primitives">Standard parts only</a>: the algorithms, their standards and the libraries; no custom cryptography.</li>
-      <li><a href="/crypto#tree">Derivation tree</a>: every key and the label it is made from.</li>
-      <li id="relay"><a href="/crypto#relay-view">What the relay sees</a>, and <a href="/privacy#relay">what it keeps</a>.</li>
-      <li><a href="/crypto#threats">Threats, answers and what remains</a>, and <a href="/crypto#not-protected">what is deliberately not protected</a>.</li>
-      <li>The <a href="{{protocol.base}}">protocol</a> and its test vectors.</li>
-    </ul>
+    <p class="prose"><a href="/crypto">Cryptographic design</a>: the key tree, each message, <a href="/crypto#relay-view">what the relay sees</a>, <a href="/crypto#threats">threats and what remains</a>.</p>
   </section>
 </div>
