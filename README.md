@@ -13,7 +13,15 @@ npm run dev          # build, then wrangler pages dev on localhost:8788
 npm run check        # tokens and contrast, html-validate, internal links
 ```
 
-Node 24. The only build dependency is `marked`, pinned.
+Node 24. The only build dependency is `marked`. `qrcode-generator` is copied into `dist/` as the QR encoder for `/p`. `html-validate` and `linkinator` (`npm run check`) and `wrangler` (`npm run dev`, preview deploys) are dev dependencies, so they come from the lockfile too, never from a fresh `npx` download.
+
+## Dependencies
+
+- Every version in `package.json` is exact and `package-lock.json` is committed. Install with `npm ci`, which installs the lockfile as it is.
+- `.npmrc` turns off dependency install scripts (`ignore-scripts=true`), and `allowScripts` in `package.json` denies the three that exist: `esbuild` and `workerd` only check their native binary, fetch it if the platform package is missing, and relink it; npm already installs the platform package, and `fsevents` ships a prebuilt binary. Everything here, `wrangler pages dev` included, works without them. A new package with an install script shows up in `npm install-scripts ls`; deny it unless it is needed.
+- `npm install` and `npm update` only take versions published at least 7 days ago (`min-release-age=7` in `.npmrc`). Dependabot waits the same 7 days (14 for a major version) and groups its updates; GitHub Actions are pinned to commit SHAs.
+- CI runs `npm ci --ignore-scripts`, `npm audit signatures`, the build and `npm run check`.
+- `/assets/js/qrcode.<hash>.js` is `node_modules/qrcode-generator/qrcode.js` byte for byte, so its file hash is the published 1.4.4 file. Check: `shasum -a 256 dist/assets/js/qrcode.*.js node_modules/qrcode-generator/qrcode.js`.
 
 ## Layout
 
