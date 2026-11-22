@@ -24,7 +24,6 @@ export default {
   // The release the site describes. While `released` is false, the status strip says it
   // is in development; set it to true when it is published on GitHub.
   release: {
-    version: "0.7.0",
     released: false,
   },
 

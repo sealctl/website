@@ -8,13 +8,13 @@ sealctl keeps API keys, SSH keys and disk passwords off your laptop's disk. Your
 
 This page explains all of it, top to bottom. Use the contents below to jump, or your browser's find. For the cryptography, see [Cryptographic design](/crypto) and the [protocol]({{protocol.base}}).
 
-> **Status.** This page describes sealctl {{release.version}}, which is in development and not released yet; the phone app is coming soon. Parts marked <span class="pill pill-planned">Planned</span> are not built yet, even in development builds.
+> **Status.** sealctl is in development and not released yet; the phone app is coming soon. Parts marked <span class="pill pill-planned">Planned</span> are not built yet, even in development builds.
 
 <!-- contents -->
 
 ## Install {#install}
 
-The command line tool runs on macOS and Linux. sealctl {{release.version}} is not released yet; once it is, these commands install it. The [Install](/install) page has every package and how to verify a download. The short version:
+The command line tool runs on macOS and Linux. sealctl is not released yet; once it is, these commands install it. The [Install](/install) page has every package and how to verify a download. The short version:
 
 ```sh
 brew install sealctl/tap/sealctl          # macOS, or Homebrew on Linux
@@ -690,7 +690,7 @@ Your words were never on that machine, so they don't need to change. A machine t
 
 ## Paying {#paying}
 
-> **Status.** Paying arrives with the release of sealctl {{release.version}}. Today there is nothing to buy and nothing asks you to.
+> **Status.** Paying arrives with the first release. Today there is nothing to buy and nothing asks you to.
 
 sealctl is free. If it earns its place, $5.99 once keeps the relay running. See [Pricing](/pricing).
 
@@ -728,7 +728,7 @@ Payments are handled by Paddle, our merchant of record. See [Refunds](/refunds).
 
 ## CLI reference {#cli}
 
-Every command of sealctl {{release.version}}, one line each. `sealctl <command> --help` shows the flags. Global flags: `-v` (more logging on stderr, never values; `-vv` for debug), `--relay <origin>`, `--version`, `--help`.
+Every command, one line each. `sealctl <command> --help` shows the flags. Global flags: `-v` (more logging on stderr, never values; `-vv` for debug), `--relay <origin>`, `--version`, `--help`.
 
 ### Session and machine {#cli-session}
 

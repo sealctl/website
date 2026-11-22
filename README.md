@@ -47,7 +47,7 @@ Then set `prelaunch: false`.
 
 Other things to update when they become true:
 
-- `release.released: true` once sealctl 0.7.0 is published (removes the status strip).
+- `release.released: true` at the first release (removes the status strip).
 - `protocol.rev` and `protocol.sha` when `/crypto` is checked against a newer `docs/protocol.md`; the diagrams in `src/pages/crypto.html` are hand-laid-out inline SVG.
 - Store badges, app screenshots, `/card-a4.pdf` and `/card-letter.pdf`, the `.well-known` app-link files: they need the app.
 
