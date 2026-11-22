@@ -345,3 +345,6 @@ a :not(pre) > code, a > code { color: inherit; }
 .doc blockquote > :last-child { margin-bottom: 0; }
 @media (max-width: 899px) { .docs-nav { order: 2; border-top: 1px solid var(--border); padding-top: 16px; } .docs .doc { order: 1; } }
 .toc a { display: inline-block; padding: 3px 0; }
+
+/* /p: the pairing code, drawn in the browser */
+.pair-qr { display: block; width: min(100%, 320px); height: auto; image-rendering: pixelated; border-radius: 8px; margin: 8px auto; }

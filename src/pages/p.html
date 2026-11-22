@@ -1,14 +1,19 @@
 ---
 title: Pair with sealctl
-description: A pairing link from sealctl pair. Open it on the phone that has the sealctl app.
+description: A pairing link from sealctl pair.
 noindex: true
+scripts: [qrcode, pair]
 ---
 <div class="wrap">
   <div class="pay">
     <h1>Pair a machine with your phone</h1>
-    <p>This link comes from <code>sealctl pair</code> on a computer. It opens the sealctl app on a phone that has it installed.</p>
-    <p>If you are reading this on your phone, the app is not installed yet, or your browser opened the link instead. In the app, go to <strong>Machines</strong>, tap <strong>Pair a machine</strong> and scan the code that <code>sealctl pair</code> shows.</p>
-    <p>The part of the link after <code>#</code> stays in your browser: it is never sent to this site.</p>
+    <div id="pair-code" hidden>
+      <div id="pair-img"></div>
+      <p id="pair-status"></p>
+    </div>
+    <p>This link comes from <code>sealctl pair</code> on a computer. Opened on that computer, this page shows the pairing code: on your phone, open sealctl, go to <strong>Machines</strong>, tap <strong>Pair a machine</strong> and scan it.</p>
+    <p>On a phone, the link opens the app's scanner. Pairing needs the app's own camera, which shows the phone is next to the computer.</p>
+    <p>The part of the link after <code>#</code> stays in this browser: it is never sent to this site.</p>
     <p><a href="/install">Install</a> · <a href="/how-it-works">How it works</a></p>
   </div>
 </div>
