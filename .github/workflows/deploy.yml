@@ -19,9 +19,18 @@ on:
 
 permissions: {}
 
+concurrency:
+  # one run per pull request (a new push cancels the old run); push, schedule and manual runs
+  # get a group of their own, so a run on main is never cancelled or replaced. The production
+  # job below has its own group, so deploys still run one at a time.
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
+  # The only build: pull requests and main (it was also in a separate ci.yml, now removed).
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -53,12 +62,15 @@ jobs:
     needs: build
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
     environment:
       name: production
       url: https://sealctl.com
-    # Production deploys queue; one never cancels another half way.
+    # Production deploys queue; one never cancels another half way. (GitHub keeps one waiting
+    # deploy per group: if two merges wait, the older waiting one is dropped and the newer,
+    # which contains it, deploys.)
     concurrency:
       group: pages-production
       cancel-in-progress: false

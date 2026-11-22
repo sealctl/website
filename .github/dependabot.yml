@@ -16,6 +16,7 @@ updates:
     groups:
       npm:
         patterns: ["*"]
+    open-pull-requests-limit: 5
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -25,3 +26,4 @@ updates:
     groups:
       actions:
         patterns: ["*"]
+    open-pull-requests-limit: 5
