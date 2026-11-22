@@ -12,7 +12,7 @@ export default {
 
   // App links: https://sealctl.com/p#... opens the app (pairing). Android checks
   // /.well-known/assetlinks.json for these signing certificates. Today only the debug
-  // certificate of the development builds; add the Play app signing certificate at release.
+  // certificate of the development builds; add the Play app signing certificate.
   // iOS needs apple-app-site-association with the Apple team id, which does not exist yet.
   appLinks: {
     androidPackage: "com.sealctl.app",
@@ -21,10 +21,11 @@ export default {
     ],
   },
 
-  // The release the site describes. While `released` is false, the status strip says it
-  // is in development; set it to true when it is published on GitHub.
-  release: {
-    released: false,
+  // The phone app's store pages. Placeholders until the app is published; used for every
+  // App Store and Google Play link on the site.
+  app: {
+    appStore: "#",
+    googlePlay: "#",
   },
 
   // docs/protocol.md revision that /crypto describes.
@@ -55,10 +56,24 @@ export default {
 
   // Filled in by the seller only. Shown as visible placeholders until then.
   seller: {
-    legalName: "[Seller legal name — to be filled before launch]",
-    tradingName: "[Trading name, if any — to be filled before launch]",
-    address: "[Seller address — to be filled before launch], Poland",
-    registration: "[NIP and REGON, if registered — to be filled before launch]",
+    legalName: "[Seller legal name]",
+    tradingName: "[Trading name, if any]",
+    address: "[Seller address], Poland",
+    registration: "[NIP and REGON, if registered]",
+  },
+
+  // Legal and support details, filled in by the seller (with a lawyer where noted).
+  // Shown as visible placeholders until then.
+  legal: {
+    privacyVersion: "[date of this version]",
+    termsVersion: "[date of this version]",
+    emailRetention: "[retention period, e.g. 2 years]",
+    emailProvider: "[email provider, if any]",
+    refundDays: "[30]",
+    answerTime: "[two working days]",
+    termsChangesNote: "[confirm wording]",
+    termsLiabilityNote: "[lawyer to word]",
+    termsDsaNote: "[lawyer to confirm DSA wording]",
   },
 
   paddle: {
