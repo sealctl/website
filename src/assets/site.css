@@ -212,7 +212,7 @@ figcaption { font-size: 0.85rem; color: var(--muted); margin-top: 10px; }
 /* bands */
 .band { background: var(--surface-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
 .band-grid { display: grid; gap: 36px; align-items: center; padding-top: 64px; padding-bottom: 64px; }
-@media (min-width: 900px) { .band-grid { grid-template-columns: 1.3fr 1fr; gap: 56px; } }
+@media (min-width: 900px) { .band-grid { grid-template-columns: minmax(0, 1fr) auto; gap: 56px; } .band-grid > figure { max-width: 34rem; } }
 .proofs { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 14px; }
 @media (min-width: 640px) { .proofs { grid-template-columns: 1fr 1fr; } }
 .proofs li { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; font-size: 0.92rem; color: var(--ink-2); }
