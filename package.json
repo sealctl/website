@@ -13,5 +13,8 @@
   },
   "devDependencies": {
     "marked": "18.2.1"
+  },
+  "dependencies": {
+    "qrcode-generator": "1.4.4"
   }
 }

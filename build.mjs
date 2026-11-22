@@ -89,6 +89,8 @@ for (const dir of ["js", "img"]) {
     emitAsset(`/assets/${dir}/${f}`, fs.readFileSync(path.join(SRC, "assets", dir, f)));
   }
 }
+// The QR encoder for /p (qrcode-generator, MIT), served from this site: the CSP allows no other.
+emitAsset("/assets/js/qrcode.js", fs.readFileSync(path.join("node_modules", "qrcode-generator", "qrcode.js")));
 // Files served at fixed paths (not fingerprinted).
 for (const f of ["favicon.svg", "apple-touch-icon.png", "social-preview.png", "robots.txt", "_redirects"]) {
   const p = path.join(SRC, f);
