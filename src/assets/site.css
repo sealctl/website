@@ -374,3 +374,14 @@ a :not(pre) > code, a > code { color: inherit; }
 :root[data-theme="dark"] .brand .mark-dark { display: block; }
 /* an explicit choice from the theme switcher also sets native UI (scrollbars, form controls) */
 :root[data-theme="light"] { color-scheme: light; }
+
+/* security log */
+.log-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.log-table th, .log-table td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.log-table th { font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+.log-table time { font-family: var(--mono); font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+.log-kind { display: inline-block; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-right: 4px; }
+.log-facts { display: grid; grid-template-columns: minmax(0, 6.5rem) minmax(0, 1fr); gap: 4px 12px; margin: 8px 0 4px; font-size: 0.88rem; }
+.log-facts dt { color: var(--muted); }
+.log-facts dd { margin: 0; color: var(--ink-2); }
+@media (max-width: 560px) { .log-facts { grid-template-columns: minmax(0, 1fr); } .log-facts dd { margin-bottom: 6px; } .log-table th:nth-child(4), .log-table td:nth-child(4) { display: none; } }
