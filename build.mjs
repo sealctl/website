@@ -172,9 +172,9 @@ for (const f of fs.readdirSync(pageDir).filter((f) => f.endsWith(".html")).sort(
 }
 
 // ---------- docs ----------
-// The docs are one long page, /docs, from src/docs/index.md. Its contents list (a sticky
-// sidebar on wide screens, a collapsible bar on phones) is built here from the page's h2 and
-// h3 headings, so it needs no script. A heading may set its own id: `## Paying {#paying}`.
+// The docs are one long page, /docs, from src/docs/index.md. Its contents list is built here
+// from the page's h2 and h3 headings and put where the Markdown says `<!-- contents -->`; each
+// h2 section ends with a link back to it. A heading may set its own id: `## Paying {#paying}`.
 
 let headings = []; // filled by the heading renderer while a page is parsed
 const marked = new Marked({ gfm: true });
@@ -235,21 +235,20 @@ function tocList(list) {
 
 function docsPage({ urlPath, outFile, meta, html, toc, source }) {
   const edit = `<p class="doc-meta"><a href="${config.github.website}/edit/main/${source}">Edit this page on GitHub</a> · Last changed ${lastCommitDate(source)}</p>`;
-  const list = tocList(toc);
-  const body = `<div class="wrap docs">
-<details class="toc-bar"><summary>Contents</summary>
-<nav class="toc-nav" aria-label="Contents menu">${list}</nav>
-</details>
-<nav class="toc-side toc-nav" aria-label="Contents">
-<p class="toc-title">On this page</p>
-${list}
-</nav>
+  const back = '<p class="to-contents"><a href="#contents">↑ Contents</a></p>\n';
+  const contents = `<nav class="contents" aria-labelledby="contents">\n<h2 id="contents">Contents</h2>\n${tocList(toc)}\n</nav>\n`;
+  if (toc.length && !html.includes("<!-- contents -->")) fail(`${source}: no <!-- contents --> marker for the contents list`);
+  // A back link closes every h2 section after the contents list, and the last one.
+  const [head, rest = ""] = html.split("<!-- contents -->");
+  const sections = rest.split(/(?=<h2 id=)/);
+  const withBacks = sections.map((sec) => (sec.startsWith("<h2") ? sec + back : sec)).join("");
+  const body = `<div class="wrap">
 <article class="prose doc">
-${html}
+${head}${toc.length ? contents : ""}${withBacks}
 ${edit}
 </article>
 </div>`;
-  render({ urlPath, outFile, meta: { ...meta, scripts: ["copy", "docs", ...(meta.scripts || [])], bodyClass: "docs-page" }, body, where: source });
+  render({ urlPath, outFile, meta: { ...meta, scripts: ["copy", ...(meta.scripts || [])], bodyClass: "docs-page" }, body, where: source });
 }
 
 for (const s of docSlugs) {
