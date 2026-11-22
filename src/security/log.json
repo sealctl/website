@@ -35,13 +35,27 @@
       "title": "Supply chain: relay and website",
       "result": "No malicious or hijacked package among 308; every registry signature verified. 1 high, 1 medium in deploy and build setup.",
       "status": "Fixing"
+    },
+    {
+      "date": "2026-11-22",
+      "kind": "Audit",
+      "title": "Supply chain: command line tool",
+      "result": "No malicious, hijacked or typosquatted crate among 405; all from crates.io. 1 high (release build setup, fixed), 9 medium, 10 low.",
+      "status": "Fixing"
+    },
+    {
+      "date": "2026-11-22",
+      "kind": "Audit",
+      "title": "Supply chain: iPhone and Android apps",
+      "result": "No malicious, hijacked or typosquatted package among 318 crates and the Android libraries; no remote Swift packages. 3 medium, 7 low, all in build controls.",
+      "status": "Fixing"
     }
   ],
   "continuous": [
-    "Every change to the main branch of a public repository goes through a pull request reviewed by GitHub Copilot.",
-    "Every parser is fuzzed on each pull request and nightly.",
+    "Every change to the main branch of a public repository goes through a pull request and an independent review before merging (internal, AI-assisted).",
+    "The command line tool's parsers are fuzzed on every pull request that changes them, and nightly.",
     "Dependencies: known advisories, licences and sources checked on each pull request; registry signatures verified in CI; routine updates wait 7 days after release (security updates don't wait).",
-    "Secret scanning with push protection on every repository.",
+    "Secret scanning with push protection on every public repository.",
     "Shared protocol test vectors, checked byte for byte by the core, the relay and both apps.",
     "Power-cut tests: unsealing is cut at every step and must resume without losing anything."
   ]
