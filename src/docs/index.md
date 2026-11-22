@@ -8,19 +8,13 @@ sealctl keeps API keys, SSH keys and disk passwords off your laptop's disk. Your
 
 This page explains all of it, top to bottom. Use the contents below to jump, or your browser's find. For the cryptography, see [Cryptographic design](/crypto) and the [protocol]({{protocol.base}}).
 
-> **Status.** This page describes the phone version, sealctl {{release.phoneVersion}}, which is in development and not released yet. Parts marked <span class="pill pill-planned">Planned</span> are not built yet, even in development builds.
->
-> | Release | State | Keys |
-> | --- | --- | --- |
-> | {{release.current}} | The current release | On a Ledger (OpenPGP app). Its guide is the [README](https://github.com/sealctl/sealctl#readme) |
-> | {{release.unsealVersion}} | Next | {{release.current}} plus `sealctl unseal`, to hand everything back. See [Moving from the Ledger version](#from-ledger) |
-> | {{release.phoneVersion}} | In development | From 24 words on your phone. Needs the sealctl app. Everything below |
+> **Status.** This page describes sealctl {{release.version}}, which is in development and not released yet; the phone app is coming soon. Parts marked <span class="pill pill-planned">Planned</span> are not built yet, even in development builds.
 
 <!-- contents -->
 
 ## Install {#install}
 
-The command line tool runs on macOS and Linux. The [Install](/install) page has every package and how to verify a download. The short version:
+The command line tool runs on macOS and Linux. sealctl {{release.version}} is not released yet; once it is, these commands install it. The [Install](/install) page has every package and how to verify a download. The short version:
 
 ```sh
 brew install sealctl/tap/sealctl          # macOS, or Homebrew on Linux
@@ -584,7 +578,7 @@ sealctl seal --from ~/sealctl-unsealed-<date>/handback.json
 
 Taking over an existing object is confirmation [level 2](#levels): the terminal says `On your phone, pick 47 if it asks.` A new object, like a secret you just typed, needs nothing extra.
 
-`sealctl seal --from` takes back everything a hand-back list names, including one written by sealctl {{release.unsealVersion}}. `--skip <kind>/<name>` leaves one out. `--words` uses your card instead of the phone.
+`sealctl seal --from` takes back everything a hand-back list from `sealctl unseal` names. `--skip <kind>/<name>` leaves one out. `--words` uses your card instead of the phone.
 
 ## Leaving sealctl {#leaving}
 
@@ -696,7 +690,7 @@ Your words were never on that machine, so they don't need to change. A machine t
 
 ## Paying {#paying}
 
-> **Status.** Paying arrives with the phone version ({{release.phoneVersion}}). Today there is nothing to buy and nothing asks you to.
+> **Status.** Paying arrives with the release of sealctl {{release.version}}. Today there is nothing to buy and nothing asks you to.
 
 sealctl is free. If it earns its place, $5.99 once keeps the relay running. See [Pricing](/pricing).
 
@@ -732,48 +726,9 @@ Restoring a phone from your words keeps the licence. Changing your words moves i
 
 Payments are handled by Paddle, our merchant of record. See [Refunds](/refunds).
 
-## Moving from the Ledger version {#from-ledger}
-
-sealctl up to {{release.unsealVersion}} keeps its keys on a Ledger (the OpenPGP app). The phone version ({{release.phoneVersion}}) uses different keys, made from new 24 words on your phone, and doesn't read the Ledger at all. So the move has three steps: hand everything back with {{release.unsealVersion}}, install the phone version, and seal it again.
-
-> **Status.** {{release.unsealVersion}}, the release with `sealctl unseal`, is the next release; the latest today is {{release.current}}. The phone version is in development. This section is ready ahead of both.
-
-### 1. Hand everything back with {{release.unsealVersion}} {#from-ledger-1}
-
-{{release.unsealVersion}} is the last release that reads the Ledger. Its `sealctl unseal --all` puts every secret, volume, backup and SSH key back in plain, standard form, in `~/sealctl-unsealed-<date>`.
-
-```sh
-sealctl unseal --all --dry-run     # the plan; changes nothing
-sealctl unseal --all               # shows the plan again, then asks you to type: unseal
-```
-
-Keys come from the Ledger, so the PIN is asked once. If the Ledger is lost or broken, `--words` takes its 24 words instead. Everything else works as in [Leaving sealctl](#leaving): the folder, the rules, `--resume`. The run ends with `handback.json`: every object and where its password went, with no passwords in it.
-
-### 2. Install the phone version {#from-ledger-2}
-
-`brew upgrade sealctl`, or a newer package from [Install](/install). Then install the app, write your new 24 words on a card, and run `sealctl pair`.
-
-If the phone version finds objects from the Ledger version still in place, it stops and says so:
-
-```text
-sealctl: Found objects from sealctl 0.5 (Ledger). Hand them back first with sealctl 0.6: sealctl unseal --all. See https://sealctl.com/docs/from-ledger
-```
-
-If you upgraded before running `unseal`, install {{release.unsealVersion}} next to it to finish step 1 first. A versioned Homebrew formula for this, `sealctl/tap/sealctl@0.6`, is <span class="pill pill-planned">Planned</span>.
-
-### 3. Seal it again {#from-ledger-3}
-
-```sh
-sealctl seal --from ~/sealctl-unsealed-<date>/handback.json
-```
-
-`sealctl seal` takes over the volumes, backups, SSH keys and secrets listed in the hand-back file, under keys from your new words. Your phone confirms with Face ID or a fingerprint and lists exactly what it takes over. Then delete the folder.
-
-Keep your Ledger and its paper card until no old copies of your backups or volumes remain: those still open only with the Ledger.
-
 ## CLI reference {#cli}
 
-Every command of sealctl {{release.phoneVersion}}, one line each. `sealctl <command> --help` shows the flags. Global flags: `-v` (more logging on stderr, never values; `-vv` for debug), `--relay <origin>`, `--version`, `--help`.
+Every command of sealctl {{release.version}}, one line each. `sealctl <command> --help` shows the flags. Global flags: `-v` (more logging on stderr, never values; `-vv` for debug), `--relay <origin>`, `--version`, `--help`.
 
 ### Session and machine {#cli-session}
 
@@ -960,14 +915,6 @@ Set up Face ID or a fingerprint on the phone, or use your card: add `--words` to
 ### `Not inside an AI agent` {#faq-agent}
 
 The agent tried a command that would show it a secret. Use `sealctl run -- <command>`, or run the command yourself in your own terminal.
-
-### `Found objects from sealctl 0.5 (Ledger)` {#faq-ledger}
-
-Hand them back with {{release.unsealVersion}} first. See [Moving from the Ledger version](#from-ledger).
-
-### `sealctl unlock` and `sealctl lock <volume>` are gone {#faq-unlock}
-
-Use `sealctl volume open <name>` and `sealctl volume close <name>`.
 
 ### Does sealctl work if the company behind it disappears? {#faq-gone}
 
