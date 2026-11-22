@@ -35,13 +35,27 @@
       "title": "Supply chain: relay and website",
       "result": "No malicious or hijacked package among 308; every registry signature verified. 1 high, 1 medium in deploy and build setup.",
       "status": "Fixing"
+    },
+    {
+      "date": "2026-11-22",
+      "kind": "Audit",
+      "title": "Supply chain: command line tool",
+      "result": "No malicious, hijacked or typosquatted crate among 405; all from crates.io. 1 high (release build setup, fixed), 9 medium, 10 low.",
+      "status": "Fixing"
+    },
+    {
+      "date": "2026-11-22",
+      "kind": "Audit",
+      "title": "Supply chain: iPhone and Android apps",
+      "result": "No malicious, hijacked or typosquatted package among 318 crates and the Android libraries; no remote Swift packages. 3 medium and 6 low in build controls; 1 low: a known SQLite advisory in a bundled library.",
+      "status": "Fixing"
     }
   ],
   "continuous": [
-    "Every change to the main branch of a public repository goes through a pull request reviewed by GitHub Copilot.",
-    "Every parser is fuzzed on each pull request and nightly.",
-    "Dependencies: known advisories, licences and sources checked on each pull request; registry signatures verified in CI; routine updates wait 7 days after release (security updates don't wait).",
-    "Secret scanning with push protection on every repository.",
+    "From 23 November 2026, every change to the main branch of a public repository goes through a pull request and an independent review before merging (internal, AI-assisted).",
+    "The command line tool's parsers are fuzzed on every pull request that changes them, and nightly.",
+    "Dependencies: the command line tool's crates are checked on each pull request for known advisories, licences and sources (cargo deny) and against reviewed audits (cargo vet); the relay's and website's npm packages install only from the lockfile with registry signatures verified in CI; Dependabot reports advisories everywhere; routine updates wait 7 days after release (security updates don't wait).",
+    "Secret scanning with push protection on every public repository.",
     "Shared protocol test vectors, checked byte for byte by the core, the relay and both apps.",
     "Power-cut tests: unsealing is cut at every step and must resume without losing anything."
   ]
