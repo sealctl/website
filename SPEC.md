@@ -85,7 +85,7 @@ Front matter per page: `title`, `description`, `noindex` (optional), `scripts` (
 | `/install` | Install | Hero card, docs |
 | `/pay` | Payment page for Paddle checkout (live) | No (noindex) |
 | `/pay/sandbox` | The same page for Paddle's sandbox, used by the staging relay | No (noindex) |
-| `/p` | Pairing link landing page: "Scan this code with the sealctl app" | No (noindex) |
+| `/p` | Pairing link landing page: "Scan this code with the sealctl app", above the code a warning to scan it only after running `sealctl pair` on this computer; the machine name is shown as the link's claim; draws again when the fragment changes | No (noindex) |
 | `/.well-known/apple-app-site-association`, `/.well-known/assetlinks.json` | Universal links and App Links for `/p` | No |
 | `/status` | Relay status and incidents | Footer |
 | `/privacy` | Privacy | Footer |
