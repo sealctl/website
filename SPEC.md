@@ -120,7 +120,7 @@ Copy below is direction, not final text. Headlines marked "copy" are approved wo
 
 Follows the approved example: hero text beside a start card, a live product scene, a six-card grid, then trust and price bands.
 
-1. **Status strip** (until 0.7.0 is released): "In development. sealctl 0.7.0 is not released yet, and the phone app is coming soon. It is being built in the open on GitHub." Removed at launch (`release.released`). The site never mentions releases before 0.7.0.
+1. **Status strip** (until the first release): "In development. sealctl is not released yet, and the phone app is coming soon. It is being built in the open on GitHub." Removed at launch (`release.released`). The site never mentions releases before 0.7.0.
 2. **Hero.** Eyebrow "Secrets for AI coding agents". H1 (copy): "Your agents run the code. *Your phone holds the keys.*" Lede (copy): "sealctl keeps API keys, SSH keys and backup passwords off your disk. When an agent needs one, your phone asks, you tap **Allow**, and the key goes into that one command. The agent never sees it, and it never lands in a transcript or a `.env` file." Buttons: Get started (to the start card), How it works.
 3. **Start card** "Start in two minutes": step 1 `brew install sealctl/tap/sealctl` with a Copy button, and "Other systems" linking to `/install`; step 2 "Get the phone app, then run `sealctl pair` and scan the code" with App Store and Google Play badges (before launch: "iPhone · coming soon", "Android · coming soon"). Fine print: "Free, no account."
 4. **Scene.** A terminal where an agent runs `sealctl run -- npm test`, shows "Waiting for your phone", then the tests pass; beside it the phone's approval card. The terminal is real CLI output, pasted from a real run. The phone card is a screenshot of the real app as soon as it exists; until then an HTML rendering that matches the app spec's card text exactly.
@@ -218,7 +218,7 @@ No `curl | sh` installer. Commands use "latest release" links (`https://github.c
 
 ### Docs `/docs`
 
-One long page, written in Markdown in this repo (`src/docs/index.md`), in the style of a single-page manual (mockk.io): after the intro, a plain nested contents list built from its h2 and h3 headings; then short sections with anchors, each ending with a link back to the contents, and copyable commands. No sidebar. It describes sealctl 0.7.0 and marks what is not built yet. The table below is its order of topics; old per-page URLs redirect to their anchors. Developer docs (protocol, derivation, store format, threat model source) stay in `sealctl/docs/` and are linked, not copied.
+One long page, written in Markdown in this repo (`src/docs/index.md`), in the style of a single-page manual (mockk.io): after the intro, a plain nested contents list built from its h2 and h3 headings; then short sections with anchors, each ending with a link back to the contents, and copyable commands. No sidebar. It marks what is not built yet. Version numbers appear nowhere in the prose; the release itself is the only place that names one. The table below is its order of topics; old per-page URLs redirect to their anchors. Developer docs (protocol, derivation, store format, threat model source) stay in `sealctl/docs/` and are linked, not copied.
 
 | Section | Pages |
 | --- | --- |

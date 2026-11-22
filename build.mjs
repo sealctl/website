@@ -111,7 +111,7 @@ const footerItems = config.footer.map((n) => `<li><a href="${n.href}">${n.label}
 
 function strip() {
   if (config.release.released) return "";
-  return `<aside class="strip" aria-label="Project status"><div class="wrap"><p><strong>In development.</strong> sealctl ${config.release.version} is not released yet, and the phone app is coming soon. It is being built in the open on <a href="${config.github.cli}">GitHub</a>.</p></div></aside>\n`;
+  return `<aside class="strip" aria-label="Project status"><div class="wrap"><p><strong>In development.</strong> sealctl is not released yet, and the phone app is coming soon. It is being built in the open on <a href="${config.github.cli}">GitHub</a>.</p></div></aside>\n`;
 }
 
 const pages = new Map(); // url path -> { file, html }
