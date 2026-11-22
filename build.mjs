@@ -271,6 +271,20 @@ write(
   ].join("\n"),
 );
 
+write(
+  ".well-known/assetlinks.json",
+  JSON.stringify(
+    [
+      {
+        relation: ["delegate_permission/common.handle_all_urls"],
+        target: { namespace: "android_app", package_name: config.appLinks.androidPackage, sha256_cert_fingerprints: config.appLinks.androidCertSha256 },
+      },
+    ],
+    null,
+    2,
+  ) + "\n",
+);
+
 const sitemapUrls = [...pages.entries()].filter(([u, p]) => !p.noindex).map(([u]) => u).sort();
 write(
   "sitemap.xml",
@@ -281,7 +295,7 @@ write("_headers", fill(read(path.join(SRC, "_headers")), { ...ctx, prelaunchRobo
 
 // ---------- checks ----------
 
-const served = new Set(["/sitemap.xml", "/.well-known/security.txt"]);
+const served = new Set(["/sitemap.xml", "/.well-known/security.txt", "/.well-known/assetlinks.json"]);
 const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(dir, e.name)) : [path.join(dir, e.name)]));
 for (const f of walk(DIST)) served.add("/" + path.relative(DIST, f));
 for (const line of read(path.join(SRC, "_redirects")).split("\n")) {
