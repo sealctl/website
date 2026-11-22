@@ -71,7 +71,9 @@ scripts: [copy]
 
     <section id="verify" aria-labelledby="verify-h">
       <h2 id="verify-h">Verify a download</h2>
-      <p>Each release has <code>SHA256SUMS</code>. Put it next to what you downloaded:</p>
+      <p>Each release file is signed with a build attestation that shows it was built by the sealctl release workflow from the public source. Check it with the <a href="https://cli.github.com">GitHub CLI</a>:</p>
+      <pre><code>gh attestation verify sealctl-&lt;file&gt; --repo sealctl/sealctl</code></pre>
+      <p>Each release also has <code>SHA256SUMS</code>, which catches a damaged download; it comes from the same release, so it does not show who made the file. Put it next to what you downloaded:</p>
       <pre><code>shasum -a 256 -c SHA256SUMS --ignore-missing      # macOS
 sha256sum -c SHA256SUMS --ignore-missing          # Linux</code></pre>
     </section>
