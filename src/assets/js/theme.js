@@ -1,41 +1,41 @@
-// Theme: auto (system), light or dark. Loaded in <head> without defer, so the choice applies
-// before the first paint. Stored per browser; the site works the same without it.
+// Theme: auto (system), light or dark. Loaded in <head> without defer, so data-theme is set
+// before the first paint; CSS does the rest (colours, color-scheme, which logo shows). The
+// choice lives in memory and is saved per browser when storage allows; the site works the
+// same without it.
 (() => {
   const KEY = "theme";
   const root = document.documentElement;
-  const read = () => { try { return localStorage.getItem(KEY); } catch { return null; } };
-  const write = (v) => { try { v ? localStorage.setItem(KEY, v) : localStorage.removeItem(KEY); } catch {} };
-  const system = () => (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  const valid = (v) => (v === "light" || v === "dark" ? v : null);
+  let current = null;
+  try { current = valid(localStorage.getItem(KEY)); } catch {}
 
-  function apply(choice) {
-    if (choice === "light" || choice === "dark") root.dataset.theme = choice;
+  function save(v) {
+    try { v ? localStorage.setItem(KEY, v) : localStorage.removeItem(KEY); } catch {}
+  }
+
+  function apply() {
+    if (current) root.dataset.theme = current;
     else delete root.dataset.theme;
-    const effective = root.dataset.theme || system();
-    // the logo's <picture> follows the media query only; point it at the chosen theme
-    for (const s of document.querySelectorAll("source[data-theme-source]")) {
-      s.media = choice ? (effective === "dark" ? "all" : "not all") : "(prefers-color-scheme: dark)";
-    }
     const btn = document.querySelector(".theme-toggle");
     if (btn) {
-      const label = choice ? choice[0].toUpperCase() + choice.slice(1) : "Auto";
-      btn.dataset.mode = choice || "auto";
+      const label = current ? current[0].toUpperCase() + current.slice(1) : "Auto";
+      btn.dataset.mode = current || "auto";
       btn.setAttribute("aria-label", `Theme: ${label}. Change theme`);
       btn.title = `Theme: ${label}`;
     }
   }
 
-  apply(read());
+  apply();
   document.addEventListener("DOMContentLoaded", () => {
     const btn = document.querySelector(".theme-toggle");
     if (!btn) return;
     btn.hidden = false;
-    apply(read());
+    apply();
     btn.addEventListener("click", () => {
       const order = [null, "light", "dark"];
-      const next = order[(order.indexOf(read()) + 1) % order.length];
-      write(next);
-      apply(next);
+      current = order[(order.indexOf(current) + 1) % order.length];
+      save(current);
+      apply();
     });
   });
-  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => apply(read()));
 })();
