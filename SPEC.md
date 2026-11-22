@@ -85,7 +85,7 @@ Front matter per page: `title`, `description`, `noindex` (optional), `scripts` (
 | `/install` | Install | Hero card, docs |
 | `/pay` | Payment page for Paddle checkout (live) | No (noindex) |
 | `/pay/sandbox` | The same page for Paddle's sandbox, used by the staging relay | No (noindex) |
-| `/p` | Pairing link landing page: "Scan this code with the sealctl app" | No (noindex) |
+| `/p` | Pairing link landing page: "Scan this code with the sealctl app", above the code a warning to scan it only after running `sealctl pair` on this computer; the machine name is shown as the link's claim; draws again when the fragment changes | No (noindex) |
 | `/.well-known/apple-app-site-association`, `/.well-known/assetlinks.json` | Universal links and App Links for `/p` | No |
 | `/status` | Relay status and incidents | Footer |
 | `/privacy` | Privacy | Footer |
@@ -157,7 +157,7 @@ The page for everyone, readable in about two minutes. Plain, concrete, checkable
 3. **What happens if…** (`#threats`). Cards, each a pictogram, a title, one sentence of at most 25 words, at most three steps of at most 10 words, and "Details" linking to `/docs`: lose your phone; laptop stolen; an AI agent asks for a key; someone takes your unlocked phone (biometrics, the two-hour wait, `sealctl cancel`); you lose your card; the relay or sealctl disappears (`#disappear`).
 4. **What sealctl can't do** (`#limits`). One line each: a program given a key can leak it; malware running as you; while a session is open, the system can copy keys to swap or a hibernation file; agent guards stop mistakes only; someone with your unlocked phone or its passcode; the relay can delay or drop messages; changing words is not in the app yet; lost words have no reset.
 5. **How to check this** (`#proof`). Open source (`#closed`: CLI MIT, app AGPL-3.0, the relay closed with a public API); standard cryptography only (`#standard`, links into `/crypto`); the public protocol with test vectors every component checks; what the relay keeps (`#relay`, `/privacy#relay`); what we don't claim (`#claims`: no independent audit or certifications; internal AI-assisted tests are not an audit).
-6. **Security log** (`#log`). `{{securityLog}}` from `src/security/log.json`; checks that run all the time (`#checks`, `{{securityChecks}}`); checking a download with `SHA256SUMS` (`#releases`).
+6. **Security log** (`#log`). `{{securityLog}}` from `src/security/log.json`; checks that run all the time (`#checks`, `{{securityChecks}}`); checking a download (`#releases`): `gh attestation verify <file> --repo sealctl/sealctl` for the build attestation (who built it; covers the packages, tarballs, `PKGBUILD` and `SHA256SUMS`), and `SHA256SUMS` for a damaged download only.
 7. **Report a problem** (`#report`). GitHub private advisory link; `security@sealctl.com`; first answer within three working days; credit in release notes; the safe-harbour paragraph (`#safe-harbour`, same terms as `SECURITY.md`); `security.txt` (with a comment line giving the answer time) and `SECURITY.md`.
 
 ### Cryptography `/crypto`
@@ -215,7 +215,7 @@ Acceptance: every claim on the page has a link to the protocol section it comes 
 
 ### Install `/install`
 
-Sections with anchors, no tabs script: macOS (Homebrew), Debian and Ubuntu (`.deb`), Fedora, RHEL, Rocky and openSUSE (`.rpm`), Arch (`PKGBUILD`), Nix (`nix profile install github:sealctl/sealctl`), any Linux (tarball), from source (`cargo install --locked --git …`). Each has the exact command and a link to the latest GitHub release. Then: verify with `SHA256SUMS`; shell completions; upgrade and uninstall; the phone app links; next step `sealctl pair`.
+Sections with anchors, no tabs script: macOS (Homebrew), Debian and Ubuntu (`.deb`), Fedora, RHEL, Rocky and openSUSE (`.rpm`), Arch (`PKGBUILD`), Nix (`nix profile install github:sealctl/sealctl`), any Linux (tarball), from source (`cargo install --locked --git …`). Each has the exact command and a link to the latest GitHub release. Then: verify with `gh attestation verify` (build attestation) and `SHA256SUMS` (damaged downloads only); shell completions; upgrade and uninstall; the phone app links; next step `sealctl pair`.
 
 No `curl | sh` installer. Commands use "latest release" links (`https://github.com/sealctl/sealctl/releases/latest`), so the page needs no edit per release.
 
@@ -266,7 +266,7 @@ Behaviour (`pay.js`, plain JS, no framework):
 
 1. Read `_ptxn` from the query. Absent: show **No payment open**.
 2. Show **Loading**: "Opening Paddle checkout…".
-3. Load `https://cdn.paddle.com/paddle/v2/paddle.js`. If it fails to load or `Paddle` is missing after 10 s: show **Error: checkout didn't load**.
+3. Load `https://cdn.paddle.com/paddle/v2/paddle.js`. If it fails to load or `Paddle` is missing after 10 s: show **Error: checkout didn't load**. If it loads after that, show **Loading** again and go on.
 4. `Paddle.Environment.set("sandbox")` on `/pay/sandbox` only. `Paddle.Initialize({ token, eventCallback, checkout: { settings: { displayMode: "overlay", theme: <light or dark from prefers-color-scheme>, locale: "en" } } })`. With `_ptxn` in the URL, Paddle.js opens the checkout for that transaction.
 5. Map events (names per Paddle.js v2 docs; confirm at build time):
 

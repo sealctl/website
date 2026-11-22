@@ -207,7 +207,9 @@ description: Where your sealctl keys are, who can use them, what happens if you 
     {{securityChecks}}
     <h3 id="releases">Check a download</h3>
     <div class="prose">
-      <p>Every <a href="{{github.releases}}">release</a> has a <code>SHA256SUMS</code> file. Put it next to your downloads and run:</p>
+      <p>The packages, tarballs, <code>PKGBUILD</code> and <code>SHA256SUMS</code> in a <a href="{{github.releases}}">release</a> have a build attestation (Sigstore) tying each to the release workflow and the commit it was built from. Check who made a download with the <a href="https://cli.github.com">GitHub CLI</a>:</p>
+      <pre><code>gh attestation verify &lt;file&gt; --repo sealctl/sealctl</code></pre>
+      <p>The <code>SHA256SUMS</code> file in each release catches a damaged download. It comes from the same place as the files, so it is not proof of who made them. Put it next to your downloads and run:</p>
       <pre><code>shasum -a 256 -c SHA256SUMS --ignore-missing      # macOS
 sha256sum -c SHA256SUMS --ignore-missing          # Linux</code></pre>
       <p>Or <a href="/install#source">build from source</a>.</p>

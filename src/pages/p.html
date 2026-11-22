@@ -8,6 +8,9 @@ scripts: [qrcode, pair]
   <div class="pay">
     <h1>Pair a machine with your phone</h1>
     <div id="pair-code" hidden>
+      <div class="callout warn" id="pair-warn" hidden>
+        <p><strong>Scan this only if you just ran <code>sealctl pair</code> on this computer.</strong> Never scan a code someone sent you: their machine could then ask your phone for keys.</p>
+      </div>
       <div id="pair-img"></div>
       <p id="pair-status"></p>
     </div>

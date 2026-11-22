@@ -23,6 +23,8 @@
     clearTimeout(timer);
     const P = window.Paddle;
     if (!P) return show("noload");
+    // Paddle.js may arrive after the 10 s timer showed "didn't load": the checkout opens now.
+    show("loading");
     if (env === "sandbox") P.Environment.set("sandbox");
     const dark = matchMedia("(prefers-color-scheme: dark)").matches;
     P.Initialize({
