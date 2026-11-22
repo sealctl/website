@@ -376,15 +376,12 @@ a :not(pre) > code, a > code { color: inherit; }
 :root[data-theme="light"] { color-scheme: light; }
 
 /* security log */
-.log-entry { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 16px 18px; margin: 14px 0; }
-.log-entry header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
-.log-entry time { font: 500 0.85rem var(--mono); color: var(--muted); }
-.log-entry h3 { margin: 0; font-size: 1.05rem; }
-.log-status { margin-left: auto; font-size: 0.8rem; font-weight: 600; color: var(--ink-2); border: 1px solid var(--border-strong); border-radius: 999px; padding: 2px 10px; }
-.log-counts { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 10px 0 8px; font-size: 0.85rem; color: var(--ink-2); }
-.log-counts .sev b { font-variant-numeric: tabular-nums; }
-.log-counts .sev-critical b, .log-counts .sev-high b { color: var(--accent); }
-.log-facts { display: grid; grid-template-columns: minmax(0, 9rem) minmax(0, 1fr); gap: 4px 14px; margin: 0; font-size: 0.9rem; }
+.log-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.log-table th, .log-table td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.log-table th { font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+.log-table time { font-family: var(--mono); font-size: 0.85rem; color: var(--muted); white-space: nowrap; }
+.log-table summary { cursor: pointer; font-weight: 600; color: var(--ink); }
+.log-facts { display: grid; grid-template-columns: minmax(0, 6.5rem) minmax(0, 1fr); gap: 4px 12px; margin: 8px 0 4px; font-size: 0.88rem; }
 .log-facts dt { color: var(--muted); }
 .log-facts dd { margin: 0; color: var(--ink-2); }
-@media (max-width: 560px) { .log-facts { grid-template-columns: minmax(0, 1fr); } .log-facts dd { margin-bottom: 6px; } }
+@media (max-width: 560px) { .log-facts { grid-template-columns: minmax(0, 1fr); } .log-facts dd { margin-bottom: 6px; } .log-table th:nth-child(4), .log-table td:nth-child(4) { display: none; } }

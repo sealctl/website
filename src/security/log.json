@@ -1,5 +1,5 @@
 {
-  "note": "Entries are added when a test campaign ends. Details of a finding are published once it is fixed and released; until then the log gives only counts and severities. Severity scale: Critical, High, Medium, Low, Info (see the scale below).",
+  "note": "One row per test. Details of a finding are published once it is fixed and released; until then only its severity is shown. Severities, from worst: critical (keys reachable without your approval), high, medium, low, info.",
   "entries": [
     {
       "date": "2026-11-22",

@@ -271,8 +271,8 @@ for (const s of docSlugs) {
   const log = JSON.parse(read(path.join(SRC, "security/log.json")));
   const h = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const sev = ["critical", "high", "medium", "low", "info"];
-  const counts = (f) =>
-    sev.map((k) => `<span class="sev sev-${k}"><b>${f[k] ?? 0}</b> ${k[0].toUpperCase() + k.slice(1)}</span>`).join(" ");
+  const short = (f) =>
+    sev.filter((k) => (f[k] ?? 0) > 0).map((k) => `${f[k]} ${k}`).join(", ") || "none";
   const entries = log.entries
     .slice()
     .sort((a, b) => b.date.localeCompare(a.date))
@@ -282,13 +282,14 @@ for (const s of docSlugs) {
         ["Scope", e.scope],
         ["Method", e.method],
         ["Tested by", e.tester],
-        ["Defences that held", e.held],
+        ["Held", e.held],
         ["Fixed", e.fixed],
+        ["Also", e.extra],
       ].filter(([, v]) => v).map(([k, v]) => `<dt>${k}</dt><dd>${h(v)}</dd>`).join("");
-      return `<article class="log-entry"><header><time datetime="${h(e.date)}">${h(e.date)}</time><h3>${h(e.title)}</h3><span class="log-status">${h(e.status)}</span></header><p class="log-counts">${counts(e.findings)}${e.extra ? ` <span class="muted">${h(e.extra)}</span>` : ""}</p><dl class="log-facts">${rows}</dl></article>`;
+      return `<tr><td><time datetime="${h(e.date)}">${h(e.date)}</time></td><td><details><summary>${h(e.title)}</summary><dl class="log-facts">${rows}</dl></details></td><td>${h(short(e.findings))}</td><td>${h(e.status)}</td></tr>`;
     })
     .join("\n");
-  const securityLog = `<p class="prose">${h(log.note)}</p>\n${entries}`;
+  const securityLog = `<p class="prose">${h(log.note)}</p>\n<div class="table-wrap"><table class="log-table"><thead><tr><th scope="col">Date</th><th scope="col">Test</th><th scope="col">Findings</th><th scope="col">Status</th></tr></thead><tbody>${entries}</tbody></table></div>`;
   const securityChecks = `<ul class="ticks">${log.continuous.map((c) => `<li>${h(c)}</li>`).join("")}</ul>`;
   const pageWhere = "src/pages/security.html";
   const page = frontMatter(read(path.join(pageDir, "security.html")), pageWhere);
