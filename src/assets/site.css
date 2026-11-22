@@ -10,8 +10,8 @@
   --term-text: #e8eaf0;
   --term-dim: #a2a9b9;
   --term-ok: #74d08f;
-  --term-key: #f5a76c;
-  --card-line: #d6c6b6;
+  --term-key: #f0b44c;
+  --card-line: #cfd4dd;
   --shadow: 0 1px 2px rgb(26 33 51 / 0.05), 0 4px 14px rgb(26 33 51 / 0.06);
   --shadow-lg: 0 2px 4px rgb(26 33 51 / 0.06), 0 16px 40px rgb(26 33 51 / 0.12);
   --focus: #2457c5;
@@ -25,7 +25,7 @@
     --term-text: #e8eaf0;
     --term-dim: #a2a9b9;
     --term-ok: #74d08f;
-    --term-key: #f5a76c;
+    --term-key: #f0b44c;
     --card-line: #3a4357;
     --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 14px rgb(0 0 0 / 0.25);
     --shadow-lg: 0 2px 4px rgb(0 0 0 / 0.3), 0 16px 40px rgb(0 0 0 / 0.4);
@@ -40,7 +40,7 @@
   --term-text: #e8eaf0;
   --term-dim: #a2a9b9;
   --term-ok: #74d08f;
-  --term-key: #f5a76c;
+  --term-key: #f0b44c;
   --card-line: #3a4357;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 14px rgb(0 0 0 / 0.25);
   --shadow-lg: 0 2px 4px rgb(0 0 0 / 0.3), 0 16px 40px rgb(0 0 0 / 0.4);

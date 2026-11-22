@@ -45,8 +45,7 @@ const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
 const pairs = [
   ["ink", "paper"], ["ink", "surface"], ["ink", "surface-2"],
   ["ink-2", "paper"], ["ink-2", "surface"], ["ink-2", "surface-2"],
-  // muted is kept off surface-2: the brand pair is 4.23:1 in light, below AA.
-  ["muted", "paper"], ["muted", "surface"],
+  ["muted", "paper"], ["muted", "surface"], ["muted", "surface-2"],
   ["accent", "surface-2"],
   ["accent", "paper"], ["accent", "surface"], ["accent", "accent-soft"], ["accent-hover", "paper"],
   ["on-accent", "accent"], ["on-accent", "accent-hover"],
