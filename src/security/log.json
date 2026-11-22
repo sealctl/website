@@ -49,6 +49,13 @@
       "title": "Supply chain: iPhone and Android apps",
       "result": "No malicious, hijacked or typosquatted package among 318 crates and the Android libraries; no remote Swift packages. 3 medium and 6 low in build controls; 1 low: a known SQLite advisory in a bundled library.",
       "status": "Fixing"
+    },
+    {
+      "date": "2026-11-22",
+      "kind": "Fix",
+      "title": "Staging incident: retries after the relay refused a call",
+      "result": "1 medium. Fixed in the command line tool; the app and relay fixes are in review.",
+      "status": "Fixing"
     }
   ],
   "continuous": [
