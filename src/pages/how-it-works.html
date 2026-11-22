@@ -105,7 +105,7 @@ description: The approval, a working day, the three states, places, setup, the 2
     <h2 id="places-h">4. Places</h2>
     <ul class="prose">
       <li><strong>Learned, not drawn.</strong> After first approvals on three different days at the same spot, the phone asks once: "Trust this place?" There is no map; you name the place.</li>
-      <li><strong>Locations never leave the phone.</strong> Places reach the relay only inside the phone's encrypted backup, which the relay cannot open.</li>
+      <li><strong>Locations never leave the phone in readable form.</strong> Places reach the relay only inside the phone's encrypted backup, which the relay cannot open.</li>
       <li><strong>Leaving locks.</strong> The phone's region monitoring notices when you leave and locks the machines you opened there. The day's credit is kept.</li>
       <li><strong>Near means the same network.</strong> The phone counts as near a machine when both reach the relay from the same network address and the phone is on Wi-Fi. On mobile data or a VPN it falls back to one tap.</li>
       <li><strong>No permission, no places.</strong> Without location access, a session stays open up to 1 hour and reopening always takes a tap.</li>
@@ -131,12 +131,11 @@ description: The approval, a working day, the three states, places, setup, the 2
         <tbody>
           <tr><td>First start</td><td>Print a blank card, write the 24 words by hand, then pick 3 of them by number from 4 choices each</td></tr>
           <tr><td>Restore from words</td><td>Type the words, completed after four letters; nothing new to write</td></tr>
-          <tr><td>Changing words</td><td>A new card, written and checked the same way; the old card is marked retired</td></tr>
           <tr><td>Yearly check</td><td>The phone asks for 2 words by number; a wrong answer offers to show the words again</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="prose">When you change words, each machine moves its keys to the new words the next time it talks to the phone; <code>sealctl migrate</code> re-encrypts volumes and backups when you start it. The printable blank card (A4 and Letter) will be published here with the app.</p>
+    <p class="prose">Changing your words is not in the app yet. Keep your card safe. If your phone is lost, restore on another phone and change the secrets that matter at their providers: see <a href="/docs#lost-phone">Lost phone</a>. The printable blank card (A4 and Letter) will be published here with the app.</p>
   </section>
 
   <section class="section-tight" id="not" aria-labelledby="not-h">
