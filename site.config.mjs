@@ -21,13 +21,11 @@ export default {
     ],
   },
 
-  // The release the site describes for installs today.
+  // The release the site describes. While `released` is false, the status strip says it
+  // is in development; set it to true when it is published on GitHub.
   release: {
-    current: "0.5.0",
-    // 0.6.0 adds `sealctl unseal --all`. Set to true when it is published on GitHub.
-    unsealReleased: false,
-    unsealVersion: "0.6.0",
-    phoneVersion: "0.7",
+    version: "0.7.0",
+    released: false,
   },
 
   // docs/protocol.md revision that /crypto describes.

@@ -2,4 +2,4 @@
 /buy                /docs#paying                302
 /docs/paying        /docs#paying                301
 /docs/leaving       /docs#leaving               301
-/docs/from-ledger   /docs#from-ledger           301
+/docs/*             /docs                       301

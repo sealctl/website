@@ -7,7 +7,7 @@ description: The whole cryptographic design of sealctl on one page: derivation t
     <p class="eyebrow">Cryptographic design</p>
     <h1>Every key from 24 words. <em>Only the phone holds the root.</em></h1>
     <p class="lede">Every key comes from 24 words. The phone holds the root and derives a key per object. A machine gets a key only after the phone approves, sealed so that only that machine's one-time key opens it. The relay carries sealed messages and sees no keys.</p>
-    <p class="src">Describes <a href="{{protocol.base}}">protocol version 1</a> at revision <a href="https://github.com/sealctl/sealctl/commit/{{protocol.sha}}"><code>{{protocol.rev}}</code></a>, for the phone version of sealctl ({{release.phoneVersion}}, in development). The current release, {{release.current}}, uses a Ledger and a different derivation: <a href="https://github.com/sealctl/sealctl/blob/main/docs/derived-keys.md">derived-keys.md</a>. Items the protocol marks as planned carry a <span class="pill pill-planned">Planned</span> pill.</p>
+    <p class="src">Describes <a href="{{protocol.base}}">protocol version 1</a> at revision <a href="https://github.com/sealctl/sealctl/commit/{{protocol.sha}}"><code>{{protocol.rev}}</code></a>, for sealctl {{release.version}}, which is in development. Items the protocol marks as planned carry a <span class="pill pill-planned">Planned</span> pill.</p>
   </header>
 
   <nav class="toc" aria-label="On this page">

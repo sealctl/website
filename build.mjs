@@ -110,11 +110,8 @@ const navItems = (current) =>
 const footerItems = config.footer.map((n) => `<li><a href="${n.href}">${n.label}</a></li>`).join("");
 
 function strip() {
-  const r = config.release;
-  const unseal = r.unsealReleased
-    ? `The current release, ${r.current}, keeps keys on a Ledger and can hand everything back with <code>sealctl unseal --all</code>.`
-    : `The current release, ${r.current}, keeps keys on a Ledger. ${r.unsealVersion}, coming next, adds <code>sealctl unseal --all</code> to hand everything back.`;
-  return `<aside class="strip" aria-label="Project status"><div class="wrap"><p><strong>In development.</strong> ${unseal} The phone version described on this site is being built in the open. <a href="${config.github.cli}">GitHub</a> · <a href="/docs#from-ledger">Moving from the Ledger version</a></p></div></aside>\n`;
+  if (config.release.released) return "";
+  return `<aside class="strip" aria-label="Project status"><div class="wrap"><p><strong>In development.</strong> sealctl ${config.release.version} is not released yet, and the phone app is coming soon. It is being built in the open on <a href="${config.github.cli}">GitHub</a>.</p></div></aside>\n`;
 }
 
 const pages = new Map(); // url path -> { file, html }

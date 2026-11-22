@@ -107,7 +107,8 @@ Redirects (`_redirects`):
 | `/github` | `https://github.com/sealctl` | 302 |
 | `/card` | `/card-a4.pdf` | 302 |
 | `/buy` | `/docs#paying` | 302 |
-| `/docs/paying`, `/docs/leaving`, `/docs/from-ledger` | `/docs#paying`, `/docs#leaving`, `/docs#from-ledger` | 301 |
+| `/docs/paying`, `/docs/leaving` | `/docs#paying`, `/docs#leaving` | 301 |
+| `/docs/*` (any other old docs page) | `/docs` | 301 |
 
 `www.sealctl.com` redirects to `https://sealctl.com` with a Cloudflare redirect rule. The production `*.pages.dev` host redirects to `sealctl.com` with a Bulk Redirect, so only previews stay on `pages.dev`.
 
@@ -119,7 +120,7 @@ Copy below is direction, not final text. Headlines marked "copy" are approved wo
 
 Follows the approved example: hero text beside a start card, a live product scene, a six-card grid, then trust and price bands.
 
-1. **Status strip** (until the phone version ships): "In development. The current release, 0.6.0, keeps keys on a Ledger and can hand everything back with `sealctl unseal --all`. The phone version is being built in the open." Links to GitHub and to "Moving from the Ledger version". Removed at launch.
+1. **Status strip** (until 0.7.0 is released): "In development. sealctl 0.7.0 is not released yet, and the phone app is coming soon. It is being built in the open on GitHub." Removed at launch (`release.released`). The site never mentions releases before 0.7.0.
 2. **Hero.** Eyebrow "Secrets for AI coding agents". H1 (copy): "Your agents run the code. *Your phone holds the keys.*" Lede (copy): "sealctl keeps API keys, SSH keys and backup passwords off your disk. When an agent needs one, your phone asks, you tap **Allow**, and the key goes into that one command. The agent never sees it, and it never lands in a transcript or a `.env` file." Buttons: Get started (to the start card), How it works.
 3. **Start card** "Start in two minutes": step 1 `brew install sealctl/tap/sealctl` with a Copy button, and "Other systems" linking to `/install`; step 2 "Get the phone app, then run `sealctl pair` and scan the code" with App Store and Google Play badges (before launch: "iPhone · coming soon", "Android · coming soon"). Fine print: "Free, no account."
 4. **Scene.** A terminal where an agent runs `sealctl run -- npm test`, shows "Waiting for your phone", then the tests pass; beside it the phone's approval card. The terminal is real CLI output, pasted from a real run. The phone card is a screenshot of the real app as soon as it exists; until then an HTML rendering that matches the app spec's card text exactly.
@@ -217,7 +218,7 @@ No `curl | sh` installer. Commands use "latest release" links (`https://github.c
 
 ### Docs `/docs`
 
-One long page, written in Markdown in this repo (`src/docs/index.md`), in the style of a single-page manual (mockk.io): after the intro, a plain nested contents list built from its h2 and h3 headings; then short sections with anchors, each ending with a link back to the contents, and copyable commands. No sidebar. It describes the phone version and marks what is not released. The table below is its order of topics; old per-page URLs redirect to their anchors. Developer docs (protocol, derivation, store format, threat model source) stay in `sealctl/docs/` and are linked, not copied.
+One long page, written in Markdown in this repo (`src/docs/index.md`), in the style of a single-page manual (mockk.io): after the intro, a plain nested contents list built from its h2 and h3 headings; then short sections with anchors, each ending with a link back to the contents, and copyable commands. No sidebar. It describes sealctl 0.7.0 and marks what is not built yet. The table below is its order of topics; old per-page URLs redirect to their anchors. Developer docs (protocol, derivation, store format, threat model source) stay in `sealctl/docs/` and are linked, not copied.
 
 | Section | Pages |
 | --- | --- |
@@ -232,7 +233,7 @@ One long page, written in Markdown in this repo (`src/docs/index.md`), in the st
 | Arriving and leaving | `sealctl seal`: bring your own volumes, backups, SSH keys and secrets · Leaving sealctl (`/docs/leaving`): `sealctl unseal`, `unseal --all`, Leave sealctl on the phone, what stays encrypted, where passwords go, keeping the card |
 | Paying | `sealctl buy` · Company invoice · Team seats and codes · Moving a licence |
 | Reference | CLI reference (generated) · `.sealctl.toml` reference · Exit codes and errors · Cryptographic design (`/crypto`) · Protocol (link) |
-| Help | Troubleshooting · FAQ · Moving from the Ledger version (`/docs/from-ledger`: `sealctl unseal --all` with 0.6, then 0.7 and `sealctl seal --from`, and `brew install sealctl/tap/sealctl@0.6` for anyone who upgraded first) · Changelog (link to releases) |
+| Help | Troubleshooting · FAQ · Changelog (link to releases) |
 
 - The CLI reference is generated from a Markdown file that each sealctl release attaches (`sealctl-<version>-cli.md`). `npm run sync-cli <version>` downloads it into `src/docs/reference/cli.md` and is committed, so builds never need the network.
 - The page ends with "Edit this page on GitHub" and the date of the last commit.
@@ -472,9 +473,9 @@ Manual before each milestone: one sandbox purchase end to end (below), read ever
 | # | Milestone | Acceptance |
 | --- | --- | --- |
 | M0 | Scaffold and pipeline | `npm run build` produces `dist/`; Pages project builds `main` and previews; `_headers` live (checked with `curl -I`); `check.yml` green |
-| M1 | Pre-launch site on `sealctl.com` | Home (with the in-development strip), Install for 0.6.0, Security, Pricing, Privacy, Terms, Refunds, Contact, security.txt and 404 live; placeholders visible where seller data is missing; Lighthouse and axe gates pass; no third-party requests (checked in DevTools) |
+| M1 | Pre-launch site on `sealctl.com` | Home (with the in-development strip), Install, Security, Pricing, Privacy, Terms, Refunds, Contact, security.txt and 404 live; placeholders visible where seller data is missing; Lighthouse and axe gates pass; no third-party requests (checked in DevTools) |
 | M2 | Payments in sandbox | `/pay/sandbox` live on `sealctl.com`; `sealctl buy` against the staging relay (`SEALCTL_RELAY=https://relay-staging.sealctl.com`) opens checkout there; a sandbox card pays; the success state shows; the relay's licence turns `paid`; a second seat purchase shows the code text; closed and expired-link states reproduced by hand |
-| M3 | Docs, How it works, Cryptography | Every page in the docs table exists for features in the release being shipped; "Moving from the Ledger version" live with the 0.6.0 release, "Leaving sealctl" before launch, both checked against a real `unseal --all` run; CLI reference synced from that release; How it works uses real CLI output; `/crypto` matches the protocol at a named revision, Planned items marked, reviewed by someone who did not write it |
+| M3 | Docs, How it works, Cryptography | Every page in the docs table exists for features in the release being shipped; "Leaving sealctl" before launch, checked against a real `unseal --all` run; CLI reference synced from that release; How it works uses real CLI output; `/crypto` matches the protocol at a named revision, Planned items marked, reviewed by someone who did not write it |
 | M4 | Status | Live check works from a browser on `sealctl.com`; an incident entry deploys in under 2 minutes; outage text reviewed |
 | M5 | Live payments | Seller placeholders filled by the seller; live Paddle token in production variables; `sealctl.com` approved in Paddle; one live purchase and refund done end to end |
 | M6 | Launch | `/p` and both `.well-known` files serve the app ids (`com.sealctl.app`) and open the app on a real iPhone and Android phone; store badges link to live listings; app screenshots replace HTML phone renderings; in-development strip removed; How it works and Security reviewed against the shipped release; every claim on Home checked against the product |
