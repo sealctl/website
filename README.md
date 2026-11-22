@@ -67,7 +67,7 @@ Deploys happen only in GitHub Actions (`.github/workflows/deploy.yml` and `previ
 
 | Trigger | What happens | GitHub environment |
 | --- | --- | --- |
-| Push to `main` (merged pull request), the 1st of each month, or a manual run on `main` | Build, check, then wait for the owner's approval; deploy `dist/` to Cloudflare Pages project `sealctl-website`, branch `main` → sealctl.com | `production` (deployment branches: `main` only; required reviewer: the owner) |
+| Push to `main` (merged pull request), the 1st of each month, or a manual run on `main` | Build, check, deploy `dist/` to Cloudflare Pages project `sealctl-website`, branch `main` → sealctl.com | `production` (deployment branches: `main` only; merging to `main` is the production deploy) |
 | Pull request from a branch of this repo | `deploy.yml` builds and checks without secrets and uploads `dist`. When that run succeeds, `preview.yml` (a `workflow_run` workflow, so its definition always comes from `main`) installs wrangler from `main`'s lockfile, downloads only that run's `dist` (minus `_worker.js` and `functions/`), deploys it with `--branch <head branch>` and comments the preview URL on the pull request | `preview` (deployment branches: `main` only, which is where `workflow_run` runs; branch names are checked and `main` is refused) |
 | Pull request from a fork | Build and check only; no secrets, no deploy | none |
 

@@ -1,8 +1,7 @@
 name: Deploy
 
 # Every deploy of sealctl.com runs in GitHub Actions, never from a laptop (README, "Deploy").
-#   push to main, monthly schedule, manual run on main → production (environment `production`,
-#                                                        waits for the owner's approval)
+#   push to main, monthly schedule, manual run on main → production (environment `production`)
 #   pull request                                         → build and check only, uploads `dist`
 # Previews are deployed by preview.yml (workflow_run), whose definition always comes from main;
 # no job in this file holds a secret on a pull request.
