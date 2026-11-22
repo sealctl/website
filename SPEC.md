@@ -266,7 +266,7 @@ Behaviour (`pay.js`, plain JS, no framework):
 
 1. Read `_ptxn` from the query. Absent: show **No payment open**.
 2. Show **Loading**: "Opening Paddle checkout…".
-3. Load `https://cdn.paddle.com/paddle/v2/paddle.js`. If it fails to load or `Paddle` is missing after 10 s: show **Error: checkout didn't load**.
+3. Load `https://cdn.paddle.com/paddle/v2/paddle.js`. If it fails to load or `Paddle` is missing after 10 s: show **Error: checkout didn't load**. If it loads after that, show **Loading** again and go on.
 4. `Paddle.Environment.set("sandbox")` on `/pay/sandbox` only. `Paddle.Initialize({ token, eventCallback, checkout: { settings: { displayMode: "overlay", theme: <light or dark from prefers-color-scheme>, locale: "en" } } })`. With `_ptxn` in the URL, Paddle.js opens the checkout for that transaction.
 5. Map events (names per Paddle.js v2 docs; confirm at build time):
 
