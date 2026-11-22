@@ -1,0 +1,48 @@
+{
+  "note": "One line per event: tests, fixes, reviews, audits, verifications and security programs. Details of a finding are published once it is fixed and released. Severity, from worst: critical (a key reachable without your approval), high, medium, low, info.",
+  "entries": [
+    {
+      "date": "2026-11-22",
+      "kind": "Test",
+      "title": "Red team: relay and protocol",
+      "result": "No key reachable without approval. 1 medium, 2 low, 1 info; 8 of 9 attack types stopped.",
+      "status": "Fixing"
+    },
+    {
+      "date": "2026-11-22",
+      "kind": "Test",
+      "title": "Red team: command line tool and core",
+      "result": "No key reachable without approval. 1 medium, 2 low, 2 info. 49 million fuzzed inputs, no crash.",
+      "status": "Fixing"
+    },
+    {
+      "date": "2026-11-22",
+      "kind": "Test",
+      "title": "Red team: Android app",
+      "result": "Nothing critical, high or medium. 3 low, 3 info.",
+      "status": "Fixing"
+    },
+    {
+      "date": "2026-11-22",
+      "kind": "Review",
+      "title": "Automated code review of the command line tool",
+      "result": "1 high, 1 medium, 2 low.",
+      "status": "Fixing"
+    },
+    {
+      "date": "2026-11-22",
+      "kind": "Audit",
+      "title": "Supply chain: relay and website",
+      "result": "No malicious or hijacked package among 308; every registry signature verified. 1 high, 1 medium in deploy and build setup.",
+      "status": "Fixing"
+    }
+  ],
+  "continuous": [
+    "Every change to the main branch of a public repository goes through a pull request reviewed by GitHub Copilot.",
+    "Every parser is fuzzed on each pull request and nightly.",
+    "Dependencies: known advisories, licences and sources checked on each pull request; registry signatures verified in CI; routine updates wait 7 days after release (security updates don't wait).",
+    "Secret scanning with push protection on every repository.",
+    "Shared protocol test vectors, checked byte for byte by the core, the relay and both apps.",
+    "Power-cut tests: unsealing is cut at every step and must resume without losing anything."
+  ]
+}

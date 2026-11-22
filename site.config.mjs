@@ -95,6 +95,7 @@ export default {
     { href: "/security", label: "Security" },
     { href: "/crypto", label: "Cryptography" },
     { href: "/status", label: "Status" },
+    { href: "/costs", label: "Costs" },
     { href: "https://github.com/sealctl", label: "GitHub" },
     { href: "/terms", label: "Terms" },
     { href: "/privacy", label: "Privacy" },
