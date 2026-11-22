@@ -37,7 +37,7 @@ bodyClass: legal
           <caption class="sr-only">What the relay keeps, why, and for how long</caption>
           <thead><tr><th scope="col">Item</th><th scope="col">Why</th><th scope="col">Kept</th></tr></thead>
           <tbody>
-            <tr><td>Phone identity public key</td><td>Identifies your phone; holds the licence</td><td>Until you delete your data</td></tr>
+            <tr><td>Phone identity public key</td><td>Identifies your phone; holds the licence</td><td>Until you delete your data; a phone that has or had a licence keeps it inside the licence record below</td></tr>
             <tr><td>Machine pairing public keys; machine name (<code>user@host</code>), OS and model; pairing time</td><td>Routes requests; shows your machines on your phone</td><td>Until unpaired</td></tr>
             <tr><td>When each machine last called the relay, to the hour</td><td>Shows "seen 2 h ago" on your phone</td><td>Until unpaired</td></tr>
             <tr><td>Pairing proof</td><td>Lets the machine confirm the pairing</td><td>Until unpaired</td></tr>
@@ -48,7 +48,7 @@ bodyClass: legal
             <tr><td>Sealed machine status and lock messages</td><td>Shows time left and locks machines from your phone</td><td>The latest status per machine; messages for an offline machine at most 24 hours; we cannot open them</td></tr>
             <tr><td>Network address of phone and machine</td><td>Says whether the phone is near the machine; flood limits</td><td>Used in memory while serving the call, as a keyed hash; the relay's code never stores or logs it</td></tr>
             <tr><td>Days with use (count), the last week the phone was seen, daily call count</td><td>The request to pay; deleting data after 2 years without use; the abuse limit</td><td>Count and week kept; daily counter in memory</td></tr>
-            <tr><td>Licence state, seat codes, Paddle transaction ids (last 100)</td><td>Your licence</td><td>As long as the licence exists, also after you delete your other data, so that restoring from your words keeps it. Ask us to erase it too</td></tr>
+            <tr><td>Licence state, seat codes, Paddle transaction ids (last 100), and the phone key a bought licence moved to (last 100)</td><td>Your licence</td><td>As long as the licence exists, also after you delete your other data, so that restoring from your words keeps it. Ask us to erase it too</td></tr>
           </tbody>
         </table>
       </div>
