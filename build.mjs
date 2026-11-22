@@ -7,10 +7,11 @@ import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { Marked } from "marked";
 import config from "./site.config.mjs";
 
-const ROOT = path.dirname(new URL(import.meta.url).pathname);
+const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.join(ROOT, "src");
 const DIST = path.join(ROOT, "dist");
 const errors = [];
@@ -90,7 +91,7 @@ for (const dir of ["js", "img"]) {
   }
 }
 // The QR encoder for /p (qrcode-generator, MIT), served from this site: the CSP allows no other.
-emitAsset("/assets/js/qrcode.js", fs.readFileSync(path.join("node_modules", "qrcode-generator", "qrcode.js")));
+emitAsset("/assets/js/qrcode.js", fs.readFileSync(path.join(ROOT, "node_modules", "qrcode-generator", "qrcode.js")));
 // Files served at fixed paths (not fingerprinted).
 for (const f of ["favicon.svg", "apple-touch-icon.png", "social-preview.png", "robots.txt", "_redirects"]) {
   const p = path.join(SRC, f);
@@ -126,9 +127,10 @@ function render({ urlPath, outFile, meta, body, where }) {
     navItems: navItems(urlPath),
     footerItems,
   };
-  // The body is filled first so that its text can't inject layout variables.
+  // The body is filled first so that its text can't inject layout variables. It goes in
+  // through a function, so "$$", "$&" and the like in page text are kept as written.
   const filledBody = fill(body, { ...ctx, ...(meta.vars || {}) }, where);
-  let html = fill(layout.replace("{{body}}", "\u0000BODY\u0000"), vars, "layout.html").replace("\u0000BODY\u0000", filledBody);
+  let html = fill(layout.replace("{{body}}", "\u0000BODY\u0000"), vars, "layout.html").replace("\u0000BODY\u0000", () => filledBody);
   for (const [from, to] of assetMap) html = html.split(`"${from}"`).join(`"${to}"`);
   // Scrollable regions must be reachable by keyboard.
   html = html.replace(/<div class="table-wrap( wide)?">/g, '<div class="table-wrap$1" tabindex="0">').replace(/<pre>/g, '<pre tabindex="0">').replace(/<div class="cmd"><code>/g, '<div class="cmd"><code tabindex="0">');
