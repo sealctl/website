@@ -24,7 +24,7 @@ description: Where your sealctl keys are, who can use them, what happens if you 
 
   <section class="section-tight" id="where" aria-labelledby="where-h">
     <h2 id="where-h">Where your keys are</h2>
-    <p class="prose">A key is a secret that lets a program use a service, open a folder or read a backup. These are all the places a sealctl key can be.</p>
+    <p class="prose">A key is a secret that lets a program use a service, open a folder or read a backup.</p>
     <ul class="where">
       <li>
         <span class="picto-wrap"><svg class="picto" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><rect x="14" y="5" width="20" height="38" rx="4"/><path d="M21 37 h6"/></svg></span>
@@ -192,7 +192,7 @@ description: Where your sealctl keys are, who can use them, what happens if you 
     <h2 id="proof-h">How to check this</h2>
     <ul class="ticks proof">
       <li id="closed"><strong>Open source.</strong> The <a href="{{github.cli}}">command line tool</a> (MIT) and the <a href="{{github.app}}">phone app</a> (AGPL-3.0) are public. The relay's code is not, but <a href="{{protocol.base}}#relay-api">how to talk to it</a> is.</li>
-      <li id="standard"><strong>Standard cryptography only.</strong> Published, widely used methods; nothing home-made. <a href="/crypto#primitives">The list</a>.</li>
+      <li id="standard"><strong>Standard cryptography only.</strong> Published, widely used methods; nothing home-made. For specialists: <a href="/crypto#primitives">the list</a>, <a href="/crypto#relay-view">what the relay sees</a> and <a href="/crypto#threats">threats and what remains</a>.</li>
       <li><strong>Public protocol.</strong> <a href="{{protocol.base}}">Every message is documented</a>, with <a href="{{protocol.base}}#appendix-a-test-vectors">test values</a> that the core, the relay and both apps check against.</li>
       <li id="relay"><strong>What the relay keeps</strong> is listed in the <a href="/privacy#relay">Privacy notice</a>.</li>
       <li id="claims"><strong>What we don't claim.</strong> No independent audit and no certifications yet. Our own tests, done with the help of AI, are listed below; they are not an audit.</li>
@@ -219,10 +219,5 @@ sha256sum -c SHA256SUMS --ignore-missing          # Linux</code></pre>
       <p>Report privately through a <a href="{{github.advisory}}">GitHub security advisory</a> or <code>{{email.security}}</code>, not a public issue. First answer within three working days; fixes are credited in the release notes.</p>
       <p class="small"><a href="/.well-known/security.txt">security.txt</a> · <a href="{{github.securityPolicy}}">SECURITY.md</a></p>
     </div>
-  </section>
-
-  <section class="section-tight" id="specialists" aria-labelledby="specialists-h">
-    <h2 id="specialists-h">For specialists</h2>
-    <p class="prose"><a href="/crypto">Cryptographic design</a>: the key tree, each message, <a href="/crypto#relay-view">what the relay sees</a>, <a href="/crypto#threats">threats and what remains</a>.</p>
   </section>
 </div>
