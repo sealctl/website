@@ -10,6 +10,17 @@ export default {
   // Set to false once the placeholders in `seller` are filled in.
   prelaunch: true,
 
+  // App links: https://sealctl.com/p#... opens the app (pairing). Android checks
+  // /.well-known/assetlinks.json for these signing certificates. Today only the debug
+  // certificate of the development builds; add the Play app signing certificate at release.
+  // iOS needs apple-app-site-association with the Apple team id, which does not exist yet.
+  appLinks: {
+    androidPackage: "com.sealctl.app",
+    androidCertSha256: [
+      "AB:00:C5:B7:78:17:6C:14:D4:7F:7E:EC:E6:55:97:3A:EB:1F:90:65:37:03:77:61:26:C8:7C:DE:8C:15:20:08",
+    ],
+  },
+
   // The release the site describes for installs today.
   release: {
     current: "0.5.0",
