@@ -7,14 +7,22 @@
   },
   "scripts": {
     "build": "node build.mjs",
-    "dev": "node build.mjs && npx wrangler@4.166.0 pages dev dist --port 8788",
-    "check": "node scripts/check-tokens.mjs && npx html-validate@11.21.1 \"dist/**/*.html\" && npx linkinator@8.1.0 dist --recurse --clean-urls --check-fragments --skip \"^https://\"",
-    "check:external": "npx linkinator@8.1.0 dist --recurse --clean-urls"
+    "dev": "node build.mjs && wrangler pages dev dist --port 8788",
+    "check": "node scripts/check-tokens.mjs && html-validate \"dist/**/*.html\" && linkinator dist --recurse --clean-urls --check-fragments --skip \"^https://\"",
+    "check:external": "linkinator dist --recurse --clean-urls"
   },
   "devDependencies": {
-    "marked": "18.2.1"
+    "html-validate": "11.21.1",
+    "linkinator": "8.1.0",
+    "marked": "18.2.1",
+    "wrangler": "4.162.0"
   },
   "dependencies": {
     "qrcode-generator": "1.4.4"
+  },
+  "allowScripts": {
+    "esbuild": false,
+    "workerd": false,
+    "fsevents": false
   }
 }
