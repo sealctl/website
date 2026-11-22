@@ -114,7 +114,7 @@ function strip() {
   const unseal = r.unsealReleased
     ? `The current release, ${r.current}, keeps keys on a Ledger and can hand everything back with <code>sealctl unseal --all</code>.`
     : `The current release, ${r.current}, keeps keys on a Ledger. ${r.unsealVersion}, coming next, adds <code>sealctl unseal --all</code> to hand everything back.`;
-  return `<aside class="strip" aria-label="Project status"><div class="wrap"><p><strong>In development.</strong> ${unseal} The phone version described on this site is being built in the open. <a href="${config.github.cli}">GitHub</a> · <a href="/docs/from-ledger">Moving from the Ledger version</a></p></div></aside>\n`;
+  return `<aside class="strip" aria-label="Project status"><div class="wrap"><p><strong>In development.</strong> ${unseal} The phone version described on this site is being built in the open. <a href="${config.github.cli}">GitHub</a> · <a href="/docs#from-ledger">Moving from the Ledger version</a></p></div></aside>\n`;
 }
 
 const pages = new Map(); // url path -> { file, html }
@@ -172,13 +172,24 @@ for (const f of fs.readdirSync(pageDir).filter((f) => f.endsWith(".html")).sort(
 }
 
 // ---------- docs ----------
+// The docs are one long page, /docs, from src/docs/index.md. Its contents list (a sticky
+// sidebar on wide screens, a collapsible bar on phones) is built here from the page's h2 and
+// h3 headings, so it needs no script. A heading may set its own id: `## Paying {#paying}`.
 
+let headings = []; // filled by the heading renderer while a page is parsed
 const marked = new Marked({ gfm: true });
 marked.use({
   renderer: {
     heading({ tokens, depth }) {
-      const text = this.parser.parseInline(tokens);
-      return `<h${depth} id="${slug(text)}">${text}</h${depth}>\n`;
+      let text = this.parser.parseInline(tokens);
+      let id;
+      const own = text.match(/\s*\{#([a-z0-9-]+)\}\s*$/);
+      if (own) {
+        id = own[1];
+        text = text.slice(0, own.index);
+      } else id = slug(text);
+      if (depth === 2 || depth === 3) headings.push({ depth, id, text });
+      return `<h${depth} id="${id}">${text}</h${depth}>\n`;
     },
     table(token) {
       const head = token.header.map((c) => `<th>${this.parser.parseInline(c.tokens)}</th>`).join("");
@@ -189,8 +200,7 @@ marked.use({
 });
 
 const docsDir = path.join(SRC, "docs");
-const nav = JSON.parse(read(path.join(docsDir, "nav.json")));
-const docSlugs = new Set(fs.readdirSync(docsDir).filter((f) => f.endsWith(".md")).map((f) => f.replace(/\.md$/, "")));
+const docSlugs = fs.readdirSync(docsDir).filter((f) => f.endsWith(".md")).map((f) => f.replace(/\.md$/, ""));
 
 function lastCommitDate(file) {
   try {
@@ -201,49 +211,55 @@ function lastCommitDate(file) {
   }
 }
 
-function sidebar(current) {
-  return nav
-    .map((sec) => {
-      const items = sec.pages
-        .map((p) => {
-          if (p.href) return `<li><a href="${p.href}"${p.href === current ? ' aria-current="page"' : ""}>${p.title}</a></li>`;
-          if (p.slug) {
-            const href = `/docs/${p.slug}`;
-            return `<li><a href="${href}"${href === current ? ' aria-current="page"' : ""}>${p.title}</a></li>`;
-          }
-          return `<li class="planned-item">${p.title} <span class="soon">soon</span></li>`;
-        })
-        .join("");
-      return `<h2>${sec.section}</h2><ul>${items}</ul>`;
-    })
-    .join("\n");
+// h2 entries with their h3 entries nested. Pills and other markup in a heading stay out of the list.
+function tocList(list) {
+  const plain = (t) => t.replace(/<span class="pill[^"]*">[^<]*<\/span>/g, "").replace(/<(?!\/?code>)[^>]+>/g, "").trim();
+  let html = "<ol>";
+  let open = false;
+  for (const h of list) {
+    if (h.depth === 2) {
+      if (open) html += "</ol></li>";
+      else if (html !== "<ol>") html += "</li>";
+      html += `<li><a href="#${h.id}">${plain(h.text)}</a>`;
+      open = false;
+    } else {
+      if (!open) html += "<ol>";
+      open = true;
+      html += `<li><a href="#${h.id}">${plain(h.text)}</a></li>`;
+    }
+  }
+  if (open) html += "</ol>";
+  if (list.length) html += "</li>";
+  return html + "</ol>";
 }
 
-function docsPage({ urlPath, outFile, meta, html, source }) {
-  const edit = source
-    ? `<p class="doc-meta"><a href="${config.github.website}/edit/main/${source}">Edit this page on GitHub</a> · Last changed ${lastCommitDate(source)}</p>`
-    : "";
+function docsPage({ urlPath, outFile, meta, html, toc, source }) {
+  const edit = `<p class="doc-meta"><a href="${config.github.website}/edit/main/${source}">Edit this page on GitHub</a> · Last changed ${lastCommitDate(source)}</p>`;
+  const list = tocList(toc);
   const body = `<div class="wrap docs">
-<nav class="docs-nav" aria-label="Docs">
-<details open><summary>All docs</summary>
-${sidebar(urlPath)}
+<details class="toc-bar"><summary>Contents</summary>
+<nav class="toc-nav" aria-label="Contents menu">${list}</nav>
 </details>
+<nav class="toc-side toc-nav" aria-label="Contents">
+<p class="toc-title">On this page</p>
+${list}
 </nav>
 <article class="prose doc">
 ${html}
 ${edit}
 </article>
 </div>`;
-  render({ urlPath, outFile, meta: { ...meta, scripts: ["copy", ...(meta.scripts || [])], bodyClass: "docs-page" }, body, where: source || outFile });
+  render({ urlPath, outFile, meta: { ...meta, scripts: ["copy", "docs", ...(meta.scripts || [])], bodyClass: "docs-page" }, body, where: source });
 }
 
 for (const s of docSlugs) {
   const source = `src/docs/${s}.md`;
   const { meta, body } = frontMatter(read(path.join(ROOT, source)), source);
+  headings = [];
   const html = marked.parse(fill(body, ctx, source));
-  docsPage({ urlPath: s === "index" ? "/docs/" : `/docs/${s}`, outFile: s === "index" ? "docs/index.html" : `docs/${s}.html`, meta, html, source });
+  const toc = headings;
+  docsPage({ urlPath: s === "index" ? "/docs" : `/docs/${s}`, outFile: s === "index" ? "docs.html" : `docs/${s}.html`, meta, html, toc, source });
 }
-for (const sec of nav) for (const p of sec.pages) if (p.slug && !docSlugs.has(p.slug)) fail(`src/docs/nav.json: no page for slug "${p.slug}"`);
 
 // ---------- status incidents ----------
 // The status page body has {{incidents}}; it is rendered from src/status/incidents.md.
@@ -328,6 +344,15 @@ for (const [urlPath, { file, html }] of pages) {
   const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
   const dup = ids.filter((id, i) => ids.indexOf(id) !== i);
   if (dup.length) fail(`${where}: duplicate ids ${[...new Set(dup)].join(", ")}`);
+}
+
+// Redirects into the site must land on a page and, with a #fragment, on an id in it.
+for (const line of read(path.join(SRC, "_redirects")).split("\n")) {
+  const [from, to] = line.trim().split(/\s+/);
+  if (!from || from.startsWith("#") || !to || !to.startsWith("/")) continue;
+  const [p, hash] = to.split("#");
+  if (!pages.has(p) && !served.has(p)) fail(`src/_redirects: ${from} goes to ${to}, which is not served`);
+  else if (hash && pages.has(p) && !pageIds.get(p).has(hash)) fail(`src/_redirects: ${from} goes to ${to}, which has no id "${hash}"`);
 }
 
 if (errors.length) {

@@ -81,7 +81,7 @@ Front matter per page: `title`, `description`, `noindex` (optional), `scripts` (
 | `/security` | Security | Header |
 | `/crypto` | Cryptographic design | Security page, footer, docs Reference |
 | `/pricing` | Pricing | Header |
-| `/docs/` | Docs | Header |
+| `/docs` | Docs: one long page | Header |
 | `/install` | Install | Hero card, docs |
 | `/pay` | Payment page for Paddle checkout (live) | No (noindex) |
 | `/pay/sandbox` | The same page for Paddle's sandbox, used by the staging relay | No (noindex) |
@@ -106,8 +106,8 @@ Redirects (`_redirects`):
 | --- | --- | --- |
 | `/github` | `https://github.com/sealctl` | 302 |
 | `/card` | `/card-a4.pdf` | 302 |
-| `/buy` | `/docs/paying` | 302 |
-| `/docs` | `/docs/` | 301 |
+| `/buy` | `/docs#paying` | 302 |
+| `/docs/paying`, `/docs/leaving`, `/docs/from-ledger` | `/docs#paying`, `/docs#leaving`, `/docs#from-ledger` | 301 |
 
 `www.sealctl.com` redirects to `https://sealctl.com` with a Cloudflare redirect rule. The production `*.pages.dev` host redirects to `sealctl.com` with a Bulk Redirect, so only previews stay on `pages.dev`.
 
@@ -215,9 +215,9 @@ Sections with anchors, no tabs script: macOS (Homebrew), Debian and Ubuntu (`.de
 
 No `curl | sh` installer. Commands use "latest release" links (`https://github.com/sealctl/sealctl/releases/latest`), so the page needs no edit per release.
 
-### Docs `/docs/`
+### Docs `/docs`
 
-Written in Markdown in this repo; one page per task; the latest release only. Developer docs (protocol, derivation, store format, threat model source) stay in `sealctl/docs/` and are linked, not copied.
+One long page, written in Markdown in this repo (`src/docs/index.md`), in the style of a single-page manual: a sticky contents list built from its h2 and h3 headings (a collapsible bar on phones), short sections with anchors, copyable commands. It describes the phone version and marks what is not released. The table below is its order of topics; old per-page URLs redirect to their anchors. Developer docs (protocol, derivation, store format, threat model source) stay in `sealctl/docs/` and are linked, not copied.
 
 | Section | Pages |
 | --- | --- |
@@ -235,8 +235,8 @@ Written in Markdown in this repo; one page per task; the latest release only. De
 | Help | Troubleshooting · FAQ · Moving from the Ledger version (`/docs/from-ledger`: `sealctl unseal --all` with 0.6, then 0.7 and `sealctl seal --from`, and `brew install sealctl/tap/sealctl@0.6` for anyone who upgraded first) · Changelog (link to releases) |
 
 - The CLI reference is generated from a Markdown file that each sealctl release attaches (`sealctl-<version>-cli.md`). `npm run sync-cli <version>` downloads it into `src/docs/reference/cli.md` and is committed, so builds never need the network.
-- Every docs page ends with "Edit this page on GitHub" and the date of the last commit.
-- No search at launch; the sidebar and browser find are enough for this size. Revisit past 60 pages.
+- The page ends with "Edit this page on GitHub" and the date of the last commit.
+- No search at launch; the contents list and browser find are enough.
 - Code blocks get a Copy button (`copy.js`, under 1 KB); no syntax highlighting.
 
 ### Pay `/pay`

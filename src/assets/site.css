@@ -252,21 +252,37 @@ td code { white-space: nowrap; }
 .toc { font-size: 0.92rem; border-left: 2px solid var(--border); padding-left: 14px; margin: 0 0 2rem; }
 .toc ol { margin: 0; }
 
-/* docs */
-.docs { display: grid; gap: 24px; padding-top: 32px; }
-@media (min-width: 900px) { .docs { grid-template-columns: 250px minmax(0, 1fr); gap: 48px; padding-top: 44px; } }
-.docs-nav { font-size: 0.9rem; }
-.docs-nav summary { cursor: pointer; font-weight: 600; padding: 6px 0; }
-.docs-nav h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 18px 0 6px; }
-.docs-nav ul { list-style: none; padding: 0; margin: 0; }
-.docs-nav li { margin: 0; }
-.docs-nav a { display: block; padding: 3px 0; color: var(--ink-2); text-decoration: none; }
-.docs-nav a:hover { color: var(--ink); text-decoration: underline; }
-.docs-nav a[aria-current="page"] { color: var(--accent); font-weight: 600; }
-.docs-nav .planned-item { padding: 3px 0; color: var(--muted); }
-.doc { max-width: 46rem; }
+/* docs: one long page with a contents list (sticky sidebar when wide, a bar on phones) */
+.docs { display: grid; gap: 0; padding-top: 0; }
+@media (min-width: 900px) { .docs { grid-template-columns: 240px minmax(0, 1fr); gap: 48px; padding-top: 40px; } }
+.toc-nav ol { list-style: none; margin: 0; padding: 0; }
+.toc-nav li { margin: 0; }
+.toc-nav a { display: block; padding: 4px 0 4px 10px; border-left: 2px solid transparent; color: var(--ink-2); text-decoration: none; line-height: 1.35; }
+.toc-nav a:hover { color: var(--ink); text-decoration: underline; }
+.toc-nav a[aria-current] { color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+.toc-nav > ol > li > a { font-weight: 600; color: var(--ink); margin-top: 6px; }
+.toc-nav > ol > li > a[aria-current] { color: var(--accent); }
+.toc-nav ol ol a { padding-left: 22px; font-size: 0.86rem; }
+.toc-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; margin: 0 0 6px 12px; }
+.toc-side { display: none; font-size: 0.9rem; }
+@media (min-width: 900px) {
+  .toc-side { display: block; position: sticky; top: 16px; align-self: start; max-height: calc(100vh - 32px); overflow-y: auto; overscroll-behavior: contain; padding: 4px 8px 24px 0; }
+  .toc-bar { display: none; }
+}
+.toc-bar { position: sticky; top: 0; z-index: 4; margin: 0 -16px; background: var(--paper); border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+.toc-bar summary { cursor: pointer; padding: 12px 16px; font-weight: 600; min-height: 44px; list-style-position: inside; }
+.toc-bar[open] summary { border-bottom: 1px solid var(--border); }
+.toc-bar nav { max-height: 70vh; overflow-y: auto; overscroll-behavior: contain; padding: 4px 16px 16px; background: var(--paper); }
+.toc-bar .toc-nav a, .toc-bar nav a { padding-top: 7px; padding-bottom: 7px; }
+@media (min-width: 720px) and (max-width: 899px) { .toc-bar { margin: 0 -28px; } .toc-bar summary, .toc-bar nav { padding-left: 28px; padding-right: 28px; } }
+.doc { max-width: 46rem; padding-top: 24px; }
+@media (min-width: 900px) { .doc { padding-top: 0; } }
 .doc h1 { font-size: clamp(1.8rem, 3.6vw, 2.4rem); }
-.doc h2 { margin-top: 2rem; font-size: 1.35rem; }
+.doc h2 { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--border); font-size: 1.5rem; }
+.doc h3 { margin-top: 1.8rem; font-size: 1.12rem; }
+.doc h2, .doc h3 { scroll-margin-top: 64px; }
+@media (min-width: 900px) { .doc h2, .doc h3 { scroll-margin-top: 16px; } }
+.doc h2 code, .doc h3 code { font-size: 0.9em; }
 .doc-meta { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.88rem; }
 
 /* status */
@@ -340,11 +356,10 @@ a :not(pre) > code, a > code { color: inherit; }
 .hero > *, .scene > *, .band-grid > *, .grid > *, .docs > * { min-width: 0; }
 .dg .t-ink2 { fill: var(--ink-2); }
 .scene.top { align-items: start; }
-.docs-nav .soon { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; border: 1px dashed var(--border-strong); border-radius: 999px; padding: 0 6px; color: var(--ink-2); }
 .doc blockquote { margin: 1.25rem 0; padding: 12px 16px; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--focus); border-radius: var(--radius-sm); }
 .doc blockquote > :last-child { margin-bottom: 0; }
-@media (max-width: 899px) { .docs-nav { order: 2; border-top: 1px solid var(--border); padding-top: 16px; } .docs .doc { order: 1; } }
 .toc a { display: inline-block; padding: 3px 0; }
 
 /* /p: the pairing code, drawn in the browser */
 .pair-qr { display: block; width: min(100%, 320px); height: auto; image-rendering: pixelated; border-radius: 8px; margin: 8px auto; }
+.toc-nav code { font-size: 0.92em; color: inherit; background: none; border: 0; padding: 0; }

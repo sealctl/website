@@ -23,14 +23,14 @@ Node 24. The only build dependency is `marked`, pinned.
 | `site.config.mjs` | Nav, footer, release numbers, protocol revision, seller placeholders, `prelaunch` |
 | `src/layout.html` | The one layout |
 | `src/pages/*.html` | Page bodies with front matter (`title`, `description`, optional `noindex`, `scripts`, `strip`) |
-| `src/docs/*.md`, `src/docs/nav.json` | Docs pages and the sidebar order; nav entries without a page show as not yet written |
+| `src/docs/index.md` | The docs: one long page at `/docs`. Its contents list (sticky sidebar, a bar on phones) is built from the h2 and h3 headings; `## Title {#id}` sets an anchor. `assets/js/docs.js` marks the section being read |
 | `src/status/incidents.md` | Incident log for `/status` |
 | `src/assets/tokens.css` | Byte copy of `sealctl/.github` `brand/tokens.css`; `npm run check` compares it with upstream |
 | `src/assets/site.css` | Layout and components; colours only from tokens |
 | `src/_headers`, `src/_redirects` | Security headers, caching, redirects |
 | `scripts/check-tokens.mjs` | Upstream token diff, raw-colour grep, WCAG AA contrast of every text pair in both themes |
 
-The build fails on a missing front-matter field, a title over 60 characters, an image without `alt`, a broken internal link or anchor, a duplicate id, an inline style or inline script (both blocked by the CSP), and an unknown `{{variable}}`.
+The build fails on a redirect to a missing page or anchor, a missing front-matter field, a title over 60 characters, an image without `alt`, a broken internal link or anchor, a duplicate id, an inline style or inline script (both blocked by the CSP), and an unknown `{{variable}}`.
 
 ## Before launch: placeholders and noindex
 
