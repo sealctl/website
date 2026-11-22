@@ -27,7 +27,7 @@ Sources of truth this spec depends on:
 | Runtime dependencies | None. The site ships HTML, one CSS file and a few small scripts |
 | Build dependencies | `marked` (Markdown to HTML for docs), pinned to an exact version |
 | Test dependencies | `lychee` (links), `html-validate`, `@axe-core/cli` or `pa11y-ci`, `@lhci/cli`, Playwright; CI only |
-| Hosting | Cloudflare Pages, Git integration, production branch `main` |
+| Hosting | Cloudflare Pages, deployed from GitHub Actions with `wrangler pages deploy`, production branch `main` |
 
 Why:
 
@@ -67,7 +67,7 @@ Front matter per page: `title`, `description`, `noindex` (optional), `scripts` (
 1. Renders each page into `layout.html`; docs pages also get the docs sidebar and "Edit on GitHub" link.
 2. Fingerprints CSS, JS and images (`site.3f9a1c2b.css`) and rewrites references.
 3. Writes `sitemap.xml` (pages without `noindex`), `/.well-known/security.txt` (below) and `404.html`.
-4. Renders `pay.html` twice: `/pay` with `PADDLE_CLIENT_TOKEN_LIVE` and the live environment, `/pay/sandbox` with `PADDLE_CLIENT_TOKEN_SANDBOX` and `Paddle.Environment.set("sandbox")`. Both tokens come from Pages environment variables and are public by design.
+4. Renders `pay.html` twice: `/pay` with `PADDLE_CLIENT_TOKEN_LIVE` and the live environment, `/pay/sandbox` with `PADDLE_CLIENT_TOKEN_SANDBOX` and `Paddle.Environment.set("sandbox")`. Both tokens come from GitHub Actions repository variables and are public by design.
 5. Fails on: a missing front-matter field, a broken internal link, an image without `alt`, a page title over 60 characters.
 
 `npm run dev` builds and serves `dist/` on `localhost:8788` with `wrangler pages dev` so `_headers` and `_redirects` behave as in production.
@@ -255,7 +255,7 @@ Rules:
 - The page never decides whether someone paid. The relay grants the licence from Paddle's signed webhook. The page only shows what Paddle.js reports.
 - `noindex`, not in the sitemap, not in nav.
 
-Build-time settings (Cloudflare Pages environment variables, the same in production and previews):
+Build-time settings (GitHub Actions repository variables, the same in production and previews):
 
 | Variable | Used by |
 | --- | --- |
@@ -375,7 +375,7 @@ Canonical: https://sealctl.com/.well-known/security.txt
 Policy: https://github.com/sealctl/.github/blob/main/SECURITY.md
 ```
 
-A scheduled GitHub Actions workflow calls the Pages deploy hook on the 1st of each month, so `Expires` never lapses.
+The deploy workflow also runs on the 1st of each month and deploys `main` again, so `Expires` never lapses.
 
 ### 404
 
@@ -444,12 +444,13 @@ Each page: `<title>`, `description`, canonical URL, Open Graph title, descriptio
 
 ## Deployment
 
-- Cloudflare Pages project `sealctl-website`, connected to `sealctl/website` with the Git integration. Build command `npm ci && npm run build`, output `dist`, `NODE_VERSION=24`.
+- Cloudflare Pages project `sealctl-website`, deployed only by GitHub Actions (`.github/workflows/deploy.yml`): `npm ci --ignore-scripts`, `npm run build`, `npm run check`, then `wrangler pages deploy dist` with the locked wrangler. No deploys from a laptop and no `wrangler login`.
+- The job deploying `main` uses the GitHub environment `production` (deployment branches: `main` only); same-repo pull requests use `preview`; fork pull requests build and check only. Each environment holds `CLOUDFLARE_API_TOKEN` (Account › Cloudflare Pages › Edit only) and the variable `CLOUDFLARE_ACCOUNT_ID`. Without the token the deploy is skipped with a notice.
 - `main` → production at `sealctl.com`. Every other branch and every pull request → a preview at `<hash>.sealctl-website.pages.dev` and `<branch>.sealctl-website.pages.dev`, with `X-Robots-Tag: noindex` (Pages adds it on previews). Sandbox purchases always go through `https://sealctl.com/pay/sandbox`.
 - Custom domains: `sealctl.com` (apex) on the Pages project; `www` redirects.
-- Deploy hook (secret in GitHub Actions `PAGES_DEPLOY_HOOK`) for the monthly rebuild.
+- Monthly rebuild: the deploy workflow's schedule (1st of each month) deploys `main` again.
 - Rollback: Pages dashboard → Deployments → "Rollback to this deployment", or revert on `main`.
-- The site is public; nothing in this repo is secret. The Paddle client tokens are set as Pages variables only so that they can change without a commit; they are public by design.
+- The site is public; nothing in this repo is secret. The Paddle client tokens are set as GitHub Actions repository variables only so that they can change without a commit; they are public by design.
 
 ## Testing
 

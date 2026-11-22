@@ -13,7 +13,7 @@ npm run dev          # build, then wrangler pages dev on localhost:8788
 npm run check        # tokens and contrast, html-validate, internal links
 ```
 
-Node 24. The only build dependency is `marked`. `qrcode-generator` is copied into `dist/` as the QR encoder for `/p`. `html-validate` and `linkinator` (`npm run check`) and `wrangler` (`npm run dev`, preview deploys) are dev dependencies, so they come from the lockfile too, never from a fresh `npx` download.
+Node 24. The only build dependency is `marked`. `qrcode-generator` is copied into `dist/` as the QR encoder for `/p`. `html-validate` and `linkinator` (`npm run check`) and `wrangler` (`npm run dev`, CI deploys) are dev dependencies, so they come from the lockfile too, never from a fresh `npx` download.
 
 ## Dependencies
 
@@ -63,11 +63,31 @@ Other things to update when they become true:
 
 ## Deploy
 
-Cloudflare Pages project `sealctl-website`, output `dist`, build command `npm ci && npm run build`, `NODE_VERSION=24`. `PADDLE_CLIENT_TOKEN_LIVE` and `PADDLE_CLIENT_TOKEN_SANDBOX` (public client tokens) are read at build time; without them `/pay` says checkout isn't set up.
+Deploys happen only in GitHub Actions (`.github/workflows/deploy.yml`), never from a laptop: no local `wrangler login`, no local `wrangler pages deploy`.
 
-Manual preview deploy:
+| Trigger | What happens | GitHub environment |
+| --- | --- | --- |
+| Push to `main` (merged pull request), the 1st of each month, or a manual run on `main` | Build, check, deploy `dist/` to Cloudflare Pages project `sealctl-website`, branch `main` → sealctl.com | `production` (deployment branches: `main` only) |
+| Pull request from a branch of this repo | Build, check, deploy a preview with `--branch <head branch>`; a comment on the pull request carries the preview URL and is updated on each push | `preview` (any branch; the workflow refuses `main`) |
+| Pull request from a fork | Build and check only; no secrets, no deploy | none |
+
+The build job has no secrets. The deploy job installs from the lockfile again (`npm ci --ignore-scripts`) and runs the locked `wrangler`, never `npx wrangler@latest`. If `CLOUDFLARE_API_TOKEN` is not set in the job's environment, the deploy step prints "CLOUDFLARE_API_TOKEN not set — deploy skipped" and the run stays green (Dependabot pull requests get no secrets, so they always skip). The monthly run rebuilds `/.well-known/security.txt` so its `Expires` never lapses.
+
+Settings, made once by the owner:
 
 ```sh
-npm run build
-npx wrangler pages deploy dist --project-name sealctl-website --branch preview
+# Cloudflare API token: Account › Cloudflare Pages › Edit, this account only, nothing else.
+# gh reads the value from the terminal; it is never echoed or stored in a file.
+gh secret set CLOUDFLARE_API_TOKEN -R sealctl/website --env production
+gh secret set CLOUDFLARE_API_TOKEN -R sealctl/website --env preview   # same or a separate token; leave unset to turn previews off
+
+# Not secret; already set on both environments
+gh variable set CLOUDFLARE_ACCOUNT_ID -R sealctl/website --env production --body <account id>
+gh variable set CLOUDFLARE_ACCOUNT_ID -R sealctl/website --env preview --body <account id>
+
+# Public Paddle client tokens, read at build time; unset → /pay says checkout isn't set up
+gh variable set PADDLE_CLIENT_TOKEN_LIVE -R sealctl/website --body <live client token>
+gh variable set PADDLE_CLIENT_TOKEN_SANDBOX -R sealctl/website --body <sandbox client token>
 ```
+
+Check a deploy: the run's `production` job shows the deployment, the repository's Deployments page links sealctl.com, and the Pages dashboard lists the deployment with the commit. Rollback: Pages dashboard → Deployments → "Rollback to this deployment", or revert on `main` (which deploys again).

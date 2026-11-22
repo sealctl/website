@@ -1,0 +1,195 @@
+name: Deploy
+
+# Every deploy of sealctl.com runs here, never from a laptop (README, "Deploy").
+#   push to main, monthly schedule, manual run on main → production (environment `production`)
+#   pull request from a branch of this repo                → preview  (environment `preview`)
+#   pull request from a fork                               → build and check only
+# The build runs without secrets; the deploy job installs from the lockfile again and only
+# runs wrangler. Without CLOUDFLARE_API_TOKEN in the environment the deploy is skipped.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # security.txt carries Expires = build date + 365 days; rebuild monthly so it never lapses.
+  schedule:
+    - cron: "17 6 1 * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      # Actions are pinned to commit SHAs; Dependabot moves them.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # build.mjs dates pages from git history
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+      - run: npm audit signatures
+      - run: npm run build
+        env:
+          # Public client-side tokens (repository variables); empty → /pay says checkout isn't set up.
+          PADDLE_CLIENT_TOKEN_LIVE: ${{ vars.PADDLE_CLIENT_TOKEN_LIVE }}
+          PADDLE_CLIENT_TOKEN_SANDBOX: ${{ vars.PADDLE_CLIENT_TOKEN_SANDBOX }}
+      - run: npm run check
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  production:
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    environment:
+      name: production
+      url: https://sealctl.com
+    # Production deploys queue; one never cancels another half way.
+    concurrency:
+      group: pages-production
+      cancel-in-progress: false
+    steps:
+      - id: token
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::notice::CLOUDFLARE_API_TOKEN not set — deploy skipped"
+            echo "set=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "set=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.token.outputs.set == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - if: steps.token.outputs.set == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      # wrangler comes from the lockfile, never npx <tool>@latest.
+      - if: steps.token.outputs.set == 'true'
+        run: npm ci --ignore-scripts
+      - if: steps.token.outputs.set == 'true'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist
+          path: dist/
+      - if: steps.token.outputs.set == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_SEND_METRICS: "false"
+        run: npm exec --no -- wrangler pages deploy dist --project-name sealctl-website --branch main --commit-hash "$GITHUB_SHA"
+
+  preview:
+    needs: build
+    # Same-repo pull requests only: fork pull requests get no secrets and stop after the build.
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    environment:
+      name: preview
+      url: ${{ steps.deploy.outputs.url }}
+    concurrency:
+      group: pages-preview-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
+      alias: ${{ steps.deploy.outputs.alias }}
+    steps:
+      - id: token
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::notice::CLOUDFLARE_API_TOKEN not set — deploy skipped"
+            echo "set=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "set=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.token.outputs.set == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - if: steps.token.outputs.set == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - if: steps.token.outputs.set == 'true'
+        run: npm ci --ignore-scripts
+      - if: steps.token.outputs.set == 'true'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist
+          path: dist/
+      - id: deploy
+        if: steps.token.outputs.set == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_SEND_METRICS: "false"
+          WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.json
+          BRANCH: ${{ github.head_ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # A preview never goes to the production branch.
+          if [ "$BRANCH" = "main" ]; then
+            echo "::error::a pull request from main cannot be a preview"
+            exit 1
+          fi
+          npm exec --no -- wrangler pages deploy dist --project-name sealctl-website --branch "$BRANCH" --commit-hash "$HEAD_SHA"
+          url=$(jq -r 'select(.type == "pages-deploy-detailed") | .url // empty' "$WRANGLER_OUTPUT_FILE_PATH" | tail -n 1)
+          alias=$(jq -r 'select(.type == "pages-deploy-detailed") | .alias // empty' "$WRANGLER_OUTPUT_FILE_PATH" | tail -n 1)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "alias=$alias" >> "$GITHUB_OUTPUT"
+
+  # The only job that can write to the pull request; it runs no repository code.
+  comment:
+    needs: preview
+    if: needs.preview.outputs.url != ''
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          URL: ${{ needs.preview.outputs.url }}
+          ALIAS: ${{ needs.preview.outputs.alias }}
+        run: |
+          marker='<!-- sealctl-pages-preview -->'
+          body="$marker
+          **Preview:** $URL"
+          if [ -n "$ALIAS" ] && [ "$ALIAS" != "$URL" ]; then
+            body="$body
+          **Branch alias:** $ALIAS"
+          fi
+          body="$body
+
+          Built from $SHA."
+          id=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$marker\"))) | .id" | head -n 1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$id" -f body="$body" > /dev/null
+          else
+            gh api -X POST "repos/$REPO/issues/$PR/comments" -f body="$body" > /dev/null
+          fi
