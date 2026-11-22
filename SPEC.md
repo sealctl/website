@@ -217,7 +217,7 @@ No `curl | sh` installer. Commands use "latest release" links (`https://github.c
 
 ### Docs `/docs`
 
-One long page, written in Markdown in this repo (`src/docs/index.md`), in the style of a single-page manual: a sticky contents list built from its h2 and h3 headings (a collapsible bar on phones), short sections with anchors, copyable commands. It describes the phone version and marks what is not released. The table below is its order of topics; old per-page URLs redirect to their anchors. Developer docs (protocol, derivation, store format, threat model source) stay in `sealctl/docs/` and are linked, not copied.
+One long page, written in Markdown in this repo (`src/docs/index.md`), in the style of a single-page manual (mockk.io): after the intro, a plain nested contents list built from its h2 and h3 headings; then short sections with anchors, each ending with a link back to the contents, and copyable commands. No sidebar. It describes the phone version and marks what is not released. The table below is its order of topics; old per-page URLs redirect to their anchors. Developer docs (protocol, derivation, store format, threat model source) stay in `sealctl/docs/` and are linked, not copied.
 
 | Section | Pages |
 | --- | --- |

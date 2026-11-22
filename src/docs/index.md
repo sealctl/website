@@ -6,7 +6,7 @@ description: Everything about sealctl on one page: install, pairing, secrets, AI
 
 sealctl keeps API keys, SSH keys and disk passwords off your laptop's disk. Your phone holds the keys, made from 24 words you write on a paper card. When a command or an AI agent needs a key, your computer asks the phone, you approve, and the key goes into that one command. The 24 words alone open everything, with no phone, relay or company.
 
-This page explains all of it, top to bottom. Use the contents list to jump, or your browser's find. For the cryptography, see [Cryptographic design](/crypto) and the [protocol]({{protocol.base}}).
+This page explains all of it, top to bottom. Use the contents below to jump, or your browser's find. For the cryptography, see [Cryptographic design](/crypto) and the [protocol]({{protocol.base}}).
 
 > **Status.** This page describes the phone version, sealctl {{release.phoneVersion}}, which is in development and not released yet. Parts marked <span class="pill pill-planned">Planned</span> are not built yet, even in development builds.
 >
@@ -15,6 +15,8 @@ This page explains all of it, top to bottom. Use the contents list to jump, or y
 > | {{release.current}} | The current release | On a Ledger (OpenPGP app). Its guide is the [README](https://github.com/sealctl/sealctl#readme) |
 > | {{release.unsealVersion}} | Next | {{release.current}} plus `sealctl unseal`, to hand everything back. See [Moving from the Ledger version](#from-ledger) |
 > | {{release.phoneVersion}} | In development | From 24 words on your phone. Needs the sealctl app. Everything below |
+
+<!-- contents -->
 
 ## Install {#install}
 

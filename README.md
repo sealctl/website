@@ -23,7 +23,7 @@ Node 24. The only build dependency is `marked`, pinned.
 | `site.config.mjs` | Nav, footer, release numbers, protocol revision, seller placeholders, `prelaunch` |
 | `src/layout.html` | The one layout |
 | `src/pages/*.html` | Page bodies with front matter (`title`, `description`, optional `noindex`, `scripts`, `strip`) |
-| `src/docs/index.md` | The docs: one long page at `/docs`. Its contents list (sticky sidebar, a bar on phones) is built from the h2 and h3 headings; `## Title {#id}` sets an anchor. `assets/js/docs.js` marks the section being read |
+| `src/docs/index.md` | The docs: one long page at `/docs`. Its contents list is built from the h2 and h3 headings and placed at `<!-- contents -->`, after the intro; each section ends with "↑ Contents". `## Title {#id}` sets an anchor |
 | `src/status/incidents.md` | Incident log for `/status` |
 | `src/assets/tokens.css` | Byte copy of `sealctl/.github` `brand/tokens.css`; `npm run check` compares it with upstream |
 | `src/assets/site.css` | Layout and components; colours only from tokens |
