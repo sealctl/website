@@ -220,7 +220,7 @@ description: The specialist page: sealctl's whole cryptographic design, with der
 <circle cx="146" cy="220" r="11" class="box-secret"/>
 <text x="146" y="225" class="t-s t-b" text-anchor="middle">1</text>
 <rect x="16" y="352" width="928" height="30" rx="6" class="box-soft"/>
-<text x="28" y="372" class="t-s t-sans">Relay holds the sealed request in memory only. Push carries only type, id and expiry.</text>
+<text x="28" y="372" class="t-s t-sans">Relay holds the sealed request while waiting, at most 5 minutes. Push carries only type, id and expiry.</text>
 <line x1="400" y1="324" x2="821" y2="324" class="line"/>
 <polygon points="830,324 820.2,317 820.2,331" class="arrowhead"/>
 <rect x="462" y="296" width="306" height="22" rx="4" class="box-soft"/>
@@ -247,7 +247,7 @@ description: The specialist page: sealctl's whole cryptographic design, with der
 <circle cx="814" cy="532" r="11" class="box-secret"/>
 <text x="814" y="537" class="t-s t-b" text-anchor="middle">4</text>
 <rect x="16" y="664" width="928" height="30" rx="6" class="box-soft"/>
-<text x="28" y="684" class="t-s t-sans">Relay passes the reply on and forgets both; the approval path writes nothing to storage.</text>
+<text x="28" y="684" class="t-s t-sans">Relay passes the reply on and forgets both; only a delayed level 3 reply is stored, sealed.</text>
 <line x1="400" y1="636" x2="139" y2="636" class="line"/>
 <polygon points="130,636 139.8,629 139.8,643" class="arrowhead"/>
 <rect x="158.2" y="608" width="213.60000000000002" height="22" rx="4" class="box-soft"/>
@@ -337,7 +337,7 @@ description: The specialist page: sealctl's whole cryptographic design, with der
           <tr><td>2</td><td>The relay checks the signature and the pairing, holds the sealed request in memory, and tells the phone over its socket. Push through APNs and FCM carries only the type, the request id and its expiry.</td><td>Which phone it goes to; the sealed string</td></tr>
           <tr><td>3</td><td>The phone opens the request, shows the card, and derives the key after the tap.</td><td>Nothing</td></tr>
           <tr><td>4</td><td>The phone seals the key with HPKE to the machine's one-time key, signs the reply with its identity key, and posts it.</td><td>Phone public key, request id, size, time, network address</td></tr>
-          <tr><td>5</td><td>The relay passes the sealed reply to the waiting socket and forgets both. The approval path writes nothing to storage.</td><td>That a reply was delivered</td></tr>
+          <tr><td>5</td><td>The relay passes the sealed reply to the waiting socket and forgets both. An immediate approval writes nothing to storage; a delayed level 3 reply is stored sealed until the machine fetches it, at most 15 minutes after the two-hour wait.</td><td>That a reply was delivered</td></tr>
           <tr><td>6</td><td>The machine checks the phone's signature, opens the reply with its one-time key, wipes the one-time key, and keeps the key in memory.</td><td>Nothing</td></tr>
         </tbody>
       </table>
@@ -353,7 +353,7 @@ description: The specialist page: sealctl's whole cryptographic design, with der
         <p>The relay routes sealed strings by public key. Everything that says what is being done sits inside HPKE ciphertext sealed to the phone's box key or to a one-time key.</p>
         <p>The network address is used in memory while serving a call. Comparing the phone's and the machine's addresses, as keyed hashes, gives the <code>near</code> flag; no address is stored.</p>
         <p>The phone's backup on the relay is sealed with the state key, which comes from the root.</p>
-        <p>In full, the relay holds or passes on: sealed requests, replies, machine status and lock messages that it cannot open; public keys; machine names, OS and model; push tokens; when each machine last called; an encrypted phone backup; days with use; licence state. It never sees which key was asked for, which command ran or what the agent did. It never logs what was asked and stores no IP address. Each item with how long it is kept: <a href="/privacy#relay">Privacy notice</a>.</p>
+        <p>In full, the relay holds or passes on: sealed requests, replies, machine status and lock messages that it cannot open; public keys; machine names, OS and model; push tokens; when each machine last called; an encrypted phone backup; days with use; licence state. It never sees which key was asked for, which command ran or what the agent did. It never logs what was asked, and its code stores no IP address; Cloudflare keeps the addresses of requests it blocks as attacks. Each item with how long it is kept: <a href="/privacy#relay">Privacy notice</a>.</p>
         <p id="closed">The relay is closed source. It runs the paid service and holds nothing that opens your data. Its <a href="{{protocol.base}}#relay-api">API is public</a>, every reply it carries is signed by the phone, and data opens without it.</p>
         <p class="src">Source: <a href="{{protocol.base}}#request-and-reply-encryption">Request and reply encryption</a> · <a href="{{protocol.base}}#state-blob">State blob</a> · <a href="{{protocol.base}}#requests-and-replies">Requests and replies</a> · <a href="/privacy#relay">Privacy: the relay</a></p>
       </div>
@@ -479,11 +479,11 @@ description: The specialist page: sealctl's whole cryptographic design, with der
           <tr><td>Agent reads key files (<code>.env</code>, <code>~/.aws</code>, shell history)</td><td><code>sealctl scan</code> moves keys out of files on day one; agent hooks refuse reading the store</td><td>Nothing on disk to read</td></tr>
           <tr><td>Prompt injection asks the agent to print or send a key</td><td>Reading a secret is refused inside agents; values are masked in output</td><td>The agent can still ask to run a command with a key, and that shows on the phone</td></tr>
           <tr><td>Malicious repository or dependency runs during <code>npm test</code></td><td>Only the keys named for that command are injected; the use is logged</td><td>That process can leak those keys</td></tr>
-          <tr><td>Malware on the laptop during the workday</td><td>Deploy and cloud tokens live in memory only, for the session, never in files</td><td>Malware can use what is open while the session is open</td></tr>
-          <tr><td>Laptop stolen</td><td>Nothing in plain text on disk; volumes unmounted unless the session is open; open keys sit behind the screen lock until idle or the hard stop</td><td>A thief who gets past the screen lock while the session is open</td></tr>
-          <tr><td>Phone lost</td><td>The root is locked behind the phone's own passcode; restore from the keychain backup or the words, then change words</td><td>A thief who also knows the passcode</td></tr>
+          <tr><td>Malware on the laptop during the workday</td><td>Deploy and cloud tokens are held in memory for the session; sealctl does not write them to files</td><td>Malware can use what is open while the session is open</td></tr>
+          <tr><td>Laptop stolen</td><td>Nothing in plain text on disk; volumes unmounted unless the session is open; open keys sit behind the screen lock until idle or the hard stop</td><td>A thief who gets past the screen lock while the session is open; keys the system copied to swap or a hibernation file during a session</td></tr>
+          <tr><td>Phone lost</td><td>The root is locked behind the phone's own passcode; restore from the keychain backup or the words, then change the secrets that matter at their providers (changing words is not in the app yet)</td><td>A thief who also knows the passcode</td></tr>
           <tr><td>Unlocked phone taken</td><td>Level 2 and 3 need a fresh strong biometric, never the passcode; a newly enrolled face or fingerprint meets the card check; level 3 away from a trusted place waits two hours, announced on every paired machine and cancellable from any of them (<code>sealctl cancel</code>)</td><td>Level 1 approvals for already paired machines</td></tr>
-          <tr><td>24 words leaked</td><td>Change words: machines rewrap in seconds, then <code>sealctl migrate</code> re-encrypts volumes and backups</td><td>Copies an attacker already took</td></tr>
+          <tr><td>24 words leaked</td><td>Changing words is not in the app yet. Until it is: change the secrets that matter at their providers</td><td>Copies an attacker already took</td></tr>
           <tr><td>Machine lost or compromised</td><td>Unpair it; the phone's inventory and usage log list what it had open and which secrets it used</td><td>Those secrets must be changed at their providers</td></tr>
         </tbody>
       </table>

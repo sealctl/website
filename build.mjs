@@ -297,6 +297,7 @@ write(
     "Preferred-Languages: en, pl",
     `Canonical: ${config.origin}/.well-known/security.txt`,
     `Policy: ${config.github.securityPolicy}`,
+    "# First answer within three working days. Safe harbour for good-faith research: see Policy.",
     "",
   ].join("\n"),
 );

@@ -33,7 +33,7 @@ description: Where your sealctl keys are, who can use them, what happens if you 
       </li>
       <li>
         <span class="picto-wrap"><svg class="picto" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><rect x="8" y="10" width="32" height="22" rx="2"/><path d="M3 37 H45"/></svg></span>
-        <span class="where-what"><strong>Your computer</strong>Only after you approve. In memory, never on disk, until the session ends.</span>
+        <span class="where-what"><strong>Your computer</strong>Only after you approve. Held in memory, not written to disk by sealctl, until the session ends.</span>
         <span class="pill pill-wait">while approved</span>
       </li>
       <li>
@@ -43,7 +43,7 @@ description: Where your sealctl keys are, who can use them, what happens if you 
       </li>
       <li>
         <span class="picto-wrap"><svg class="picto" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true"><path d="M6 42 V14 L24 5 L42 14 V42 Z"/><path d="M18 42 V30 h12 V42 M14 20 h4 M30 20 h4"/></svg></span>
-        <span class="where-what"><strong>sealctl, the company</strong>Has no copy of your keys or your 24 words.</span>
+        <span class="where-what"><strong>sealctl (us)</strong>We have no copy of your keys or your 24 words.</span>
         <span class="pill pill-no">never</span>
       </li>
       <li>
@@ -180,6 +180,7 @@ description: Where your sealctl keys are, who can use them, what happens if you 
     <ul class="prose limits">
       <li>A program you give a key to can use it, or leak it.</li>
       <li>Harmful software running as you can use what is unlocked during a session.</li>
+      <li>While a session is open, your system can copy keys from memory to disk, in swap or a hibernation file.</li>
       <li>The AI-agent guards stop mistakes, not a determined attacker.</li>
       <li>Someone with your unlocked phone, or its passcode, can approve everyday requests.</li>
       <li>The relay can delay or drop messages. It cannot read or fake them.</li>
@@ -217,6 +218,7 @@ sha256sum -c SHA256SUMS --ignore-missing          # Linux</code></pre>
     <h2 id="report-h">Report a problem</h2>
     <div class="prose">
       <p>Report privately through a <a href="{{github.advisory}}">GitHub security advisory</a> or <code>{{email.security}}</code>, not a public issue. First answer within three working days; fixes are credited in the release notes.</p>
+      <p id="safe-harbour">We welcome good-faith security research and will not pursue or support legal action against you if you follow this policy: test only with your own phone, words and machines; never access, change or keep other people's data; no denial-of-service or load tests on the relay, and no testing of Cloudflare's, Paddle's, Apple's or Google's systems; give us 90 days to fix before you publish, sooner by agreement. We treat such research as authorised and will say so if anyone takes action against you for it.</p>
       <p class="small"><a href="/.well-known/security.txt">security.txt</a> · <a href="{{github.securityPolicy}}">SECURITY.md</a></p>
     </div>
   </section>

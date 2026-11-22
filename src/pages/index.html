@@ -1,6 +1,6 @@
 ---
 title: Keys for developers and their AI agents
-description: API keys, SSH and git signing keys, encrypted volumes and backups, unlocked from your phone: once per work session or on every use. Your AI agents never see the key.
+description: API keys, SSH and git signing keys, encrypted volumes and backups, unlocked from your phone: once per work session or on every use. Your AI agents use the key without seeing it.
 scripts: [copy]
 ---
 <div class="wrap">
@@ -8,7 +8,7 @@ scripts: [copy]
     <div>
       <p class="eyebrow">Keys for developers and their AI agents</p>
       <h1 id="hero-title">Your agents run the code. <em>Your phone holds the keys.</em></h1>
-      <p class="lede">sealctl keeps API keys, SSH keys, encrypted volumes and backups locked until your phone says yes. When an agent needs a key, your phone asks, you tap <strong>Allow</strong>, and the key goes into that one command. The agent never sees it, and it never lands in a transcript or a <code>.env</code> file.</p>
+      <p class="lede">sealctl keeps API keys, SSH keys, encrypted volumes and backups locked until your phone says yes. When an agent needs a key, your phone asks, you tap <strong>Allow</strong>, and the key goes into that one command. Output is masked to <code>****</code>, and reading a key directly is refused inside an agent. <a href="/security#limits">Limits</a>.</p>
       <div class="actions">
         <a class="btn btn-primary" href="#start">Get started</a>
         <a class="btn btn-ghost" href="/how-it-works">How it works</a>
@@ -86,8 +86,8 @@ scripts: [copy]
     <div class="grid grid-3">
       <div class="card feature">
         <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><path d="M4 4l16 16"/></svg></div>
-        <h3>Agents never see the key</h3>
-        <p>The key goes into the environment of the one command that asked. Output is masked to <code>****</code>, and reading a secret directly is refused inside an agent.</p>
+        <h3>Agents use the key without seeing it</h3>
+        <p>The key goes into the environment of the one command that asked. Output is masked to <code>****</code>, and reading a secret directly is refused inside an agent. <a href="/docs#ai-limits">Limits</a>.</p>
       </div>
       <div class="card feature">
         <div class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 18h4"/></svg></div>
