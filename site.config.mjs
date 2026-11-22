@@ -75,11 +75,11 @@ export default {
     { href: "/how-it-works", label: "How it works" },
     { href: "/security", label: "Security" },
     { href: "/pricing", label: "Pricing" },
-    { href: "/docs/", label: "Docs" },
+    { href: "/docs", label: "Docs" },
   ],
 
   footer: [
-    { href: "/docs/", label: "Docs" },
+    { href: "/docs", label: "Docs" },
     { href: "/security", label: "Security" },
     { href: "/crypto", label: "Cryptography" },
     { href: "/status", label: "Status" },
