@@ -63,15 +63,15 @@ Other things to update when they become true:
 
 ## Deploy
 
-Deploys happen only in GitHub Actions (`.github/workflows/deploy.yml`), never from a laptop: no local `wrangler login`, no local `wrangler pages deploy`.
+Deploys happen only in GitHub Actions (`.github/workflows/deploy.yml` and `preview.yml`), never from a laptop: no local `wrangler login`, no local `wrangler pages deploy`.
 
 | Trigger | What happens | GitHub environment |
 | --- | --- | --- |
-| Push to `main` (merged pull request), the 1st of each month, or a manual run on `main` | Build, check, deploy `dist/` to Cloudflare Pages project `sealctl-website`, branch `main` → sealctl.com | `production` (deployment branches: `main` only) |
-| Pull request from a branch of this repo | Build, check, deploy a preview with `--branch <head branch>`; a comment on the pull request carries the preview URL and is updated on each push | `preview` (any branch; the workflow refuses `main`) |
+| Push to `main` (merged pull request), the 1st of each month, or a manual run on `main` | Build, check, then wait for the owner's approval; deploy `dist/` to Cloudflare Pages project `sealctl-website`, branch `main` → sealctl.com | `production` (deployment branches: `main` only; required reviewer: the owner) |
+| Pull request from a branch of this repo | `deploy.yml` builds and checks without secrets and uploads `dist`. When that run succeeds, `preview.yml` (a `workflow_run` workflow, so its definition always comes from `main`) installs wrangler from `main`'s lockfile, downloads only that run's `dist` (minus `_worker.js` and `functions/`), deploys it with `--branch <head branch>` and comments the preview URL on the pull request | `preview` (deployment branches: `main` only, which is where `workflow_run` runs; branch names are checked and `main` is refused) |
 | Pull request from a fork | Build and check only; no secrets, no deploy | none |
 
-The build job has no secrets. The deploy job installs from the lockfile again (`npm ci --ignore-scripts`) and runs the locked `wrangler`, never `npx wrangler@latest`. If `CLOUDFLARE_API_TOKEN` is not set in the job's environment, the deploy step prints "CLOUDFLARE_API_TOKEN not set — deploy skipped" and the run stays green (Dependabot pull requests get no secrets, so they always skip). The monthly run rebuilds `/.well-known/security.txt` so its `Expires` never lapses.
+No job that holds the token runs code from a pull request: the pull request's `package.json`, lockfile, `.npmrc` and workflow files are never used by a deploy. The build job has no secrets. The deploy jobs install from the lockfile again (`npm ci --ignore-scripts && npm audit signatures`) and run the locked `wrangler`, never `npx wrangler@latest`. If `CLOUDFLARE_API_TOKEN` is not set in the job's environment, the deploy prints "CLOUDFLARE_API_TOKEN not set — deploy skipped" and the run stays green (Dependabot pull requests get no secrets, so they always skip). The monthly run rebuilds `/.well-known/security.txt` so its `Expires` never lapses.
 
 Settings, made once by the owner:
 
@@ -79,7 +79,7 @@ Settings, made once by the owner:
 # Cloudflare API token: Account › Cloudflare Pages › Edit, this account only, nothing else.
 # gh reads the value from the terminal; it is never echoed or stored in a file.
 gh secret set CLOUDFLARE_API_TOKEN -R sealctl/website --env production
-gh secret set CLOUDFLARE_API_TOKEN -R sealctl/website --env preview   # same or a separate token; leave unset to turn previews off
+gh secret set CLOUDFLARE_API_TOKEN -R sealctl/website --env preview   # leave unset to turn previews off
 
 # Not secret; already set on both environments
 gh variable set CLOUDFLARE_ACCOUNT_ID -R sealctl/website --env production --body <account id>
