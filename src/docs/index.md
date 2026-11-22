@@ -396,7 +396,7 @@ How often the phone asks:
 | --- | --- | --- |
 | **Automatic** | Reopening a machine whose day began at a trusted place, while you are there, the phone is unlocked and near the machine; an agent's use you already allowed | Nothing |
 | **One tap** | The first approval of the day; reopening anywhere else; an agent's first use of a key in a repository; every use of an own-approval secret | Tap the notification |
-| **In the app** | Pairing, handing objects back, changing words, typing old words, showing the words | Open the app; Face ID or a fingerprint |
+| **In the app** | Pairing, handing objects back, typing old words, showing the words | Open the app; Face ID or a fingerprint |
 
 None of this is a setting. "Near" means the phone, on Wi-Fi, reaches the relay from the same network as the machine; on mobile data or a VPN it falls back to one tap.
 
@@ -448,7 +448,7 @@ Some steps remove sealctl's protection or are hard to undo. They ask harder.
 | Level | What | What the phone asks |
 | --- | --- | --- |
 | **1 Routine** | Opening a session, an agent's first use, own-approval secrets, a new volume or backup | As above: automatic or one tap |
-| **2 Sensitive** | Pairing; `sealctl seal` of something you already have; `sealctl unseal` of one object; moving a machine to new words | Face ID or a fingerprint every time, never the passcode; the exact objects listed; the phone near the machine, or the number match |
+| **2 Sensitive** | Pairing; `sealctl seal` of something you already have; `sealctl unseal` of one object | Face ID or a fingerprint every time, never the passcode; the exact objects listed; the phone near the machine, or the number match |
 | **3 Leaving** | `sealctl unseal --all`; Unseal all machines and leave; Show words; Delete relay data and unpair | Level 2, plus the number match, the plan signed by the phone, a **two-hour wait** away from a trusted place, and a report |
 
 **The number match.** The terminal shows a number:
@@ -484,7 +484,7 @@ sealctl inventory    # objects this machine knows
 
 | Section | What |
 | --- | --- |
-| Words | Show words, Check my card now, Change words |
+| Words | Show words, Check my card now |
 | Backups | The iCloud Keychain (Android: Google backup) copy of your words; the encrypted backup on the relay |
 | Places, Answers | See [Places](#places) and [Per-agent answers](#answers) |
 | Notifications | Send a test request; the phones getting requests |
@@ -518,7 +518,7 @@ You can turn off either online copy in **Settings**, **Backups**.
 
 Install the app on the new phone. If it finds your words in iCloud Keychain or your Google backup, tap **Restore**. Otherwise tap **Restore from paper** and type the 24 words; four letters each are enough. The app shows the fingerprint: check it matches your card. Your machines stay paired and reconnect by themselves.
 
-The app then asks where the old phone is. If it was lost or stolen, change your words (below).
+The app then asks where the old phone is. If it was lost or stolen, change the secrets that matter at their providers; changing words is not in the app yet (see [Change words](#change-words)).
 
 ### Open files without a phone: `sealctl recover` {#recover}
 
@@ -535,29 +535,10 @@ It asks for the words one at a time, without echo. It checks the fingerprint fir
 
 ### Change words {#change-words}
 
-Change your words when they may have been seen, when a phone is lost, or as a routine. On the phone: **Settings**, **Words**, **Change words**. You write a new card and pass its check, as at the start.
+Changing your words is not available yet: the app says so if you try. Until it is:
 
-Then the phone moves each paired machine to the new words. Each machine rewraps its objects by itself (the store, volumes, backups): the phone asks once per machine with Face ID or a fingerprint. Your licence moves too.
-
-To make old copies useless as well, re-encrypt. At each machine that holds volumes or backups:
-
-```sh
-sealctl migrate                   # a table with sizes and time estimates, then asks
-sealctl migrate --status          # the re-encryption job, which keeps running if you close the terminal
-sealctl migrate --pause           # or --resume, --cancel
-sealctl migrate --depth rewrap    # retry objects that could not be rewrapped
-sealctl migrate --scan            # find sealed objects on this machine by their markers
-```
-
-Re-encryption makes new keys for sparse bundles and restic repositories and copies the data. When every machine is done, tap **Finish** on the phone and write "retired on" with the date on the old card. Keep it with the new card until your next change, then destroy it.
-
-An object still sealed with retired words gives:
-
-```text
-sealctl: Sealed with words 7Hq3, retired 2028-03-02. Type them on the phone to move this object to your current words.
-```
-
-The phone asks you to type those words, moves the object, and forgets them.
+- Keep your card safe. Your words stay the same, so the card keeps restoring everything.
+- If your phone is lost or stolen, restore sealctl on another phone (see [Restore a phone](#restore)), then change the secrets that matter at their providers: API keys, cloud and deploy tokens.
 
 ## Bring what you have: `sealctl seal` {#seal}
 
@@ -659,7 +640,7 @@ Your words are behind the phone's passcode. To be safe:
 
 1. **Find, lock or erase it** with Apple Find My ([icloud.com/find](https://www.icloud.com/find)) or Google Find My Device ([google.com/android/find](https://www.google.com/android/find)).
 2. **Restore sealctl on another phone** from iCloud Keychain, your Google backup or your card. See [Restore a phone](#restore).
-3. **Change your words** there, so the old phone can't open anything new. See [Change words](#change-words).
+3. **Change the secrets that matter** at their providers: API keys, cloud and deploy tokens. Changing your words is not in the app yet; see [Change words](#change-words).
 
 Sensitive steps need Face ID or a fingerprint, never the passcode alone. The most sensitive ones (level 3) wait two hours away from your trusted places and are announced on every paired machine:
 
@@ -672,7 +653,7 @@ sealctl status     # Pending   leaving sealctl, approved on your phone · takes 
 sealctl cancel     # asks: Cancel leaving sealctl on dev@mbp.example.com, due at 11:00? [y/N]
 ```
 
-`sealctl cancel` works on any paired machine. Afterwards it reminds you: if you didn't approve this, someone else may have your phone; find, lock or erase it, then restore on another phone and change your words.
+`sealctl cancel` works on any paired machine. Afterwards it reminds you: if you didn't approve this, someone else may have your phone; find, lock or erase it, then restore on another phone and change the secrets that matter.
 
 ### A lost or stolen machine {#lost-machine}
 
@@ -716,7 +697,7 @@ A claimed seat stays with that person.
 
 ### Moving a licence {#licence-move}
 
-Restoring a phone from your words keeps the licence. Changing your words moves it to the new words.
+Restoring a phone from your words keeps the licence.
 
 Payments are handled by Paddle, our merchant of record. See [Refunds](/refunds).
 
@@ -916,7 +897,7 @@ Yes. Your 24 words open every object with `sealctl recover`, and `sealctl unseal
 
 ### Does sealctl see my secrets? {#faq-privacy}
 
-No. Requests and replies are encrypted between your computer and your phone. The relay sees ids, sizes and timing. Places never leave the phone. See [Privacy](/privacy) and [Security](/security).
+No. Requests and replies are encrypted between your computer and your phone. The relay sees ids, sizes and timing. Places leave the phone only inside its encrypted backup, which the relay cannot open. See [Privacy](/privacy) and [Security](/security).
 
 ### Is it free? {#faq-free}
 

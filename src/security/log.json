@@ -31,7 +31,7 @@
     },
     {
       "date": "2026-11-22",
-      "kind": "Audit",
+      "kind": "Review",
       "title": "Supply chain: relay and website",
       "result": "No malicious or hijacked package among 308; every registry signature verified. 1 high, 1 medium in deploy and build setup.",
       "status": "Fixing"
