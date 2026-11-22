@@ -6,7 +6,7 @@ bodyClass: legal
 <div class="wrap">
   <header class="page-head">
     <h1>Terms</h1>
-    <p class="legal-meta">Draft for launch. Version <span class="placeholder">[date of this version — set at launch]</span>. Items in highlighted brackets are filled in or confirmed before launch.</p>
+    <p class="legal-meta">Version <span class="placeholder">{{legal.termsVersion}}</span>.</p>
   </header>
 
   <div class="prose">
@@ -44,12 +44,12 @@ bodyClass: legal
 
     <section aria-labelledby="service-h">
       <h2 id="service-h">7. Changes to the service</h2>
-      <p>We may change limits for unpaid phones, for example how many machines can be paired. A paid licence is never limited this way, and machines already paired keep working. <span class="placeholder">[confirm wording]</span></p>
+      <p>We may change limits for unpaid phones, for example how many machines can be paired. A paid licence is never limited this way, and machines already paired keep working. <span class="placeholder">{{legal.termsChangesNote}}</span></p>
     </section>
 
     <section aria-labelledby="liab-h">
       <h2 id="liab-h">8. Liability</h2>
-      <p>Our liability is limited as far as the law allows. Nothing here limits liability for intent or gross negligence, or consumer rights that can't be waived. <span class="placeholder">[Lawyer to word]</span></p>
+      <p>Our liability is limited as far as the law allows. Nothing here limits liability for intent or gross negligence, or consumer rights that can't be waived. <span class="placeholder">{{legal.termsLiabilityNote}}</span></p>
     </section>
 
     <section aria-labelledby="compl-h">
@@ -64,7 +64,7 @@ bodyClass: legal
 
     <section aria-labelledby="law-h">
       <h2 id="law-h">11. Law</h2>
-      <p>Polish law applies. If you are a consumer, you keep the protection of the law of your own country. Contact point for authorities and users under the EU Digital Services Act: <code>{{email.support}}</code>, in English or Polish. <span class="placeholder">[Lawyer to confirm DSA wording]</span></p>
+      <p>Polish law applies. If you are a consumer, you keep the protection of the law of your own country. Contact point for authorities and users under the EU Digital Services Act: <code>{{email.support}}</code>, in English or Polish. <span class="placeholder">{{legal.termsDsaNote}}</span></p>
     </section>
 
     <section aria-labelledby="changes-h">

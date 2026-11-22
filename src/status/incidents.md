@@ -2,7 +2,7 @@
 title: Incidents
 description: Relay incidents, newest first, kept for 12 months.
 ---
-No incidents yet. The relay is not in public use; sealctl is in development.
+No incidents.
 
 <!-- Add entries newest first:
 ### 2027-01-15 · 14 minutes

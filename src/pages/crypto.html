@@ -7,7 +7,7 @@ description: The whole cryptographic design of sealctl on one page: derivation t
     <p class="eyebrow">Cryptographic design</p>
     <h1>Every key from 24 words. <em>Only the phone holds the root.</em></h1>
     <p class="lede">Every key comes from 24 words. The phone holds the root and derives a key per object. A machine gets a key only after the phone approves, sealed so that only that machine's one-time key opens it. The relay carries sealed messages and sees no keys.</p>
-    <p class="src">Describes <a href="{{protocol.base}}">protocol version 1</a> at revision <a href="https://github.com/sealctl/sealctl/commit/{{protocol.sha}}"><code>{{protocol.rev}}</code></a>. Items the protocol marks as planned carry a <span class="pill pill-planned">Planned</span> pill.</p>
+    <p class="src">Describes <a href="{{protocol.base}}">protocol version 1</a> at revision <a href="https://github.com/sealctl/sealctl/commit/{{protocol.sha}}"><code>{{protocol.rev}}</code></a>.</p>
   </header>
 
   <nav class="toc" aria-label="On this page">
@@ -188,8 +188,8 @@ description: The whole cryptographic design of sealctl on one page: derivation t
     <h2 id="approval-h">One approval, as a sequence</h2>
     <figure class="diagram">
 <svg class="dg dg-wide" viewBox="0 0 960 818" width="960" height="818" role="img" aria-labelledby="seq-w-t seq-w-d">
-<title id="seq-w-t">One approval as a sequence: machine, relay, push services (planned) and phone</title>
-<desc id="seq-w-d">1. The machine makes a one-time key, signs the request with its pairing key, seals it with HPKE to the phone's box key, signs the relay call and opens a WebSocket wait. The relay sees the machine key, request id, sealed size, time and network address, not which key or command. 2. The relay checks the signature and pairing, holds the sealed request in memory and tells the phone over its socket; push through APNs and FCM is planned and carries only type, id and expiry. 3. The phone opens the request, shows the card, and derives the key after the tap; the relay sees nothing of this. 4. The phone seals the key with HPKE to the machine's one-time key, signs the reply with its identity key and posts it; the relay sees the phone key, request id, size, time and network address, not the key. 5. The relay passes the sealed reply to the waiting socket and forgets both. 6. The machine checks the phone's signature, opens the reply with its one-time key, wipes the one-time key and keeps the key in memory.</desc>
+<title id="seq-w-t">One approval as a sequence: machine, relay, push services and phone</title>
+<desc id="seq-w-d">1. The machine makes a one-time key, signs the request with its pairing key, seals it with HPKE to the phone's box key, signs the relay call and opens a WebSocket wait. The relay sees the machine key, request id, sealed size, time and network address, not which key or command. 2. The relay checks the signature and pairing, holds the sealed request in memory and tells the phone over its socket; push through APNs and FCM carries only type, id and expiry. 3. The phone opens the request, shows the card, and derives the key after the tap; the relay sees nothing of this. 4. The phone seals the key with HPKE to the machine's one-time key, signs the reply with its identity key and posts it; the relay sees the phone key, request id, size, time and network address, not the key. 5. The relay passes the sealed reply to the waiting socket and forgets both. 6. The machine checks the phone's signature, opens the reply with its one-time key, wipes the one-time key and keeps the key in memory.</desc>
 <line x1="130" y1="56" x2="130" y2="808" class="life"/>
 <rect x="40" y="12" width="180" height="44" rx="8" class="box"/>
 <text x="130" y="40" class="t-m t-b t-sans" text-anchor="middle">Machine</text>
@@ -197,12 +197,11 @@ description: The whole cryptographic design of sealctl on one page: derivation t
 <rect x="310" y="12" width="180" height="44" rx="8" class="box"/>
 <text x="400" y="40" class="t-m t-b t-sans" text-anchor="middle">Relay</text>
 <line x1="615" y1="56" x2="615" y2="808" class="life"/>
-<rect x="525" y="12" width="180" height="44" rx="8" class="box-planned"/>
+<rect x="525" y="12" width="180" height="44" rx="8" class="box"/>
 <text x="615" y="40" class="t-m t-b t-sans" text-anchor="middle">Push services</text>
 <line x1="830" y1="56" x2="830" y2="808" class="life"/>
 <rect x="740" y="12" width="180" height="44" rx="8" class="box"/>
 <text x="830" y="40" class="t-m t-b t-sans" text-anchor="middle">Phone</text>
-<text x="615" y="74" class="t-s t-ink2 t-sans" text-anchor="middle">planned</text>
 <rect x="16" y="144" width="928" height="30" rx="6" class="box-soft"/>
 <text x="28" y="164" class="t-s t-sans">Relay sees: nothing yet.</text>
 <rect x="16" y="84" width="290" height="48" rx="8" class="box"/>
@@ -219,7 +218,7 @@ description: The whole cryptographic design of sealctl on one page: derivation t
 <circle cx="146" cy="220" r="11" class="box-secret"/>
 <text x="146" y="225" class="t-s t-b" text-anchor="middle">1</text>
 <rect x="16" y="352" width="928" height="30" rx="6" class="box-soft"/>
-<text x="28" y="372" class="t-s t-sans">Relay holds the sealed request in memory only. Push carries only type, id and expiry (planned).</text>
+<text x="28" y="372" class="t-s t-sans">Relay holds the sealed request in memory only. Push carries only type, id and expiry.</text>
 <line x1="400" y1="324" x2="821" y2="324" class="line"/>
 <polygon points="830,324 820.2,317 820.2,331" class="arrowhead"/>
 <rect x="462" y="296" width="306" height="22" rx="4" class="box-soft"/>
@@ -262,8 +261,8 @@ description: The whole cryptographic design of sealctl on one page: derivation t
 <text x="33" y="726" class="t-s t-b" text-anchor="middle">6</text>
 </svg>
 <svg class="dg dg-narrow" viewBox="0 0 320 1146" width="320" height="1146" role="img" aria-labelledby="seq-n-t seq-n-d">
-<title id="seq-n-t">One approval as a sequence: machine, relay, push services (planned) and phone</title>
-<desc id="seq-n-d">1. The machine makes a one-time key, signs the request with its pairing key, seals it with HPKE to the phone's box key, signs the relay call and opens a WebSocket wait. The relay sees the machine key, request id, sealed size, time and network address, not which key or command. 2. The relay checks the signature and pairing, holds the sealed request in memory and tells the phone over its socket; push through APNs and FCM is planned and carries only type, id and expiry. 3. The phone opens the request, shows the card, and derives the key after the tap; the relay sees nothing of this. 4. The phone seals the key with HPKE to the machine's one-time key, signs the reply with its identity key and posts it; the relay sees the phone key, request id, size, time and network address, not the key. 5. The relay passes the sealed reply to the waiting socket and forgets both. 6. The machine checks the phone's signature, opens the reply with its one-time key, wipes the one-time key and keeps the key in memory.</desc>
+<title id="seq-n-t">One approval as a sequence: machine, relay, push services and phone</title>
+<desc id="seq-n-d">1. The machine makes a one-time key, signs the request with its pairing key, seals it with HPKE to the phone's box key, signs the relay call and opens a WebSocket wait. The relay sees the machine key, request id, sealed size, time and network address, not which key or command. 2. The relay checks the signature and pairing, holds the sealed request in memory and tells the phone over its socket; push through APNs and FCM carries only type, id and expiry. 3. The phone opens the request, shows the card, and derives the key after the tap; the relay sees nothing of this. 4. The phone seals the key with HPKE to the machine's one-time key, signs the reply with its identity key and posts it; the relay sees the phone key, request id, size, time and network address, not the key. 5. The relay passes the sealed reply to the waiting socket and forgets both. 6. The machine checks the phone's signature, opens the reply with its one-time key, wipes the one-time key and keeps the key in memory.</desc>
 <rect x="8" y="8" width="304" height="198" rx="8" class="box"/>
 <circle cx="30" cy="32" r="13" class="box-secret"/>
 <text x="30" y="38" class="t-m t-b" text-anchor="middle">1</text>
@@ -282,7 +281,7 @@ description: The whole cryptographic design of sealctl on one page: derivation t
 <text x="20" y="274" class="t-m t-sans">Checks signature and pairing,</text>
 <text x="20" y="296" class="t-m t-sans">holds the sealed request in</text>
 <text x="20" y="318" class="t-m t-sans">memory, tells the phone's</text>
-<text x="20" y="340" class="t-m t-sans">socket. Push: planned.</text>
+<text x="20" y="340" class="t-m t-sans">socket and by push.</text>
 <rect x="16" y="354" width="288" height="54" rx="6" class="box-soft"/>
 <text x="24" y="372" class="t-m t-sans">Relay never sees which key</text>
 <text x="24" y="394" class="t-m t-sans">or which command.</text>
@@ -333,7 +332,7 @@ description: The whole cryptographic design of sealctl on one page: derivation t
         <thead><tr><th scope="col">Hop</th><th scope="col">What happens</th><th scope="col">Relay sees</th></tr></thead>
         <tbody>
           <tr><td>1</td><td>The machine makes a one-time key, signs the request with its pairing key and seals it with HPKE to the phone's box key; signs the relay call; opens a WebSocket <code>wait</code>.</td><td>Machine public key, request id, size, time, network address</td></tr>
-          <tr><td>2</td><td>The relay checks the signature and the pairing, holds the sealed request in memory, and tells the phone over its socket. Push through APNs and FCM <span class="pill pill-planned">Planned</span> carries only the type, the request id and its expiry.</td><td>Which phone it goes to; the sealed string</td></tr>
+          <tr><td>2</td><td>The relay checks the signature and the pairing, holds the sealed request in memory, and tells the phone over its socket. Push through APNs and FCM carries only the type, the request id and its expiry.</td><td>Which phone it goes to; the sealed string</td></tr>
           <tr><td>3</td><td>The phone opens the request, shows the card, and derives the key after the tap.</td><td>Nothing</td></tr>
           <tr><td>4</td><td>The phone seals the key with HPKE to the machine's one-time key, signs the reply with its identity key, and posts it.</td><td>Phone public key, request id, size, time, network address</td></tr>
           <tr><td>5</td><td>The relay passes the sealed reply to the waiting socket and forgets both. The approval path writes nothing to storage.</td><td>That a reply was delivered</td></tr>
@@ -342,7 +341,7 @@ description: The whole cryptographic design of sealctl on one page: derivation t
       </table>
     </div>
     <p class="prose">Because the one-time key lives only in memory until the reply arrives, a machine stolen later cannot open a reply someone recorded. The relay never sees the request content or the key.</p>
-    <p class="src">Source: <a href="{{protocol.base}}#request-and-reply-encryption">Request and reply encryption</a> · <a href="{{protocol.base}}#requests-and-replies">Relay API → Requests and replies</a> · <a href="{{protocol.base}}#push-planned">Push (planned)</a></p>
+    <p class="src">Source: <a href="{{protocol.base}}#request-and-reply-encryption">Request and reply encryption</a> · <a href="{{protocol.base}}#requests-and-replies">Relay API → Requests and replies</a> · <a href="{{protocol.base}}#push-planned">Push</a></p>
   </section>
 
   <section class="section-tight" id="relay-view" aria-labelledby="relay-view-h">
@@ -350,7 +349,7 @@ description: The whole cryptographic design of sealctl on one page: derivation t
     <div class="scene top">
       <div class="prose">
         <p>The relay routes sealed strings by public key. Everything that says what is being done sits inside HPKE ciphertext sealed to the phone's box key or to a one-time key.</p>
-        <p>The network address is used in memory while serving a call. Comparing the phone's and the machine's addresses, as keyed hashes, gives the <code>near</code> flag <span class="pill pill-planned">Planned</span>; no address is stored.</p>
+        <p>The network address is used in memory while serving a call. Comparing the phone's and the machine's addresses, as keyed hashes, gives the <code>near</code> flag; no address is stored.</p>
         <p>The phone's backup on the relay is sealed with the state key, which comes from the root.</p>
         <p class="src">Source: <a href="{{protocol.base}}#request-and-reply-encryption">Request and reply encryption</a> · <a href="{{protocol.base}}#state-blob">State blob</a> · <a href="{{protocol.base}}#requests-and-replies">Requests and replies</a> · <a href="/privacy#relay">Privacy: the relay</a></p>
       </div>
@@ -403,7 +402,7 @@ description: The whole cryptographic design of sealctl on one page: derivation t
           <tr><th scope="row">Machine, Open</th><td class="no">no</td><td class="yes">in memory while Open</td><td class="yes">in memory while Open¹</td><td>its own</td><td>its own</td><td class="no">no</td></tr>
           <tr><th scope="row">Machine, Locked</th><td class="no">no</td><td class="no">no</td><td>sealed only</td><td>its own</td><td>its own</td><td class="no">no</td></tr>
           <tr><th scope="row">Relay</th><td class="no">no</td><td class="no">no</td><td class="no">no</td><td class="no">no</td><td>yes²</td><td>sealed only</td></tr>
-          <tr><th scope="row">Push services <span class="pill pill-planned">Planned</span></th><td class="no">no</td><td class="no">no</td><td class="no">no</td><td class="no">no</td><td>request id and expiry³</td><td class="no">no</td></tr>
+          <tr><th scope="row">Push services</th><td class="no">no</td><td class="no">no</td><td class="no">no</td><td class="no">no</td><td>request id and expiry³</td><td class="no">no</td></tr>
           <tr><th scope="row">Phone, unlocked</th><td class="yes">yes</td><td class="yes">yes</td><td class="no">no⁴</td><td>yes</td><td>yes</td><td class="yes">yes</td></tr>
           <tr><th scope="row">Phone, locked</th><td class="no">no⁵</td><td class="no">no</td><td class="no">no⁴</td><td>yes⁵</td><td>yes</td><td class="no">no⁵</td></tr>
           <tr><th scope="row">Paper card</th><td class="yes">yes</td><td class="yes">yes</td><td>with the objects⁶</td><td class="no">no</td><td class="no">no</td><td>with the relay's copy⁶</td></tr>
@@ -430,13 +429,13 @@ description: The whole cryptographic design of sealctl on one page: derivation t
       <div class="prose">
         <p>The level of asking says <em>when</em> the phone is asked; the confirmation level says <em>how hard</em> the approval is. The phone computes the level and applies the higher of its own and the machine's; a machine can raise its level, never lower it.</p>
         <p>Levels don't change which keys a machine can get. They make deliberate the steps that remove sealctl's protection or are hard to undo.</p>
-        <p>The number match: the terminal shows a two-digit number exported from the request's HPKE context; the phone offers three. A wrong pick holds that machine's sensitive requests for an hour. The relay holds a delayed approval for its hour <span class="pill pill-planned">Planned</span>.</p>
+        <p>The number match: the terminal shows a two-digit number exported from the request's HPKE context; the phone offers three. A wrong pick holds that machine's sensitive requests for an hour. The relay holds a delayed approval for its two hours.</p>
         <p class="src">Source: <a href="{{protocol.base}}#confirmation-levels">Confirmation levels</a> · <a href="{{protocol.base}}#number-match">Number match</a> · <a href="{{protocol.base}}#delayed-approvals">Delayed approvals</a></p>
       </div>
       <figure class="diagram dg-box-single">
 <svg class="dg dg-single" viewBox="0 0 320 572" width="320" height="572" role="img" aria-labelledby="levels-t levels-d">
 <title id="levels-t">Confirmation levels 1 to 3</title>
-<desc id="levels-d">Level 1, Routine: sealctl run, SSH signing, opening a volume; one tap, or automatic at a trusted place. Level 2, Sensitive: pairing a machine, unseal of one object, sealctl seal of an existing object, rewrap; biometrics every time with no passcode fallback, the exact objects listed, and the phone near the machine. Level 3, Leaving: unseal --all, Leave sealctl, showing the 24 words, deleting the phone's relay data; everything in level 2 plus the number match, a signed plan, a one-hour delay away from a trusted place, and a report.</desc>
+<desc id="levels-d">Level 1, Routine: sealctl run, SSH signing, opening a volume; one tap, or automatic at a trusted place. Level 2, Sensitive: pairing a machine, unseal of one object, sealctl seal of an existing object, rewrap; biometrics every time with no passcode fallback, the exact objects listed, and the phone near the machine. Level 3, Leaving: unseal --all, Leave sealctl, showing the 24 words, deleting the phone's relay data; everything in level 2 plus the number match, a signed plan, a two-hour delay away from a trusted place, and a report.</desc>
 <rect x="8" y="8" width="304" height="150" rx="8" class="box"/>
 <text x="22" y="36" class="t-l t-sans">1 · Routine</text>
 <text x="22" y="62" class="t-m">sealctl run, SSH signing,</text>
@@ -459,7 +458,7 @@ description: The whole cryptographic design of sealctl on one page: derivation t
 <text x="34" y="445" class="t-m">showing the words, deleting</text>
 <text x="34" y="466" class="t-m">the phone's relay data</text>
 <text x="34" y="495" class="t-m t-ink2 t-sans">Level 2 plus number match,</text>
-<text x="34" y="516" class="t-m t-ink2 t-sans">signed plan, 1 h delay away</text>
+<text x="34" y="516" class="t-m t-ink2 t-sans">signed plan, 2 h delay away</text>
 <text x="34" y="537" class="t-m t-ink2 t-sans">from a trusted place, report</text>
 </svg>
       </figure>
@@ -529,7 +528,7 @@ description: The whole cryptographic design of sealctl on one page: derivation t
         <caption class="sr-only">Cryptographic primitives, their standards, where they are used and which implementation provides them</caption>
         <thead><tr><th scope="col">Primitive</th><th scope="col">Standard</th><th scope="col">Where used</th><th scope="col">Implementation</th></tr></thead>
         <tbody>
-          <tr><td>BIP39</td><td><a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki">BIP-0039</a></td><td>Words to seed (PBKDF2-HMAC-SHA512, empty passphrase)</td><td rowspan="5">Rust core <code>sealctl-core</code>, shared by the CLI and both apps <span class="pill pill-planned">Planned</span>. Crates and versions are listed here from its <code>Cargo.lock</code> when it ships.</td></tr>
+          <tr><td>BIP39</td><td><a href="https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki">BIP-0039</a></td><td>Words to seed (PBKDF2-HMAC-SHA512, empty passphrase)</td><td rowspan="5">Rust core <code>sealctl-core</code>, shared by the CLI and both apps: <code>bip39</code> 3, <code>hkdf</code> 0.13, <code>hpke</code> 0.15, <code>chacha20poly1305</code> 0.11, <code>ed25519-dalek</code> 3</td></tr>
           <tr><td>HKDF-SHA256</td><td><a href="https://www.rfc-editor.org/rfc/rfc5869">RFC 5869</a></td><td>Root, every derived key, file keys, key checks</td></tr>
           <tr><td>HPKE</td><td><a href="https://www.rfc-editor.org/rfc/rfc9180">RFC 9180</a>, X25519 (<a href="https://www.rfc-editor.org/rfc/rfc7748">RFC 7748</a>)</td><td>Requests, replies, machine status and messages; the number match</td></tr>
           <tr><td>ChaCha20-Poly1305</td><td><a href="https://www.rfc-editor.org/rfc/rfc8439">RFC 8439</a></td><td>The AEAD of <code>.sealed</code> files and the state blob</td></tr>
@@ -539,7 +538,7 @@ description: The whole cryptographic design of sealctl on one page: derivation t
         </tbody>
       </table>
     </div>
-    <p class="src">The test vectors in <a href="{{protocol.base}}#appendix-a-test-vectors">Appendix A</a> were computed by a dependency-free Node.js script (<a href="{{protocol.base}}#appendix-b-how-the-vectors-were-computed">Appendix B</a>) that checks its HKDF and HPKE against Node's own HKDF and RFC 9180's published vectors. The script and the relay signing vectors are in <a href="https://github.com/sealctl/sealctl/tree/{{protocol.sha}}/docs/vectors"><code>docs/vectors/</code></a>. Cross-implementation tests against these vectors <span class="pill pill-planned">Planned</span> arrive with the Rust core.</p>
+    <p class="src">The test vectors in <a href="{{protocol.base}}#appendix-a-test-vectors">Appendix A</a> were computed by a dependency-free Node.js script (<a href="{{protocol.base}}#appendix-b-how-the-vectors-were-computed">Appendix B</a>) that checks its HKDF and HPKE against Node's own HKDF and RFC 9180's published vectors. The script and the relay signing vectors are in <a href="https://github.com/sealctl/sealctl/tree/{{protocol.sha}}/docs/vectors"><code>docs/vectors/</code></a>. The Rust core, the relay and both apps test against these vectors.</p>
   </section>
 
   <section class="section-tight" id="not-protected" aria-labelledby="not-protected-h">

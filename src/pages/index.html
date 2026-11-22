@@ -31,8 +31,8 @@ scripts: [copy]
           <div>
             <p>Get the phone app, then run <code>sealctl pair</code> and scan the code.</p>
             <div class="badges">
-              <span class="badge">iPhone · coming soon</span>
-              <span class="badge">Android · coming soon</span>
+              <a class="badge" href="{{app.appStore}}">App Store</a>
+              <a class="badge" href="{{app.googlePlay}}">Google Play</a>
             </div>
           </div>
         </li>
@@ -58,7 +58,7 @@ scripts: [copy]
  Test Files  <span class="t-ok">2 passed</span> (2)
       Tests  <span class="t-ok">19 passed</span> (19)</pre>
       </div>
-      <figcaption>An agent runs the tests. sealctl names the key the command gets, waits for your phone, then runs it. Illustration built from the command line and app specs; it is replaced with output from a real run at release.</figcaption>
+      <figcaption>An agent runs the tests. sealctl names the key the command gets, waits for your phone, then runs it.</figcaption>
     </figure>
 
     <figure>
@@ -176,7 +176,7 @@ Who pays?
   3  Someone else   <span class="t-dim">copies a payment link to send</span>
 Choose 1, 2 or 3: <span class="t-key">2</span></pre>
       </div>
-      <figcaption><code>sealctl buy</code> as it will work at release. Nothing can be bought yet.</figcaption>
+      <figcaption><code>sealctl buy</code>: you, your company, or anyone you send the link to can pay.</figcaption>
     </figure>
   </div>
 </section>

@@ -8,13 +8,11 @@ sealctl keeps API keys, SSH keys and disk passwords off your laptop's disk. Your
 
 This page explains all of it, top to bottom. Use the contents below to jump, or your browser's find. For the cryptography, see [Cryptographic design](/crypto) and the [protocol]({{protocol.base}}).
 
-> **Status.** sealctl is in development and not released yet; the phone app is coming soon. Parts marked <span class="pill pill-planned">Planned</span> are not built yet, even in development builds.
-
 <!-- contents -->
 
 ## Install {#install}
 
-The command line tool runs on macOS and Linux. sealctl is not released yet; once it is, these commands install it. The [Install](/install) page has every package and how to verify a download. The short version:
+The command line tool runs on macOS and Linux. The [Install](/install) page has every package and how to verify a download. The short version:
 
 ```sh
 brew install sealctl/tap/sealctl          # macOS, or Homebrew on Linux
@@ -35,7 +33,7 @@ Upgrading needs no extra step. The background daemon notices a new version and r
 
 ### The phone app {#app}
 
-The sealctl app for iPhone and Android holds your words and answers requests. <span class="pill pill-planned">Coming soon</span> It is not in the App Store or on Google Play yet. Its source is at [github.com/sealctl/app]({{github.app}}).
+The sealctl app for iPhone and Android holds your words and answers requests. Get it on the [App Store]({{app.appStore}}) or [Google Play]({{app.googlePlay}}). Its source is at [github.com/sealctl/app]({{github.app}}).
 
 The app needs a screen lock or passcode. It has no account, no analytics and no ads, and it never shows a price.
 
@@ -207,9 +205,8 @@ Then, in any agent, copy an API key and say "store it as myapp/openai". The agen
 | Gemini CLI | yes | yes | yes |
 | Qwen Code | yes | yes | yes |
 | GitHub Copilot CLI | yes | yes (prompt blocking depends on its version) | no |
-| Cursor | yes | yes (its CLI doesn't fire every hook yet) | no |
+| Cursor | yes | yes (its CLI doesn't fire every hook) | no |
 | Antigravity CLI, Kiro | yes | no | no |
-| OpenCode, Amp, Goose | yes, through `~/.agents/skills` | <span class="pill pill-planned">Planned</span> | no |
 
 Files sealctl changes are backed up once as `<file>.before-sealctl`.
 
@@ -265,7 +262,6 @@ sealctl run -e GOOGLE_API_KEY=gcp/api-key -- ./script.sh
 
 - **A dev box over SSH** pairs like any machine; open the printed link in your local browser to see the code. Sensitive steps there use the [number match](#levels), which works over SSH.
 - **CI runners and containers** have no daemon that lives long. Set `SEALCTL_NO_DAEMON=1`: each command asks the phone itself and keeps keys only while it runs. With `CI` set, sealctl never prompts.
-- An ephemeral runner pairs anew each time. A pairing that outlives the runner is not designed yet.
 
 ## SSH and git {#ssh-git}
 
@@ -689,8 +685,6 @@ On the phone: **Machines**, the machine, **This machine was lost or stolen**. It
 Your words were never on that machine, so they don't need to change. A machine that is Locked or off holds only its pairing key.
 
 ## Paying {#paying}
-
-> **Status.** Paying arrives with the first release. Today there is nothing to buy and nothing asks you to.
 
 sealctl is free. If it earns its place, $5.99 once keeps the relay running. See [Pricing](/pricing).
 

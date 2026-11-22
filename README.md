@@ -20,9 +20,9 @@ Node 24. The only build dependency is `marked`, pinned.
 | Path | What |
 | --- | --- |
 | `build.mjs` | Layout, Markdown, fingerprinting, sitemap, `security.txt`, build checks |
-| `site.config.mjs` | Nav, footer, release numbers, protocol revision, seller placeholders, `prelaunch` |
+| `site.config.mjs` | Nav, footer, protocol revision, app store links, seller and legal placeholders, `prelaunch` |
 | `src/layout.html` | The one layout |
-| `src/pages/*.html` | Page bodies with front matter (`title`, `description`, optional `noindex`, `scripts`, `strip`) |
+| `src/pages/*.html` | Page bodies with front matter (`title`, `description`, optional `noindex`, `scripts`) |
 | `src/docs/index.md` | The docs: one long page at `/docs`. Its contents list is built from the h2 and h3 headings and placed at `<!-- contents -->`, after the intro; each section ends with "↑ Contents". `## Title {#id}` sets an anchor |
 | `src/status/incidents.md` | Incident log for `/status` |
 | `src/assets/tokens.css` | Byte copy of `sealctl/.github` `brand/tokens.css`; `npm run check` compares it with upstream |
@@ -34,22 +34,24 @@ The build fails on a redirect to a missing page or anchor, a missing front-matte
 
 ## Before launch: placeholders and noindex
 
-While `prelaunch: true` in `site.config.mjs`, **every page carries `<meta name="robots" content="noindex">` and every response `X-Robots-Tag: noindex`**. That stays until the seller placeholders are filled in.
+The site is written as for a released product, in the present tense. Everything that still has to be filled in lives in `site.config.mjs`; the pages show it as highlighted brackets until then:
 
-Placeholders are shown on the pages in highlighted brackets. Only the seller fills them in:
+| Key | Where it shows | Who fills it |
+| --- | --- | --- |
+| `app.appStore`, `app.googlePlay` | Store links on Home, Install and Docs (now `#`) | Once the app is published |
+| `seller.legalName`, `tradingName`, `address`, `registration` | Privacy, Terms, Contact, footer | The seller |
+| `legal.privacyVersion`, `legal.termsVersion` | Version dates of Privacy and Terms | The seller |
+| `legal.emailRetention`, `legal.emailProvider` | Privacy | The seller |
+| `legal.refundDays` | Refunds | The seller |
+| `legal.answerTime` | Contact | The seller |
+| `legal.termsChangesNote`, `termsLiabilityNote`, `termsDsaNote` | Terms: service changes, liability, DSA contact point; replace the note with the final wording, or with `""` | The seller, with a lawyer |
 
-- `seller.*` in `site.config.mjs`: legal name, trading name, address, NIP and REGON (Privacy, Terms, Contact, footer).
-- Version dates of Privacy and Terms; email retention period and email provider (Privacy).
-- Terms: "[confirm wording]" (service changes), "[Lawyer to word]" (liability), "[Lawyer to confirm DSA wording]".
-- Refund window (Refunds); answer time (Contact).
-
-Then set `prelaunch: false`.
+While `prelaunch: true`, **every page carries `<meta name="robots" content="noindex">` and every response `X-Robots-Tag: noindex`**. It changes no visible text. Set it to `false` once the placeholders are filled in.
 
 Other things to update when they become true:
 
-- `release.released: true` at the first release (removes the status strip).
 - `protocol.rev` and `protocol.sha` when `/crypto` is checked against a newer `docs/protocol.md`; the diagrams in `src/pages/crypto.html` are hand-laid-out inline SVG.
-- Store badges, app screenshots, `/card-a4.pdf` and `/card-letter.pdf`, the `.well-known` app-link files: they need the app.
+- App screenshots, `/card-a4.pdf` and `/card-letter.pdf`, the `.well-known` app-link files (Play app signing certificate, Apple team id).
 
 ## Deploy
 

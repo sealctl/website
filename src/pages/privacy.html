@@ -6,7 +6,7 @@ bodyClass: legal
 <div class="wrap">
   <header class="page-head">
     <h1>Privacy</h1>
-    <p class="legal-meta">Draft for launch. Version <span class="placeholder">[date of this version — set at launch]</span>. Items in highlighted brackets are filled in by the seller before launch.</p>
+    <p class="legal-meta">Version <span class="placeholder">{{legal.privacyVersion}}</span>.</p>
   </header>
 
   <div class="prose">
@@ -51,7 +51,6 @@ bodyClass: legal
         </table>
       </div>
       <p>Location never leaves the phone. The relay never learns which key was used, which command ran or what the agent did. A phone that makes no call for 2 years has its data deleted; a licence record stays.</p>
-      <p class="small muted">The relay is not yet in public use. Some items above (push tokens, machine status, last-seen times, the near check, deletion after 2 years) belong to relay features that are specified but not yet shipped; this list describes the relay as it will run at launch.</p>
     </section>
 
     <section aria-labelledby="pay-h">
@@ -61,7 +60,7 @@ bodyClass: legal
 
     <section aria-labelledby="email-h">
       <h2 id="email-h">6. Email</h2>
-      <p>If you write to us, we keep the conversation to answer you and for <span class="placeholder">[retention period, e.g. 2 years — to be filled before launch]</span>.</p>
+      <p>If you write to us, we keep the conversation to answer you and for <span class="placeholder">{{legal.emailRetention}}</span>.</p>
     </section>
 
     <section aria-labelledby="stores-h">
@@ -71,7 +70,7 @@ bodyClass: legal
 
     <section aria-labelledby="proc-h">
       <h2 id="proc-h">8. Processors</h2>
-      <p>Cloudflare (website, relay hosting, email forwarding), Apple and Google (app distribution and push notifications), Paddle (payments, as merchant of record and separate controller), <span class="placeholder">[email provider, if any — to be filled before launch]</span>. Where data leaves the European Economic Area, it does so under the EU–US Data Privacy Framework or standard contractual clauses.</p>
+      <p>Cloudflare (website, relay hosting, email forwarding), Apple and Google (app distribution and push notifications), Paddle (payments, as merchant of record and separate controller), <span class="placeholder">{{legal.emailProvider}}</span>. Where data leaves the European Economic Area, it does so under the EU–US Data Privacy Framework or standard contractual clauses.</p>
     </section>
 
     <section aria-labelledby="bases-h">

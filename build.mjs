@@ -109,11 +109,6 @@ const navItems = (current) =>
     .join("");
 const footerItems = config.footer.map((n) => `<li><a href="${n.href}">${n.label}</a></li>`).join("");
 
-function strip() {
-  if (config.release.released) return "";
-  return `<aside class="strip" aria-label="Project status"><div class="wrap"><p><strong>In development.</strong> sealctl is not released yet, and the phone app is coming soon. It is being built in the open on <a href="${config.github.cli}">GitHub</a>.</p></div></aside>\n`;
-}
-
 const pages = new Map(); // url path -> { file, html }
 
 function render({ urlPath, outFile, meta, body, where }) {
@@ -130,7 +125,6 @@ function render({ urlPath, outFile, meta, body, where }) {
     bodyClass: meta.bodyClass || "",
     navItems: navItems(urlPath),
     footerItems,
-    strip: meta.strip === false ? "" : strip(),
   };
   // The body is filled first so that its text can't inject layout variables.
   const filledBody = fill(body, { ...ctx, ...(meta.vars || {}) }, where);
