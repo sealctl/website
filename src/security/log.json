@@ -47,14 +47,14 @@
       "date": "2026-11-22",
       "kind": "Audit",
       "title": "Supply chain: iPhone and Android apps",
-      "result": "No malicious, hijacked or typosquatted package among 318 crates and the Android libraries; no remote Swift packages. 3 medium, 7 low, all in build controls.",
+      "result": "No malicious, hijacked or typosquatted package among 318 crates and the Android libraries; no remote Swift packages. 3 medium and 6 low in build controls; 1 low: a known SQLite advisory in a bundled library.",
       "status": "Fixing"
     }
   ],
   "continuous": [
-    "Every change to the main branch of a public repository goes through a pull request and an independent review before merging (internal, AI-assisted).",
+    "Since 22 November 2026, every change to the main branch of a public repository goes through a pull request and an independent review before merging (internal, AI-assisted).",
     "The command line tool's parsers are fuzzed on every pull request that changes them, and nightly.",
-    "Dependencies: known advisories, licences and sources checked on each pull request; registry signatures verified in CI; routine updates wait 7 days after release (security updates don't wait).",
+    "Dependencies of the command line tool, relay and website: known advisories, licences and sources checked on each pull request; registry signatures verified in CI; routine updates wait 7 days after release (security updates don't wait).",
     "Secret scanning with push protection on every public repository.",
     "Shared protocol test vectors, checked byte for byte by the core, the relay and both apps.",
     "Power-cut tests: unsealing is cut at every step and must resume without losing anything."
