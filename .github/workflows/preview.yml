@@ -23,6 +23,7 @@ jobs:
       github.event.workflow_run.path == '.github/workflows/deploy.yml' &&
       github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
       actions: read # download the artifact of the triggering run
@@ -111,6 +112,7 @@ jobs:
     needs: preview
     if: needs.preview.outputs.url != ''
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       pull-requests: write
     steps:

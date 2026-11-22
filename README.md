@@ -20,7 +20,7 @@ Node 24. The only build dependency is `marked`. `qrcode-generator` is copied int
 - Every version in `package.json` is exact and `package-lock.json` is committed. Install with `npm ci`, which installs the lockfile as it is.
 - `.npmrc` turns off dependency install scripts (`ignore-scripts=true`), and `allowScripts` in `package.json` denies the three that exist: `esbuild` and `workerd` only check their native binary, fetch it if the platform package is missing, and relink it; npm already installs the platform package, and `fsevents` ships a prebuilt binary. Everything here, `wrangler pages dev` included, works without them. A new package with an install script shows up in `npm install-scripts ls`; deny it unless it is needed.
 - `npm install` and `npm update` only take versions published at least 7 days ago (`min-release-age=7` in `.npmrc`). Dependabot waits the same 7 days (14 for a major version) and groups its updates; GitHub Actions are pinned to commit SHAs.
-- CI runs `npm ci --ignore-scripts`, `npm audit signatures`, the build and `npm run check`.
+- CI (`deploy.yml`, job `build`, on every pull request and push) runs `npm ci --ignore-scripts`, `npm audit signatures`, the build and `npm run check`. One run per pull request: a new push cancels the old run; runs on `main` are never cancelled, and production deploys run one at a time. Every job has a timeout.
 - `/assets/js/qrcode.<hash>.js` is `node_modules/qrcode-generator/qrcode.js` byte for byte, so its file hash is the published 1.4.4 file. Check: `shasum -a 256 dist/assets/js/qrcode.*.js node_modules/qrcode-generator/qrcode.js`.
 
 ## Layout
