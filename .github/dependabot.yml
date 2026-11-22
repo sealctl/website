@@ -9,6 +9,10 @@ updates:
     cooldown:
       default-days: 7
       semver-major-days: 14
+    ignore:
+      # 2.x has no qrcode.js (the file /p serves); adapt build.mjs before moving
+      - dependency-name: qrcode-generator
+        update-types: ["version-update:semver-major"]
     groups:
       npm:
         patterns: ["*"]
