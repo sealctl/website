@@ -54,8 +54,8 @@
       "date": "2026-11-22",
       "kind": "Fix",
       "title": "Staging incident: retries after the relay refused a call",
-      "result": "1 medium. Fixed in the command line tool and the relay; the app fix is in review.",
-      "status": "Fixing"
+      "result": "1 medium. Fixed in the command line tool, the relay and both apps.",
+      "status": "Fixed"
     }
   ],
   "continuous": [
