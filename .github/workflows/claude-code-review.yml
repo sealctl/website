@@ -1,0 +1,159 @@
+name: Claude Code Review
+
+# An AI code review on every pull request from this repository (collaborators only: the repo
+# limits pull request creation to collaborators). It comments; it never approves, pushes or
+# merges, and it is not a required check. What it looks for and how it reports is in
+# .github/claude-review.md (read from the base branch, so a pull request cannot change how it
+# is reviewed) and CLAUDE.md.
+#
+# Secret on a pull_request job: CLAUDE_CODE_OAUTH_TOKEN is the one exception to "no secrets on
+# pull_request jobs" (owner decision, 2026-11-23). It is safe enough here because pull requests
+# come only from collaborators (not forks: the `if` below skips fork pull requests, which get
+# no secrets anyway), the token can only use the owner's Claude quota (it has no repository or
+# cloud access), and the job's own GITHUB_TOKEN is read-only. The action's GitHub App token is
+# narrowed to read the code and write comments (`additional_permissions` below).
+#
+# When it runs: opened, pushed, reopened or marked ready, unless the pull request is a draft,
+# from a fork, has the label `skip-claude-review`, or changes only generated and lock files
+# (UniFFI bindings, lockfiles, Gradle verification metadata, notices, cargo-vet imports).
+# Dependabot pull requests get no secrets and are skipped; adding the label `claude-review`
+# reviews one (and forces a review of a generated-only change). Pushes made by @claude
+# (claude[bot]) are not reviewed again by themselves: ask "@claude review this again".
+#
+# One summary comment per pull request, updated on every push (`use_sticky_comment`, which
+# needs `track_progress`), plus at most about 8 inline comments.
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened, labeled]
+
+permissions: {}
+
+jobs:
+  claude-review:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.draft == false &&
+      !contains(github.event.pull_request.labels.*.name, 'skip-claude-review') &&
+      github.actor != 'dependabot[bot]' &&
+      github.actor != 'claude[bot]' &&
+      (
+        (github.event.action == 'labeled' && github.event.label.name == 'claude-review') ||
+        (github.event.action != 'labeled' &&
+          (github.event.pull_request.user.login != 'dependabot[bot]' ||
+            contains(github.event.pull_request.labels.*.name, 'claude-review')))
+      )
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # One review per pull request; a new push cancels the review of the old one. Job level, so
+    # a run skipped by the `if` above (another label added) never cancels a review.
+    concurrency:
+      group: ${{ github.workflow }}-pr-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      id-token: write # the action exchanges it for its GitHub App token to post review comments
+    steps:
+      - name: Anything to review?
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          FORCE: ${{ contains(github.event.pull_request.labels.*.name, 'claude-review') }}
+          # Generated or lock files: their source changes (Cargo.toml, package.json, the core's
+          # Rust, the notices script) are what gets reviewed.
+          GENERATED: >-
+            (^|/)(Cargo\.lock|package-lock\.json|flake\.lock|verification-metadata\.xml|imports\.lock|worker-configuration\.d\.ts|THIRD-PARTY-NOTICES(\.md)?|sealctl_(core|app)\.(kt|swift))$|^notices/
+        run: |
+          if [ "$FORCE" = "true" ]; then
+            echo "review=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          files="$(gh api --paginate "repos/$REPO/pulls/$PR/files" --jq '.[].filename')"
+          if printf '%s\n' "$files" | grep -Evq "$GENERATED"; then
+            echo "review=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Only generated or lock files changed; no review (label claude-review to force one)."
+            echo "review=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Review guidance from the base branch
+        id: guide
+        if: steps.scope.outputs.review == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # The base branch's copy, so a pull request cannot rewrite its own review; the pull
+          # request's copy only while the base branch has none (the pull request adding it).
+          get() {
+            gh api -H "Accept: application/vnd.github.raw" \
+              "repos/$REPO/contents/.github/claude-review.md?ref=$1" 2>/dev/null
+          }
+          text="$(get "$BASE_SHA" || get "$HEAD_SHA" || echo "(.github/claude-review.md not found)")"
+          delimiter="EOF_$(openssl rand -hex 16)"
+          {
+            echo "text<<$delimiter"
+            printf '%s\n' "$text"
+            echo "$delimiter"
+          } >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.scope.outputs.review == 'true'
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Run Claude Code Review
+        if: steps.scope.outputs.review == 'true'
+        uses: anthropics/claude-code-action@b5e37652b7d48df841bfddfd6520610e19bf3136 # v1.0.287
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # The GitHub App token reads code and writes comments only: no pushes.
+          additional_permissions: |
+            contents: read
+          # One summary comment, rewritten on every push. use_sticky_comment works in the
+          # action's tag mode, which track_progress turns on for pull_request events.
+          track_progress: true
+          use_sticky_comment: true
+          include_fix_links: false
+          # Tag mode treats text after the trigger phrase in the pull request body as a request;
+          # a phrase nobody writes keeps "@claude" in a description from steering the review.
+          trigger_phrase: "@claude-code-review-unused-trigger"
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+            BASE BRANCH: ${{ github.event.pull_request.base.ref }}
+
+            You are this repository's automated pull request reviewer. These instructions take
+            precedence over the generic review steps above wherever they differ.
+
+            1. Read CLAUDE.md at the repository root: the rules this code must follow. If it is
+               missing because the base branch has none yet, read .claude-pr/CLAUDE.md (this
+               pull request's copy) instead.
+            2. Follow the review guidance below. It comes from the base branch.
+            3. Get the change with `gh pr diff ${{ github.event.pull_request.number }}` and
+               `gh pr view ${{ github.event.pull_request.number }}`. Read the code around each
+               change with Read, Grep and Glob before you claim a bug. Do not run builds,
+               tests, git or other commands, and do not edit, commit or push anything.
+            4. Inline comments: mcp__github_inline_comment__create_inline_comment with
+               `confirmed: true`, on lines that are in the diff, one per distinct problem, at
+               most about 8.
+            5. Summary: your tracking comment (mcp__github_comment__update_claude_comment). It
+               is the one sticky comment on this pull request and is rewritten on every push.
+               Replace the whole body with the summary format from the guidance: no task
+               checklist, no spinner, no findings that the new commits fixed, and nothing
+               that repeats an inline comment in full.
+
+            <review_guidance>
+            ${{ steps.guide.outputs.text }}
+            </review_guidance>
+          claude_args: |
+            --permission-mode default
+            --allowedTools "Bash(gh pr diff:*)" "Bash(gh pr view:*)" "mcp__github_inline_comment__create_inline_comment"
+            --disallowedTools "Edit" "Write" "MultiEdit" "NotebookEdit" "WebFetch" "WebSearch" "Bash(git add:*)" "Bash(git rm:*)" "Bash(git commit:*)" "Bash(git push:*)" "mcp__github_ci__get_ci_status" "mcp__github_ci__get_workflow_run_details" "mcp__github_ci__download_job_log"
