@@ -119,7 +119,8 @@ sealctl run -e GITHUB_TOKEN=git/github.com -- gh release list
 sealctl run -- npm start          # variables from .sealctl.toml
 ```
 
-- Before the program starts, sealctl lists on stderr what it gets, by name: `sealctl: OPENAI_API_KEY ← shop/openai-api-key`. A cloned repository can contain a `.sealctl.toml`, so you always see it.
+- Before the program starts, sealctl lists on stderr what it gets, by name: `sealctl: OPENAI_API_KEY ← shop/openai-api-key`.
+- A `.sealctl.toml` is used only once you trust it on this machine (see [below](#sealctl-toml)).
 - Inside an AI agent, or when the output is not a terminal, every value in the program's output is replaced by `****` (raw, base64 and URL-encoded forms). `SEALCTL_NO_MASK=1` turns this off, except inside an agent.
 - `sealctl run` exits with the program's own exit code.
 
@@ -137,7 +138,13 @@ DEPLOY_TOKEN = "shop/deploy-token"
 
 sealctl uses the nearest `.sealctl.toml` above the working folder. `[env]` applies to every command. A `[command."..."]` section applies when the command line starts with those words; the longest match wins. `-e` on the command line wins over both. `--no-project` ignores the file.
 
-A file in a repository never grants anything. It only names which secrets a command asks for; the phone still decides.
+A file in a repository never grants anything. It only names which secrets a command asks for, and sealctl trusts it on first use:
+
+- The first time `sealctl run` uses a `.sealctl.toml`, and again whenever its content changes, it lists every secret the file names and asks `Trust this file? [y/N]`. A cloned repository can bring one, so you decide before any of your secrets go to its commands.
+- Without a terminal (a script, CI), `sealctl run` refuses and says how to trust the file once: `sealctl project trust` (the file, or a folder; by default the one you are in).
+- Files that `sealctl seal env` and `sealctl scan` write are trusted already, unless they added to a file you had not trusted.
+- sealctl keeps the trusted files' paths and a hash of their content in its state folder, never names or values.
+- An AI agent never trusts a file: its use of a secret goes to your phone, which shows the agent, the repository and the names.
 
 ### Own approval {#own-approval}
 
@@ -194,7 +201,7 @@ Then, in any agent, copy an API key and say "store it as myapp/openai". The agen
 
 ### What is installed {#ai-layers}
 
-1. **sealctl itself**, with no setup. `sealctl run` masks values whenever it runs inside an agent. `secret get`, `recover`, `seal`, `unseal`, `buy`, `unpair` and the credential helpers refuse inside an agent. sealctl knows it is inside one by the environment variables agents set (`CLAUDECODE`, `CODEX_THREAD_ID`, `GEMINI_CLI`, `QWEN_CODE`, `COPILOT_AGENT_SESSION_ID`, `OPENCODE`, `CURSOR_AGENT`, `AI_AGENT`); `SEALCTL_AGENT=1` forces it.
+1. **sealctl itself**, with no setup. `sealctl run` masks values whenever it runs inside an agent. `secret get`, `recover`, `seal`, `unseal`, `buy`, `unpair`, `project trust` and the credential helpers refuse inside an agent. sealctl knows it is inside one by the environment variables agents set (`CLAUDECODE`, `CODEX_THREAD_ID`, `GEMINI_CLI`, `QWEN_CODE`, `COPILOT_AGENT_SESSION_ID`, `OPENCODE`, `CURSOR_AGENT`, `AI_AGENT`); `SEALCTL_AGENT=1` forces it.
 2. **Hooks** the agent runs every time. A prompt that contains something that looks like a key is blocked before the model sees it. Commands that would reveal secrets (`cat .env`, `printenv`, `echo $API_KEY`, `pbpaste`, `sealctl secret get`) are denied with a hint. Reading `.env` files, private keys, `*.sealed` files or sealctl's state folder is denied. Each session starts with one line naming the secrets available through `sealctl run`, never their values.
 3. **A skill and deny rules.** The `sealctl-secrets` skill explains the workflow: when a command prints `Waiting for your phone`, tell you and wait, don't retry; a decline means stop and ask you. Deny rules block the dangerous sealctl commands where the agent supports them.
 
@@ -528,6 +535,8 @@ The app then asks where the old phone is. If it was lost or stolen, change the s
 sealctl recover ~/.local/share/sealctl/store/<store-id> --out ~/recovered   # every secret, one file each
 sealctl recover ~/.local/share/sealctl/store/<store-id> --name shop/openai-api-key --show
 sealctl recover ~/Vaults/clients.sparsebundle                               # unlock and mount
+sealctl recover ~/Vaults/safe.luks                                          # Linux: mounted at ~/Vaults/safe
+sealctl recover <APFS volume UUID>                                          # macOS: diskutil apfs list shows it
 sealctl recover s3:https://<account>.r2.cloudflarestorage.com/<bucket>/<repo-id> -- snapshots
 ```
 
@@ -725,6 +734,7 @@ Every command, one line each. `sealctl <command> --help` shows the flags. Global
 - `sealctl secret store [--use <folder>] [--json]`: show the store folder, or use another one.
 - `sealctl secret import-env [FILE] --prefix <p> [--delete] [--force]`: same as `sealctl seal env`.
 - `sealctl run [-e NAME=secret]... [--no-project] -- <command>`: run a command with secrets in its environment.
+- `sealctl project trust [PATH]`: trust a `.sealctl.toml` as it is now.
 - `sealctl scan [PATH...] [--home] [--dry-run] [--yes] [--json]`: find keys in files and seal them.
 
 ### Agents {#cli-agents}
