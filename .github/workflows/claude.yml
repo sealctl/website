@@ -3,7 +3,21 @@ name: Claude Code
 # Answers "@claude" in issues, pull request comments and reviews, from the owner and
 # collaborators only (author_association): anyone can comment on a public repository, and a
 # comment from someone else must not spend the owner's Claude quota or steer the agent. The job's
-# GITHUB_TOKEN is read-only; the action posts its answer with its own GitHub App token.
+# GITHUB_TOKEN is read-only; the action posts its answer, and pushes commits when asked for a
+# change, with its own GitHub App token, narrowed by `additional_permissions` to contents, pull
+# requests and issues (no workflows, no administration, no secrets).
+#
+# What it may do: answer questions, review ("@claude review this again" follows
+# .github/claude-review.md), and on request edit files and push commits to the pull request's
+# branch (on an issue: to a new claude/ branch, with a link to open a pull request). The action's
+# push wrapper only updates that one branch and never forces. CLAUDE.md holds the repository
+# rules its commits follow.
+#
+# What it may not do: `--permission-mode acceptEdits` denies every command that is not on the
+# allow list below (nobody is there to approve one), so it cannot merge, deploy, tag, call the
+# GitHub API directly or run anything else. The deny list repeats the dangerous ones explicitly
+# (merge, force push, deploy, workflows, secrets, rulesets, releases), and edits to workflows and
+# CODEOWNERS are denied.
 
 on:
   issue_comment:
@@ -47,9 +61,33 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
       - name: Run Claude Code
         uses: anthropics/claude-code-action@b5e37652b7d48df841bfddfd6520610e19bf3136 # v1.0.287
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           additional_permissions: |
             actions: read
+          include_fix_links: false
+          claude_args: |
+            --permission-mode acceptEdits
+            --allowedTools
+            # Read the change and CI results.
+            "Bash(git status:*)" "Bash(git diff:*)" "Bash(git log:*)" "Bash(git show:*)"
+            "Bash(gh pr view:*)" "Bash(gh pr diff:*)" "Bash(gh pr checks:*)" "Bash(gh issue view:*)" "Bash(gh run view:*)"
+            # Open a pull request from the branch it pushed (it still needs review and a maintainer's merge).
+            "Bash(gh pr create:*)"
+            # Build and check: install from the lockfile without scripts.
+            "Bash(npm ci --ignore-scripts)" "Bash(npm run build)" "Bash(npm run check)"
+            --disallowedTools
+            # Never merge, approve or change the repository's settings, secrets, rulesets, workflows or releases.
+            "Bash(gh pr merge:*)" "Bash(gh pr review:*)" "Bash(gh api:*)" "Bash(gh workflow:*)" "Bash(gh run rerun:*)" "Bash(gh run cancel:*)" "Bash(gh secret:*)" "Bash(gh variable:*)" "Bash(gh ruleset:*)" "Bash(gh release:*)" "Bash(gh repo:*)" "Bash(gh auth:*)"
+            # Never force-push, delete branches or push tags; rewriting history is out of scope.
+            "Bash(git push --force:*)" "Bash(git push -f:*)" "Bash(git push --force-with-lease:*)" "Bash(git push --delete:*)" "Bash(git push --mirror:*)" "Bash(git push --tags:*)" "Bash(git push origin --force:*)" "Bash(git push origin -f:*)" "Bash(git push origin main:*)" "Bash(git push origin HEAD:main:*)" "Bash(git tag:*)" "Bash(git rebase:*)" "Bash(git reset --hard:*)"
+            # Never deploy.
+            "Bash(wrangler:*)" "Bash(npx:*)" "Bash(npm exec:*)" "Bash(npm run dev:*)" "Bash(npm install:*)" "Bash(npm update:*)" "Bash(npm publish:*)"
+            # Never change workflows or code owners.
+            "Edit(.github/workflows/**)" "Write(.github/workflows/**)" "Edit(.github/CODEOWNERS)" "Write(.github/CODEOWNERS)"
