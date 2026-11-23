@@ -1,65 +1,73 @@
 {
-  "note": "One line per event: tests, fixes, reviews, audits, verifications and security programs. Details of a finding are published once it is fixed and released. Severity, from worst: critical (a key reachable without your approval), high, medium, low, info.",
+  "note": "One line per test, review or fix, with who did it. Details of a finding are published once it is fixed and released; until then a line gives only how many were found and how serious they are. Severity, from worst: critical (a key reachable without your approval, or a way into your data lost), high, medium, low, info. Code reviews and tests count bugs and security problems together.",
   "entries": [
+    {
+      "date": "2026-11-23",
+      "kind": "Test",
+      "title": "Timing and interruption tests",
+      "who": "Internal, AI-assisted (Claude)",
+      "result": "158 problems found with repeatable tests of clock changes, crossing messages and interrupted steps: 19 high, 64 medium, 74 low, 1 info; 130 fixed.",
+      "status": "Fixing (28 open)"
+    },
+    {
+      "date": "2026-11-22",
+      "kind": "Review",
+      "title": "Code review of every repository",
+      "who": "Internal, AI-assisted (Claude)",
+      "result": "131 confirmed problems in 339 source files: 1 critical, 11 high, 43 medium, 76 low; 125 fixed, including every critical and high one.",
+      "status": "Fixing (6 open)"
+    },
     {
       "date": "2026-11-22",
       "kind": "Test",
       "title": "Red team: relay and protocol",
-      "result": "No key reachable without approval. 1 medium, 2 low, 1 info; 8 of 9 attack types stopped.",
-      "status": "Fixing"
+      "who": "Internal, AI-assisted (Claude)",
+      "result": "No key reachable without approval; 1 medium, 2 low, 1 info.",
+      "status": "Fixing (1 open, decided for after 0.7.0)"
     },
     {
       "date": "2026-11-22",
       "kind": "Test",
       "title": "Red team: command line tool and core",
-      "result": "No key reachable without approval. 1 medium, 2 low, 2 info. 49 million fuzzed inputs, no crash.",
-      "status": "Fixing"
+      "who": "Internal, AI-assisted (Claude)",
+      "result": "No key reachable without approval; 1 medium, 2 low, 2 info; 49 million fuzzed inputs to 12 parsers, no crash.",
+      "status": "Fixing (3 open)"
     },
     {
       "date": "2026-11-22",
       "kind": "Test",
       "title": "Red team: Android app",
-      "result": "Nothing critical, high or medium. 3 low, 3 info.",
-      "status": "Fixing"
+      "who": "Internal, AI-assisted (Claude)",
+      "result": "No key reachable without approval; 3 low, 3 info.",
+      "status": "Fixed in 0.7.0"
     },
     {
       "date": "2026-11-22",
       "kind": "Review",
       "title": "Automated code review of the command line tool",
-      "result": "1 high, 1 medium, 2 low.",
-      "status": "Fixing"
+      "who": "GitHub Copilot code review; confirmed and fixed internally, AI-assisted (Claude)",
+      "result": "1 high, 1 medium, 3 low, each fixed with a test.",
+      "status": "Fixed in 0.7.0"
     },
     {
       "date": "2026-11-22",
       "kind": "Review",
-      "title": "Supply chain: relay and website",
-      "result": "No malicious or hijacked package among 308; every registry signature verified. 1 high, 1 medium in deploy and build setup.",
-      "status": "Fixing"
-    },
-    {
-      "date": "2026-11-22",
-      "kind": "Audit",
-      "title": "Supply chain: command line tool",
-      "result": "No malicious, hijacked or typosquatted crate among 405; all from crates.io. 1 high (release build setup, fixed), 9 medium, 10 low.",
-      "status": "Fixing"
-    },
-    {
-      "date": "2026-11-22",
-      "kind": "Audit",
-      "title": "Supply chain: iPhone and Android apps",
-      "result": "No malicious, hijacked or typosquatted package among 318 crates and the Android libraries; no remote Swift packages. 3 medium and 6 low in build controls; 1 low: a known SQLite advisory in a bundled library.",
-      "status": "Fixing"
+      "title": "Supply chain: command line tool, apps, relay and website",
+      "who": "Internal, AI-assisted (Claude)",
+      "result": "No malicious, hijacked or look-alike package among 405 crates for the command line tool, 318 for the apps and 308 npm packages; 2 high, 13 medium, 22 low, 22 info, all in build, release and deploy setup.",
+      "status": "Fixing (5 open)"
     },
     {
       "date": "2026-11-22",
       "kind": "Fix",
       "title": "Staging incident: retries after the relay refused a call",
+      "who": "Internal, AI-assisted (Claude)",
       "result": "1 medium. Fixed in the command line tool, the relay and both apps.",
-      "status": "Fixed"
+      "status": "Fixed in 0.7.0"
     }
   ],
   "continuous": [
-    "From 23 November 2026, every change to the main branch of a public repository goes through a pull request and an independent review before merging (internal, AI-assisted).",
+    "From 23 November 2026, every change to the main branch of a public repository goes through a pull request and an independent review by a separate agent before merging (internal, AI-assisted).",
     "The command line tool's parsers are fuzzed on every pull request that changes them, and nightly.",
     "Dependencies: the command line tool's crates are checked on each pull request for known advisories, licences and sources (cargo deny) and against reviewed audits (cargo vet); the relay's and website's npm packages install only from the lockfile with registry signatures verified in CI; Dependabot reports advisories everywhere; routine updates wait 7 days after release (security updates don't wait).",
     "Secret scanning with push protection on every public repository.",
