@@ -14,8 +14,8 @@
       "kind": "Review",
       "title": "Code review of every repository",
       "who": "Internal, AI-assisted (Claude)",
-      "result": "131 confirmed problems in 339 source files: 1 critical, 11 high, 43 medium, 76 low; 127 fixed, including every critical and high one.",
-      "status": "Fixing (4 open)"
+      "result": "131 confirmed problems in 339 source files: 1 critical, 11 high, 43 medium, 76 low; 128 fixed, including every critical, high and medium one.",
+      "status": "Open: decision needed"
     },
     {
       "date": "2026-11-22",
