@@ -1,5 +1,5 @@
 {
-  "note": "One line per test, review or fix, with who did it. Details of a finding are published once it is fixed and released; until then a line gives only how many were found and how serious they are. Severity, from worst: critical (a key reachable without your approval, or a way into your data lost), high, medium, low, info. Code reviews and tests count bugs and security problems together.",
+  "note": "One line per test, review or fix, with who did it. Details of a finding are published once it is fixed and released; until then a line gives only how many were found and how serious they are. Severity, from worst: critical (a key reachable without your approval, or your own access to your data lost), high, medium, low, info. Code reviews and tests count bugs and security problems together.",
   "entries": [
     {
       "date": "2026-11-24",
@@ -70,7 +70,7 @@
       "kind": "Fix",
       "title": "Staging incident: retries after the relay refused a call",
       "who": "Internal, AI-assisted (Claude)",
-      "result": "1 medium, fixed in the command line tool, the relay and both apps; 10 related medium items where a client or the relay retries without backing off are still open.",
+      "result": "1 medium, fixed in the command line tool, the relay and both apps; 10 related medium follow-ups are still open.",
       "status": "Fixing (10 open)"
     }
   ],
