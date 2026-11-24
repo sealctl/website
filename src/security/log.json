@@ -30,7 +30,7 @@
       "kind": "Test",
       "title": "Red team: relay and protocol",
       "who": "Internal, AI-assisted (Claude)",
-      "result": "No key reachable without approval; 1 medium, 2 low, 1 info; 3 fixed, 1 low partly fixed.",
+      "result": "No key reachable without approval; 1 medium, 2 low, 1 info; 3 fixed, 1 low open.",
       "status": "Open: decision needed"
     },
     {
@@ -62,7 +62,7 @@
       "kind": "Review",
       "title": "Supply chain: command line tool, apps, relay and website",
       "who": "Internal, AI-assisted (Claude)",
-      "result": "No malicious, hijacked or look-alike package among 405 crates for the command line tool, 318 for the apps and 308 npm packages; 2 high, 13 medium, 22 low, 22 info, all in build, release and deploy setup; 1 high, 2 medium and 2 low still open.",
+      "result": "No malicious, hijacked or look-alike package among 405 crates for the command line tool, 318 for the apps and 308 npm packages; 2 high, 13 medium, 22 low, 22 info; 1 high, 2 medium and 2 low still open.",
       "status": "Fixing (5 open)"
     },
     {
