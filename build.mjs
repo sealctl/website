@@ -272,15 +272,19 @@ for (const s of docSlugs) {
   const where = "src/security/log.json";
   const log = JSON.parse(read(path.join(SRC, "security/log.json")));
   const h = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  // kinds: "Audit" only for a named independent firm, never for internal work (CLAUDE.md)
+  const kinds = ["Test", "Review", "Fix", "Audit", "Verification", "Program"];
   const entries = log.entries
     .slice()
     .sort((a, b) => b.date.localeCompare(a.date))
     .map((e) => {
-      if (!e.date || !e.kind || !e.title || !e.result || !e.status) fail(`${where}: an entry lacks date, kind, title, result or status`);
-      return `<tr><td><time datetime="${h(e.date)}">${h(e.date)}</time></td><td><span class="log-kind">${h(e.kind)}</span> ${h(e.title)}</td><td>${h(e.result)}</td><td>${h(e.status)}</td></tr>`;
+      if (!e.date || !e.kind || !e.title || !e.who || !e.result || !e.status) fail(`${where}: an entry lacks date, kind, title, who, result or status`);
+      if (!kinds.includes(e.kind)) fail(`${where}: "${e.title}": kind must be one of ${kinds.join(", ")}`);
+      if (e.kind === "Audit" && /\binternal\b/i.test(e.who)) fail(`${where}: "${e.title}": internal work is a Test or Review, not an Audit`);
+      return `<tr><td><time datetime="${h(e.date)}">${h(e.date)}</time></td><td><span class="log-kind">${h(e.kind)}</span> ${h(e.title)}<span class="log-who">${h(e.who)}</span></td><td>${h(e.result)}<span class="log-status-inline">${h(e.status)}</span></td><td>${h(e.status)}</td></tr>`;
     })
     .join("\n");
-  const securityLog = `<p class="prose">${h(log.note)}</p>\n<div class="table-wrap"><table class="log-table"><thead><tr><th scope="col">Date</th><th scope="col">What</th><th scope="col">Key result</th><th scope="col">Status</th></tr></thead><tbody>${entries}</tbody></table></div>`;
+  const securityLog = `<p class="prose">${h(log.note)}</p>\n<div class="table-wrap"><table class="log-table"><thead><tr><th scope="col">Date</th><th scope="col">What and who</th><th scope="col">Key result</th><th scope="col">Status</th></tr></thead><tbody>${entries}</tbody></table></div>`;
   const securityChecks = `<ul class="ticks">${log.continuous.map((c) => `<li>${h(c)}</li>`).join("")}</ul>`;
   const pageWhere = "src/pages/security.html";
   const page = frontMatter(read(path.join(pageDir, "security.html")), pageWhere);
