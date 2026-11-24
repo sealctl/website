@@ -6,39 +6,39 @@
       "kind": "Test",
       "title": "Timing and interruption tests",
       "who": "Internal, AI-assisted (Claude)",
-      "result": "158 problems found with repeatable tests of clock changes, crossing messages and interrupted steps: 19 high, 64 medium, 74 low, 1 info; 130 fixed.",
-      "status": "Fixing (28 open)"
+      "result": "158 problems found with repeatable tests of clock changes, crossing messages and interrupted steps: 19 high, 64 medium, 74 low, 1 info; 138 fixed, including every high one and all but one medium.",
+      "status": "Fixing (20 open)"
     },
     {
       "date": "2026-11-22",
       "kind": "Review",
       "title": "Code review of every repository",
       "who": "Internal, AI-assisted (Claude)",
-      "result": "131 confirmed problems in 339 source files: 1 critical, 11 high, 43 medium, 76 low; 125 fixed, including every critical and high one.",
-      "status": "Fixing (6 open)"
+      "result": "131 confirmed problems in 339 source files: 1 critical, 11 high, 43 medium, 76 low; 127 fixed, including every critical and high one.",
+      "status": "Fixing (4 open)"
     },
     {
       "date": "2026-11-22",
       "kind": "Test",
       "title": "Red team: relay and protocol",
       "who": "Internal, AI-assisted (Claude)",
-      "result": "No key reachable without approval; 1 medium, 2 low, 1 info.",
-      "status": "Fixing (1 open, decided for after 0.7.0)"
+      "result": "No key reachable without approval; 1 medium, 2 low, 1 info; 3 fixed, 1 low partly fixed.",
+      "status": "Open: decision needed"
     },
     {
       "date": "2026-11-22",
       "kind": "Test",
       "title": "Red team: command line tool and core",
       "who": "Internal, AI-assisted (Claude)",
-      "result": "No key reachable without approval; 1 medium, 2 low, 2 info; 49 million fuzzed inputs to 12 parsers, no crash.",
-      "status": "Fixing (3 open)"
+      "result": "No key reachable without approval; 1 medium and 2 low, all fixed; 2 info notes; 49 million fuzzed inputs to 12 parsers, no crash.",
+      "status": "Fixed in 0.7.0"
     },
     {
       "date": "2026-11-22",
       "kind": "Test",
       "title": "Red team: Android app",
       "who": "Internal, AI-assisted (Claude)",
-      "result": "No key reachable without approval; 3 low, 3 info.",
+      "result": "No key reachable without approval; 3 low, all fixed; 3 info notes.",
       "status": "Fixed in 0.7.0"
     },
     {
@@ -54,7 +54,7 @@
       "kind": "Review",
       "title": "Supply chain: command line tool, apps, relay and website",
       "who": "Internal, AI-assisted (Claude)",
-      "result": "No malicious, hijacked or look-alike package among 405 crates for the command line tool, 318 for the apps and 308 npm packages; 2 high, 13 medium, 22 low, 22 info, all in build, release and deploy setup.",
+      "result": "No malicious, hijacked or look-alike package among 405 crates for the command line tool, 318 for the apps and 308 npm packages; 2 high, 13 medium, 22 low, 22 info, all in build, release and deploy setup; 1 high, 2 medium and 2 low still open.",
       "status": "Fixing (5 open)"
     },
     {
@@ -62,8 +62,8 @@
       "kind": "Fix",
       "title": "Staging incident: retries after the relay refused a call",
       "who": "Internal, AI-assisted (Claude)",
-      "result": "1 medium. Fixed in the command line tool, the relay and both apps.",
-      "status": "Fixed in 0.7.0"
+      "result": "1 medium, fixed in the command line tool, the relay and both apps; 10 related medium items where a client or the relay retries without backing off are still open.",
+      "status": "Fixing (10 open)"
     }
   ],
   "continuous": [
