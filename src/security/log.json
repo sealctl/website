@@ -2,6 +2,14 @@
   "note": "One line per test, review or fix, with who did it. Details of a finding are published once it is fixed and released; until then a line gives only how many were found and how serious they are. Severity, from worst: critical (a key reachable without your approval, or a way into your data lost), high, medium, low, info. Code reviews and tests count bugs and security problems together.",
   "entries": [
     {
+      "date": "2026-11-24",
+      "kind": "Fix",
+      "title": "Lock could leave a volume mounted",
+      "who": "Internal, AI-assisted (Claude)",
+      "result": "Under load, macOS can briefly list a disk image without its devices, and sealctl lock then reported the volume closed while it stayed mounted; found by a CI test and fixed with tests.",
+      "status": "Fixed in 0.7.0"
+    },
+    {
       "date": "2026-11-23",
       "kind": "Test",
       "title": "Timing and interruption tests",
