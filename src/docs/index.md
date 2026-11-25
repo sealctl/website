@@ -47,7 +47,7 @@ The app needs a screen lock or passcode. It has no account, no analytics and no 
 
 ```sh
 sealctl pair                                            # scan the QR code with the app
-sealctl status                                          # Locked · dev@mbp.example.com #k7m2 · words qHWf
+sealctl status                                          # Locked · dev@mbp.example.com #k7m2 · seed qHWf
 sealctl secret set shop/openai-api-key --from-clipboard # or pipe it in, or type it at a hidden prompt
 sealctl run -e OPENAI_API_KEY=shop/openai-api-key -- npm test
 sealctl ai install                                      # Claude Code, Codex, Gemini CLI, ...
@@ -202,8 +202,8 @@ Then, in any agent, copy an API key and say "store it as myapp/openai". The agen
 ### What is installed {#ai-layers}
 
 1. **sealctl itself**, with no setup. `sealctl run` masks values whenever it runs inside an agent. `secret get`, `recover`, `seal`, `unseal`, `buy`, `unpair`, `project trust` and the credential helpers refuse inside an agent. sealctl knows it is inside one by the environment variables agents set (`CLAUDECODE`, `CODEX_THREAD_ID`, `GEMINI_CLI`, `QWEN_CODE`, `COPILOT_AGENT_SESSION_ID`, `OPENCODE`, `CURSOR_AGENT`, `AI_AGENT`); `SEALCTL_AGENT=1` forces it.
-2. **Hooks** the agent runs every time. A prompt that contains something that looks like a key is blocked before the model sees it. Commands that would reveal secrets (`cat .env`, `printenv`, `echo $API_KEY`, `pbpaste`, `sealctl secret get`) are denied with a hint. Reading `.env` files, private keys, `*.sealed` files or sealctl's state folder is denied. Each session starts with one line naming the secrets available through `sealctl run`, never their values.
-3. **A skill and deny rules.** The `sealctl-secrets` skill explains the workflow: when a command prints `Waiting for your phone`, tell you and wait, don't retry; a decline means stop and ask you. Deny rules block the dangerous sealctl commands where the agent supports them.
+2. **Hooks** the agent runs every time. A prompt that contains something that looks like a key is blocked before the model sees it. Commands that would reveal secrets (`cat .env`, `printenv`, `echo $API_KEY`, `pbpaste`, `sealctl secret get`) are denied with a hint. Variables that only name a socket, folder or file, such as `echo $SSH_AUTH_SOCK`, may be printed. Text in a quoted here-document (`python3 - <<'EOF'`, `cat > notes.md <<'EOF'`) is text, not commands, unless it is fed to a shell. Reading `.env` files, private keys, `*.sealed` files or sealctl's state folder is denied. Each session starts with one line naming the secrets available through `sealctl run`, never their values. Where git signs through sealctl, the line adds that signed commits, `git push` over SSH and `ssh` wait silently for approval on your phone.
+3. **A skill and deny rules.** The `sealctl-secrets` skill explains the workflow: when a command prints `Waiting for your phone`, tell you and wait, don't retry; a decline means stop and ask you. Signed git commits, `git push` over SSH and `ssh` print no such line: they wait silently for your phone, and a [desktop notification](#notifications) shows you what waits. That request is the approval, so the agent commits as usual, without asking you first. `agent refused operation` means it was declined or not answered in time. Deny rules block the dangerous sealctl commands where the agent supports them.
 
 | Agent | Skill | Hooks | Deny rules |
 | --- | --- | --- | --- |
@@ -300,7 +300,7 @@ sealctl git setup --key github    # with another key
 sealctl git setup --undo
 ```
 
-git signs through the daemon's SSH agent. When the session is Locked, a commit prints `Waiting for your phone` and, with no terminal watching, shows a desktop notification.
+git signs through the daemon's SSH agent. When the session is Locked, the commit waits for your phone. git shows nothing meanwhile, so a [desktop notification](#notifications) says what waits: `Sign a git commit · shop`, with the agent's name when an agent committed. `git push` over SSH and `ssh` logins do the same (`SSH login to github.com`).
 
 ## Volumes and backups {#volumes-backups}
 
@@ -407,6 +407,22 @@ How often the phone asks:
 
 None of this is a setting. "Near" means the phone, on Wi-Fi, reaches the relay from the same network as the machine; on mobile data or a VPN it falls back to one tap.
 
+### Desktop notifications {#notifications}
+
+When a request waits for your phone and nothing on your screen says so, the computer shows a desktop notification. It says what waits, by name only, never a value:
+
+```text
+Approve on your phone
+Sign a git commit · shop · Claude Code
+```
+
+Other examples: `SSH login to github.com`, `Open volume safe`, `Back up safe`, `Use 2 secrets for npm test`. When you answer, the same notification changes to `Signed` or `Approved`, `Declined`, or `Expired: nothing was signed`.
+
+- It shows for git signing and SSH logins, the git and AWS credential helpers, scheduled backups, and commands whose output nobody sees, also when an AI agent made the request. A command you watch in a terminal prints `Waiting for your phone` instead.
+- **macOS:** notifications come from `sealctl Notifier.app`, which Homebrew installs with sealctl. The first one makes macOS ask whether sealctl may send notifications; allow it.
+- **Linux:** notifications go over D-Bus, with the sealctl icon.
+- To turn them off, add `notifications = false` to `~/.config/sealctl/config.toml`.
+
 ### Sessions and states {#sessions}
 
 Each machine is in one state:
@@ -425,14 +441,14 @@ sealctl lock         # back up, unmount volumes, wipe keys
 
 ```text
 Open · 3 h 12 min left · hard stop 02:00
-dev@mbp.example.com #k7m2 · words qHWf
+dev@mbp.example.com #k7m2 · seed qHWf
 Store     7 secrets · ~/.local/share/sealctl/store/0f8c6d2e…
 Volumes   safe (APFS) mounted at /Volumes/safe · backup 12 min ago
 SSH       2 keys: ed25519, github
 This month: 214 keys used, 0 requests declined, nothing written to disk.
 ```
 
-**When a session locks.** An Open session locks by itself when you stop working for longer than its idle allowance. The allowance starts short and grows the more you work that day, up to 4 hours at a trusted place, 1 hour without places, and 10 minutes away from your places. A minute counts as worked when you used the keyboard or mouse, or a key was used. Sleep counts as idle.
+**When a session locks.** An Open session locks by itself when you stop working for longer than its idle allowance. The allowance starts short and grows the more you work that day, up to 4 hours at a trusted place, 1 hour without places, and 10 minutes away from your places. A minute counts as worked when you used the keyboard or mouse, or a key was used. Sleep counts as idle. The phone counts down to the lock and follows your work: when working moves the lock 2 minutes later or more, the machine tells the phone.
 
 Every session also stops at 02:00 or 14 hours after the first approval of the day, whichever comes first. You can lock any machine from the phone at any time: **Machines**, the machine, **Lock now**, or **Lock all**.
 
@@ -466,7 +482,7 @@ Waiting for your phone. On your phone, pick 59.
 
 The phone offers three numbers. Pick the one on the terminal. A wrong pick refuses the request, and for an hour the phone ignores sensitive requests from that machine (release it early on the machine's page in the app).
 
-**The two-hour wait.** Away from a trusted place, a level 3 approval takes effect two hours later. Every paired machine is told and shows a desktop notification. Anyone can cancel it until then: on the phone, or on any paired machine with `sealctl cancel`. At a trusted place it runs at once, except at a place added by hand in the last 24 hours.
+**The two-hour wait.** Away from a trusted place, a level 3 approval takes effect two hours later. Every paired machine is told and shows a desktop notification. Anyone can cancel it until then: on the phone, or on any paired machine with `sealctl cancel`. At a trusted place it runs at once, except at a place added by hand in the last 24 hours. An action on the phone (showing the words, deleting relay data, leaving) is finished on the phone once the two hours are over: you have an hour to do that, after which you start again.
 
 **No Face ID or fingerprint?** Level 2 asks for two words from your card instead. Level 3 is refused on the phone; on a computer, use your card: `sealctl unseal --all --words`.
 
@@ -505,7 +521,7 @@ Every key sealctl hands out comes from your 24 words. With the card you can rest
 
 ### The card {#card}
 
-The app prints a blank card (A4 or Letter): 24 numbered lines with four boxes each. Any paper works; number 24 lines. The first four letters are enough to know each word, but write each word in full. Also copy the **words fingerprint** (4 characters, like `7Hq3`) and the date the app shows. The fingerprint names your words: `sealctl status` shows it, and so does every object sealed with them.
+The app prints a blank card (A4 or Letter): 24 numbered lines with four boxes each. Any paper works; number 24 lines. The first four letters are enough to know each word, but write each word in full. Also copy the **seed fingerprint** (4 characters, like `7Hq3`) and the date the app shows. The fingerprint names the seed your words make: `sealctl status`, `sealctl volume ls` and messages about a sealed object show it as `seed 7Hq3`.
 
 The app never shows the words for printing, copying or screenshots. Write where no camera can see.
 
@@ -523,7 +539,7 @@ You can turn off either online copy in **Settings**, **Backups**.
 
 ### Restore a phone {#restore}
 
-Install the app on the new phone. If it finds your words in iCloud Keychain or your Google backup, tap **Restore**. Otherwise tap **Restore from paper** and type the 24 words; four letters each are enough. The app shows the fingerprint: check it matches your card. Your machines stay paired and reconnect by themselves.
+Install the app on the new phone. If it finds your words in iCloud Keychain or your Google backup, tap **Restore**. Otherwise tap **Restore from paper** and type the 24 words; four letters each are enough. The app shows the seed fingerprint: check it matches your card. Your machines stay paired and reconnect by themselves.
 
 The app then asks where the old phone is. If it was lost or stolen, change the secrets that matter at their providers; changing words is not in the app yet (see [Change words](#change-words)).
 
@@ -536,11 +552,13 @@ sealctl recover ~/.local/share/sealctl/store/<store-id> --out ~/recovered   # ev
 sealctl recover ~/.local/share/sealctl/store/<store-id> --name shop/openai-api-key --show
 sealctl recover ~/Vaults/clients.sparsebundle                               # unlock and mount
 sealctl recover ~/Vaults/safe.luks                                          # Linux: mounted at ~/Vaults/safe
-sealctl recover <APFS volume UUID>                                          # macOS: diskutil apfs list shows it
+sealctl recover <APFS volume>                                               # macOS: its name, UUID or disk identifier
 sealctl recover s3:https://<account>.r2.cloudflarestorage.com/<bucket>/<repo-id> -- snapshots
 ```
 
-It asks for the words one at a time, without echo. It checks the fingerprint first: words that don't match say so and change nothing. It refuses inside an AI agent and without a terminal.
+An APFS volume can be given by the name Finder and Disk Utility show, by its UUID or by its disk identifier (`disk3s5`; `diskutil apfs list` shows both). If several volumes share the name, sealctl lists their disk identifiers and UUIDs to choose from.
+
+It asks for the words one at a time, without echo. It checks the seed fingerprint first: words that don't match say so (`These words are seed qHWf; this object was sealed with seed 7Hq3.`) and change nothing. It refuses inside an AI agent and without a terminal.
 
 ### Change words {#change-words}
 
@@ -554,13 +572,15 @@ Changing your words is not available yet: the app says so if you try. Until it i
 `sealctl seal` takes over something you already have. After it, sealctl's key opens the object and your old passphrase or password stops working. Each object is opened with the new key before the old way in is removed.
 
 ```sh
-sealctl seal volume safe <APFS volume UUID>       # or a sparse bundle path, or a LUKS file
+sealctl seal volume safe <APFS volume>            # its name, UUID or disk identifier; or a sparse bundle path, or a LUKS file
 sealctl seal backup safe --repo <restic URL>      # your restic password is removed (--keep-old-password keeps it)
 sealctl seal ssh ~/.ssh/id_ed25519
 sealctl seal secret shop/openai-api-key --from-clipboard
 sealctl seal env .env --prefix shop --delete      # every variable, then a .sealctl.toml
 sealctl seal --from ~/sealctl-unsealed-<date>/handback.json
 ```
+
+An APFS volume is given as for [recover](#recover): by its name, UUID or disk identifier. A name that several volumes share lists them to choose from.
 
 Taking over an existing object is confirmation [level 2](#levels): the terminal says `On your phone, pick 47 if it asks.` A new object, like a secret you just typed, needs nothing extra.
 
@@ -774,7 +794,7 @@ Every command, one line each. `sealctl <command> --help` shows the flags. Global
 
 ### Seal, unseal and recover {#cli-seal}
 
-- `sealctl seal volume <name> <APFS UUID | sparse bundle | LUKS file> [--mountpoint M] [--manual] [--words]`: take over a volume.
+- `sealctl seal volume <name> <APFS volume (name, UUID or disk) | sparse bundle | LUKS file> [--mountpoint M] [--manual] [--words]`: take over a volume.
 - `sealctl seal backup <name> --repo <URL> [--from <volume or folder>] [-e VAR=value]... [--keep-old-password] [--words]`: take over a restic repository.
 - `sealctl seal ssh <file> [--name <n>]`: take over an SSH key.
 - `sealctl seal secret <name> [--from-clipboard] [--force]`: store a secret.
@@ -817,7 +837,7 @@ Every command, one line each. `sealctl <command> --help` shows the flags. Global
 
 | Path | What |
 | --- | --- |
-| `~/.config/sealctl/config.toml` | Relay and store folder |
+| `~/.config/sealctl/config.toml` | Relay, store folder, `notifications = false` |
 | `~/.config/sealctl/machine.json` | This machine's pairing key (0600; sealctl refuses a readable one) |
 | `~/.config/sealctl/volumes/`, `backups/` | Volume and backup definitions; no keys |
 | `~/.local/share/sealctl/store/<store-id>/` | The secret store, encrypted |
@@ -881,7 +901,7 @@ The relay takes up to 5,000 requests a day per phone. It resets at 00:00 UTC.
 
 A program has files open on it; sealctl names it. Close it, or use `sealctl volume close <name> --force`. See [Busy volumes](#busy).
 
-### `Sealed with words 7Hq3; your phone has words qHWf` {#faq-other-words}
+### `Sealed with seed 7Hq3; your phone has seed qHWf` {#faq-other-words}
 
 The object was sealed with other words than your phone's. If those are your retired words, the phone asks you to type them. Otherwise open it with the right card: `sealctl recover`.
 

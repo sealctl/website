@@ -231,7 +231,7 @@ One long page, written in Markdown in this repo (`src/docs/index.md`), in the st
 | Cloud and CI | AWS (`credential_process`) · GCP · GitHub and git credential helper · Remote sessions and CI runners |
 | SSH and git | `sealctl seal ssh` (was `ssh import`) · SSH agent · `sealctl git setup` |
 | Volumes and backups | Volumes (APFS, LUKS, sparse bundle) · Backups (restic to S3, R2, B2, folder) · Busy volumes |
-| Your phone | Approval card · Sessions, states and places · Machines and tags · Usage log · Inventory |
+| Your phone | Approval card · Desktop notifications · Sessions, states and places · Machines and tags · Usage log · Inventory |
 | Your 24 words | Recovery card · Restore a phone · `sealctl recover` without a phone · Change words (not in the app yet: what to do instead) |
 | Arriving and leaving | `sealctl seal`: bring your own volumes, backups, SSH keys and secrets · Leaving sealctl (`/docs/leaving`): `sealctl unseal`, `unseal --all`, Leave sealctl on the phone, what stays encrypted, where passwords go, keeping the card |
 | Paying | `sealctl buy` · Company invoice · Team seats and codes · Moving a licence |
@@ -324,7 +324,7 @@ Short sections, plain words. Placeholders (`seller.*` and `legal.*` in `site.con
 | Push token, platform and a random device id per phone app install | Wakes the app when a machine asks | Until replaced, removed, rejected by Apple or Google, or you delete your data |
 | Encrypted phone state (pairings, places, answers, inventory) | Restores your phone | Until replaced or deleted; we cannot open it |
 | Sealed requests and replies | Carries approvals | Held while waiting, at most 5 minutes; not logged; we cannot open them |
-| Delayed approvals: which machine asked, when, and the sealed reply | A sensitive action away from a trusted place waits two hours and can be cancelled | Until the machine fetches it or the wait ends, at most 15 minutes after the two hours; we cannot open the reply |
+| Delayed approvals: which machine asked, when, and the sealed reply | A sensitive action away from a trusted place waits two hours and can be cancelled | For a machine: until it fetches the reply, at most 15 minutes after the two hours; we cannot open the reply. For an action on the phone (times only, no reply): until you finish it, at most an hour after the two hours |
 | Sealed machine status and lock messages | Shows time left and locks machines from your phone | The latest status per machine; messages for an offline machine at most 24 hours; we cannot open them |
 | Network address of phone and machine | Says whether the phone is near the machine; flood limits | Used in memory while serving the call, as a keyed hash; the relay's code never stores or logs it |
 | Days with use (count), the last week the phone was seen, daily call count | The request to pay; deleting data after 2 years without use; the abuse limit | Count and week kept; daily counter in memory |
