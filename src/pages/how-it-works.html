@@ -69,7 +69,7 @@ description: The approval, a working day, the three states, places, setup, the 2
         </tbody>
       </table>
     </div>
-    <p class="small muted">The idle allowance is 30 minutes plus 2 minutes per minute worked today, up to 4 hours at a trusted place and 10 minutes elsewhere. The hard stop is 02:00 or 14 hours after the first approval, whichever comes first. Screen lock and sleep keep the session; <code>sealctl lock</code> or Lock on the phone ends it at once.</p>
+    <p class="small muted">The idle allowance is 30 minutes plus 2 minutes per minute worked today, up to 4 hours at a trusted place and 10 minutes elsewhere. The hard stop is 02:00 or 24 hours after the first approval, whichever comes first. Screen lock and sleep keep the session; <code>sealctl lock</code> or Lock on the phone ends it at once.</p>
   </section>
 
   <section class="section-tight" id="states" aria-labelledby="states-h">
@@ -81,7 +81,7 @@ description: The approval, a working day, the three states, places, setup, the 2
           <thead><tr><th scope="col">State</th><th scope="col">Means</th><th scope="col">Where you see it</th></tr></thead>
           <tbody>
             <tr><td><strong>Locked</strong></td><td>No keys in memory; volumes unmounted</td><td>Phone list, <code>sealctl status</code></td></tr>
-            <tr><td><strong>Open</strong></td><td>Keys in memory; you and known agents use them without asking</td><td>Phone list with time left, <code>sealctl status</code></td></tr>
+            <tr><td><strong>Open</strong></td><td>Keys in memory; you and known agents use them without asking</td><td>Phone list ("Open · active", or "Open · locks in 3 h 47 min" once idle), <code>sealctl status</code></td></tr>
             <tr><td><strong>Waiting</strong></td><td>A request is on the phone</td><td>One terminal line, "Waiting for your phone", which the agent reads too; it gives up after 5 minutes</td></tr>
           </tbody>
         </table>
@@ -106,9 +106,10 @@ description: The approval, a working day, the three states, places, setup, the 2
     <ul class="prose">
       <li><strong>Learned, not drawn.</strong> After first approvals on three different days at the same spot, the phone asks once: "Trust this place?" There is no map; you name the place.</li>
       <li><strong>Locations never leave the phone in readable form.</strong> Places reach the relay only inside the phone's encrypted backup, which the relay cannot open.</li>
-      <li><strong>Leaving locks.</strong> The phone's region monitoring notices when you leave and locks the machines you opened there. The day's credit is kept.</li>
+      <li><strong>Leaving locks.</strong> The phone's region monitoring notices when you leave a trusted place and locks every machine you approved there. The day's credit is kept.</li>
+      <li><strong>A new place is announced.</strong> A place you just trusted lifts the two-hour wait of the most sensitive steps only two hours later. Every paired computer is told and can cancel it until then.</li>
       <li><strong>Near means the same network.</strong> The phone counts as near a machine when both reach the relay from the same network address and the phone is on Wi-Fi. On mobile data or a VPN it falls back to one tap.</li>
-      <li><strong>No permission, no places.</strong> Without location access, a session stays open up to 1 hour and reopening always takes a tap.</li>
+      <li><strong>Places need "Allow all the time".</strong> Without location access set to "Allow all the time" (iPhone: Always), the phone can't notice you leaving, so places count for nothing: a session stays open up to 1 hour and reopening always takes a tap.</li>
     </ul>
   </section>
 

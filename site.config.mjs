@@ -30,9 +30,9 @@ export default {
 
   // docs/protocol.md revision that /crypto describes.
   protocol: {
-    rev: "6e606d1",
-    sha: "6e606d1935a4a4d1300e61f45d1130e6aa1f0a85",
-    base: "https://github.com/sealctl/sealctl/blob/6e606d1935a4a4d1300e61f45d1130e6aa1f0a85/docs/protocol.md",
+    rev: "349619b",
+    sha: "349619b8c359768ebb487cab9327204d20ec2fb4",
+    base: "https://github.com/sealctl/sealctl/blob/349619b8c359768ebb487cab9327204d20ec2fb4/docs/protocol.md",
   },
 
   github: {

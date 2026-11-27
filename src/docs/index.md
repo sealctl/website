@@ -202,7 +202,7 @@ Then, in any agent, copy an API key and say "store it as myapp/openai". The agen
 ### What is installed {#ai-layers}
 
 1. **sealctl itself**, with no setup. `sealctl run` masks values whenever it runs inside an agent. `secret get`, `recover`, `seal`, `unseal`, `buy`, `unpair`, `project trust` and the credential helpers refuse inside an agent. sealctl knows it is inside one by the environment variables agents set (`CLAUDECODE`, `CODEX_THREAD_ID`, `GEMINI_CLI`, `QWEN_CODE`, `COPILOT_AGENT_SESSION_ID`, `OPENCODE`, `CURSOR_AGENT`, `AI_AGENT`); `SEALCTL_AGENT=1` forces it.
-2. **Hooks** the agent runs every time. A prompt that contains something that looks like a key is blocked before the model sees it. Commands that would reveal secrets (`cat .env`, `printenv`, `echo $API_KEY`, `pbpaste`, `sealctl secret get`) are denied with a hint. Variables that only name a socket, folder or file, such as `echo $SSH_AUTH_SOCK`, may be printed. Text in a quoted here-document (`python3 - <<'EOF'`, `cat > notes.md <<'EOF'`) is text, not commands, unless it is fed to a shell. Reading `.env` files, private keys, `*.sealed` files or sealctl's state folder is denied. Each session starts with one line naming the secrets available through `sealctl run`, never their values. Where git signs through sealctl, the line adds that signed commits, `git push` over SSH and `ssh` wait silently for approval on your phone.
+2. **Hooks** the agent runs every time. A prompt that contains something that looks like a key is blocked before the model sees it. Commands that would reveal secrets (`cat .env`, `printenv`, `echo $API_KEY`, `pbpaste`, `sealctl secret get`) are denied with a hint. Variables that only name a socket, folder or file, such as `echo $SSH_AUTH_SOCK`, may be printed. Text in a quoted here-document (`python3 - <<'EOF'`, `cat > notes.md <<'EOF'`) is text, not commands, unless it is fed to a shell. A script that `cat` or `tee` only writes to a file (`cat > voices.mjs <<'EOF'`) may mention `process.env.API_KEY` or a `.env` file. A body that runs (fed to a shell, `node -` or `python3 -`, or run by the same command line) is still checked, so dumping the environment or opening a `.env` file in it is denied. A reference to a key kept elsewhere, such as `process.env.API_KEY`, is not taken for a key. Reading `.env` files, private keys, `*.sealed` files or sealctl's state folder is denied. Each session starts with one line naming the secrets available through `sealctl run`, never their values. Where git signs through sealctl, the line adds that signed commits, `git push` over SSH and `ssh` wait silently for approval on your phone.
 3. **A skill and deny rules.** The `sealctl-secrets` skill explains the workflow: when a command prints `Waiting for your phone`, tell you and wait, don't retry; a decline means stop and ask you. Signed git commits, `git push` over SSH and `ssh` print no such line: they wait silently for your phone, and a [desktop notification](#notifications) shows you what waits. That request is the approval, so the agent commits as usual, without asking you first. `agent refused operation` means it was declined or not answered in time. Deny rules block the dangerous sealctl commands where the agent supports them.
 
 | Agent | Skill | Hooks | Deny rules |
@@ -440,7 +440,7 @@ sealctl lock         # back up, unmount volumes, wipe keys
 ```
 
 ```text
-Open · 3 h 12 min left · hard stop 02:00
+Open · active · locks after 4 h idle · hard stop 02:00
 dev@mbp.example.com #k7m2 · seed qHWf
 Store     7 secrets · ~/.local/share/sealctl/store/0f8c6d2e…
 Volumes   safe (APFS) mounted at /Volumes/safe · backup 12 min ago
@@ -448,19 +448,22 @@ SSH       2 keys: ed25519, github
 This month: 214 keys used, 0 requests declined, nothing written to disk.
 ```
 
-**When a session locks.** An Open session locks by itself when you stop working for longer than its idle allowance. The allowance starts short and grows the more you work that day, up to 4 hours at a trusted place, 1 hour without places, and 10 minutes away from your places. A minute counts as worked when you used the keyboard or mouse, or a key was used. Sleep counts as idle. The phone counts down to the lock and follows your work: when working moves the lock 2 minutes later or more, the machine tells the phone.
+The first line says `active` while you work: you used the keyboard or mouse, or a key was used, in the last 2 minutes. Once the machine is idle, it counts down to the lock in whole minutes: `Open · locks in 3 h 47 min · hard stop 02:00`. The phone's **Machines** tab says the same: `Open · active` or `Open · locks in 3 h 47 min`.
 
-Every session also stops at 02:00 or 14 hours after the first approval of the day, whichever comes first. You can lock any machine from the phone at any time: **Machines**, the machine, **Lock now**, or **Lock all**.
+**When a session locks.** An Open session locks by itself when you stop working for longer than its idle allowance. The allowance starts short and grows the more you work that day, up to 4 hours at a trusted place, 1 hour without places, and 10 minutes away from your places. A minute counts as worked when you used the keyboard or mouse, or a key was used. Sleep counts as idle. The machine tells the phone when it goes idle and when you start working again.
+
+Every session also stops at 02:00 or 24 hours after the first approval of the day, whichever comes first, so a day begun in the morning lasts until 02:00. You can lock any machine from the phone at any time: **Machines**, the machine, **Lock now**, or **Lock all**.
 
 ### Places {#places}
 
 Places let the phone know where you work. Locations stay on the phone; there is no map.
 
 - **Learned.** After you open your machines at the same spot on three different days, the phone asks once: "Trust this place?" You name it.
-- **Trust where I am now.** You can also add the place you are at by hand: **Settings**, **Places**, **Trust where I am now**, with Face ID or a fingerprint. Its comforts start at once. It lifts the two-hour wait of [level 3](#levels) only 24 hours after you add it, so someone holding your unlocked phone cannot trust "here" to skip that wait.
-- **At a trusted place**, reopening needs no tap while your phone is unlocked and near the machine, and sessions can stay open up to 4 hours.
-- **Leaving locks.** When you leave a place, the phone locks the machines you opened there.
-- **Without location access**, a session stays open up to 1 hour and reopening always takes a tap.
+- **Trust where I am now.** You can also add the place you are at by hand: **Settings**, **Places**, **Trust where I am now**, with Face ID or a fingerprint.
+- **At a trusted place**, reopening needs no tap while your phone is unlocked and near the machine, and sessions can stay open up to 4 hours. These comforts start as soon as you trust the place.
+- **Skipping the two-hour wait.** A trusted place, learned or added by hand, lifts the two-hour wait of [level 3](#levels) two hours after you trust it. Trusting it is announced to every paired computer, which can cancel it until then (`Your phone trusted the place Home. It skips the two-hour wait from 12:04. Not you? Run: sealctl cancel`). A cancel, or removing the place, means it is not trusted. So someone holding your unlocked phone cannot trust "here" unseen to skip that wait.
+- **Leaving locks.** When you leave a trusted place, the phone locks every machine you approved there.
+- **Location "Allow all the time".** Places need location access set to "Allow all the time" (iPhone: Always), so the phone notices when you leave. Without it, sessions follow the rules for no location: a session stays open up to 1 hour and reopening always takes a tap. The app shows a banner with **Open settings** while you have a trusted place without it.
 
 At most 10 places. Remove or rename them in **Settings**, **Places**.
 
@@ -482,7 +485,7 @@ Waiting for your phone. On your phone, pick 59.
 
 The phone offers three numbers. Pick the one on the terminal. A wrong pick refuses the request, and for an hour the phone ignores sensitive requests from that machine (release it early on the machine's page in the app).
 
-**The two-hour wait.** Away from a trusted place, a level 3 approval takes effect two hours later. Every paired machine is told and shows a desktop notification. Anyone can cancel it until then: on the phone, or on any paired machine with `sealctl cancel`. At a trusted place it runs at once, except at a place added by hand in the last 24 hours. An action on the phone (showing the words, deleting relay data, leaving) is finished on the phone once the two hours are over: you have an hour to do that, after which you start again.
+**The two-hour wait.** Away from a trusted place, a level 3 approval takes effect two hours later. Every paired machine is told and shows a desktop notification. Anyone can cancel it until then: on the phone, or on any paired machine with `sealctl cancel`. At a trusted place it runs at once, except at a place trusted less than two hours ago (see [Places](#places)). An action on the phone (showing the words, deleting relay data, leaving) is finished on the phone once the two hours are over: you have an hour to do that, after which you start again.
 
 **No Face ID or fingerprint?** Level 2 asks for two words from your card instead. Level 3 is refused on the phone; on a computer, use your card: `sealctl unseal --all --words`.
 
@@ -494,7 +497,7 @@ The **Machines** tab lists every paired machine as Locked, Open or Waiting. A ma
 
 ### Activity and inventory {#inventory}
 
-- **Activity** logs every use of a key: time, key name, agent, repository, command, machine and how it was answered. At the top, a monthly summary: keys used, requests declined.
+- **Activity** logs every use of a key: time, key name, agent, repository, command, machine and how it was answered. At the top, a monthly summary: keys used, requests declined. Uses are kept on the phone for 90 days; at the bottom, a heatmap shows the last year day by day.
 - **Inventory** lists every object a key was handed out for (the secret store, own-approval secrets, volumes, backups), by machine, with its words and when it was last used.
 
 On a computer:
@@ -674,7 +677,7 @@ Your words are behind the phone's passcode. To be safe:
 Sensitive steps need Face ID or a fingerprint, never the passcode alone. The most sensitive ones (level 3) wait two hours away from your trusted places and are announced on every paired machine:
 
 ```text
-sealctl: your phone approved leaving sealctl on dev@mbp.example.com away from a trusted place. It takes effect at 11:00. Not you? Run: sealctl cancel
+Your phone approved leaving sealctl on dev@mbp.example.com away from a trusted place. It takes effect at 11:00. Not you? Run: sealctl cancel
 ```
 
 ```sh
@@ -706,14 +709,25 @@ Who pays?
   1  Me             card, opens checkout
   2  My company     invoice with VAT ID, opens checkout
   3  Someone else   copies a payment link to send
-Choose 1, 2 or 3:
+  4  Give feedback instead
+Choose 1, 2, 3 or 4:
 ```
 
 - **Me** opens Paddle's checkout and waits until the licence arrives.
 - **My company** opens the same checkout, where Paddle asks for the company and its VAT ID, and copies a short message for your team chat with the link.
 - **Someone else** copies a payment link that anyone can pay.
+- **Give feedback instead** is there until this phone has given feedback; see [Feedback for a free year](#feedback).
 
-`sealctl buy` needs a paired machine, because the licence belongs to your phone's identity. It refuses inside AI agents.
+`sealctl buy` needs a paired machine, because the licence belongs to your phone's identity. It refuses inside AI agents, and its menus need you at a terminal: not in a pipe or CI.
+
+### Feedback for a free year {#feedback}
+
+While card payments are not open, `sealctl buy` offers two choices instead of checkout:
+
+- **I'd buy it** records that you would buy. Nothing is charged, and sealctl tells you at the terminal once you can pay.
+- **Give feedback** asks four short questions: what you use sealctl for, whether $5.99 once is fair, what is missing, and one optional line. It gives this phone a year's licence, once per phone.
+
+The answers are sent with your phone's id, with no name or email. See [Privacy](/privacy#feedback) for what is kept. While the year lasts, `sealctl status` shows `Licensed until 2027-11-26 (feedback)`, and in its last 30 days one line after a command you typed says when it ends. Then sealctl counts as unpaid again, and $5.99 once pays for it as usual.
 
 ### Team seats {#seats}
 
@@ -726,7 +740,7 @@ A claimed seat stays with that person.
 
 ### Moving a licence {#licence-move}
 
-Restoring a phone from your words keeps the licence.
+Restoring a phone from your words keeps the licence, or what is left of a free year.
 
 Payments are handled by Paddle, our merchant of record. See [Refunds](/refunds).
 

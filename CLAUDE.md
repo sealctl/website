@@ -26,7 +26,9 @@ the SPEC disagree, say so and fix one of them in the pull request; don't silentl
 - Approval is per work session or on every use: "one tap per use" is wrong. When summarising
   sealctl, name encrypted volumes and backups alongside API and SSH keys.
 - Level 3 (unseal everything, show the words, delete relay data) waits two hours away from a
-  trusted place; a place added by hand lifts that wait only after 24 hours.
+  trusted place; a trusted place, learned or added by hand, lifts the two-hour wait two hours
+  after it is trusted, and trusting it is announced to every paired computer and can be
+  cancelled.
 - Same words as the product: Locked, Open, Waiting, One tap, Places, Allow.
 - `/security` is written for non-specialists (plain pictures); `/crypto` is for specialists.
   The docs are one page (`/docs`) with the contents list at the top, no sidebar.
