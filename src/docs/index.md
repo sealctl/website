@@ -722,12 +722,12 @@ Choose 1, 2, 3 or 4:
 
 ### Feedback for a free year {#feedback}
 
-While card payments are not open, `sealctl buy` offers two choices instead of checkout:
+`sealctl buy` also offers feedback instead of paying:
 
-- **I'd buy it** records that you would buy. Nothing is charged, and sealctl tells you at the terminal once you can pay.
 - **Give feedback** asks four short questions: what you use sealctl for, whether $5.99 once is fair, what is missing, and one optional line. It gives this phone a year's licence, once per phone.
+- **I'd buy it**, where the menu shows it, records that you would buy. Nothing is charged.
 
-The answers are sent with your phone's id, with no name or email. See [Privacy](/privacy#feedback) for what is kept. While the year lasts, `sealctl status` shows `Licensed until 2027-11-26 (feedback)`, and in its last 30 days one line after a command you typed says when it ends. Then sealctl counts as unpaid again, and $5.99 once pays for it as usual.
+The answers are sent with your phone's id, with no name or email. See [Privacy](/privacy#feedback) for what is kept. While the year lasts, `sealctl status` shows `Licensed until 2027-11-26 (feedback)`. In its last 30 days, the one line that would ask you to pay says once when the year ends instead: `Your free year of sealctl ends on 26 Nov 2027. It's $5.99 once: sealctl buy`. Then sealctl counts as unpaid again, and $5.99 once pays for it as usual.
 
 ### Team seats {#seats}
 
