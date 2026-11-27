@@ -234,7 +234,7 @@ One long page, written in Markdown in this repo (`src/docs/index.md`), in the st
 | Your phone | Approval card · Desktop notifications · Sessions, states and places · Machines and tags · Usage log · Inventory |
 | Your 24 words | Recovery card · Restore a phone · `sealctl recover` without a phone · Change words (not in the app yet: what to do instead) |
 | Arriving and leaving | `sealctl seal`: bring your own volumes, backups, SSH keys and secrets · Leaving sealctl (`/docs/leaving`): `sealctl unseal`, `unseal --all`, Leave sealctl on the phone, what stays encrypted, where passwords go, keeping the card |
-| Paying | `sealctl buy` · Company invoice · Team seats and codes · Moving a licence |
+| Paying | `sealctl buy` · Company invoice · Team seats and codes · Feedback for a free year (`I'd buy it`, `Give feedback`) · Moving a licence |
 | Reference | CLI reference (generated) · `.sealctl.toml` reference · Exit codes and errors · Cryptographic design (`/crypto`) · Protocol (link) |
 | Help | Troubleshooting · FAQ · Changelog (link to releases) |
 
@@ -311,7 +311,7 @@ Simple and honest, no third-party status service.
 Short sections, plain words. Placeholders (`seller.*` and `legal.*` in `site.config.mjs`) stay until the seller fills them in; nobody else fills them.
 
 1. **Who we are.** "sealctl is made and sold by `[legal name]`, `[trading name, if any]`, `[address]`, Poland. `[NIP and REGON, if registered]`. Email: `privacy@sealctl.com`." Controller under GDPR.
-2. **The short version.** No accounts, no analytics, no trackers, no advertising. The website sets no cookies. The relay stores public keys, machine names and an encrypted backup it cannot open. The relay's code stores and logs no IP address.
+2. **The short version.** No accounts, no analytics, no trackers, no advertising. The website sets no cookies. The relay stores public keys, machine names and an encrypted backup it cannot open. The relay's code stores and logs no IP address. Feedback and "I'd buy it" from `sealctl buy` are kept with the phone's id, never a name or email.
 3. **The website.** Served by Cloudflare, which processes IP addresses to deliver pages and stop attacks; we get no logs of visitors. No cookies. A chosen light or dark theme is remembered in the browser only, never sent to us. `/pay` loads Paddle.js, which sets the cookies and storage Paddle needs for checkout and fraud checks.
 4. **The relay** (`id="relay"`). Table of every item from the protocol, with purpose and retention:
 
@@ -329,13 +329,18 @@ Short sections, plain words. Placeholders (`seller.*` and `legal.*` in `site.con
 | Network address of phone and machine | Says whether the phone is near the machine; flood limits | Used in memory while serving the call, as a keyed hash; the relay's code never stores or logs it |
 | Days with use (count), the last week the phone was seen, daily call count | The request to pay; deleting data after 2 years without use; the abuse limit | Count and week kept; daily counter in memory |
 | Licence state, seat codes, Paddle transaction ids (last 100) | Your licence | As long as the licence exists, also after you delete your other data, so that restoring from your words keeps it. Ask us to erase it too |
+| Feedback, if given: use, price, what is missing, one optional line (at most 280 characters), and its time | What to build and what to charge; it earns a free year | Until the next feedback replaces it, or you delete your data |
+| "I'd buy it", if chosen: that you would buy, and when (the relay also takes a short note, which `sealctl buy` never sends) | Knowing who would buy; one line at your terminal about paying | Until a later one replaces it, or you delete your data |
+| Free year for feedback: that it was given, and until when | Your licence; one free year per phone | Like a bought licence: kept after you delete your other data; ask us to erase it too |
 
    Location never leaves the phone in readable form: places travel only inside the encrypted backup. The relay never learns which key was used, which command ran or what the agent did. Cloudflare sees network addresses to deliver traffic and keeps those of requests it blocks as attacks in its security log. Operational logs hold no keys, addresses or identifiers (7 days); daily counts with no identifier (3 months). A phone that makes no call for 2 years has its data deleted; a licence record and its usage count stay.
+
+   Subsection **Feedback and "I'd buy it"** (`id="feedback"`): what `sealctl buy` sends for feedback instead of paying, and for "I'd buy it" where its menu shows it (the answers or the intent, with the phone's id and the time, no name or email); only we read them, on a private admin page; deleting relay data deletes the answers and the intent, while the record that a free year was given, and until when, stays like a bought licence record (relay SPEC 3.16, protocol.md "Buy intent and feedback").
 5. **Payments.** Paddle is the merchant of record and a separate controller for payment data (link to Paddle's privacy notice). Paddle shares with us what we need to support you and keep tax records: name, email, country, company name and VAT ID if given, and what was bought. We never see card details. The phone's public identity key goes to Paddle (`custom_data`) to link payment and phone; deleting relay data doesn't delete Paddle's records.
 6. **Email.** If you write to us, we keep the conversation to answer you and for `[retention, e.g. 2 years]`.
 7. **App stores and push.** Apple and Google distribute the app under their own privacy terms. Push notifications go through Apple Push Notification service and Firebase Cloud Messaging; they carry no request content. On Android, Firebase also creates an installation id that Google uses to deliver notifications.
 8. **Processors.** Cloudflare (website, relay hosting, email forwarding), Google Firebase Cloud Messaging and Apple Push Notification service (notifications), `[email provider, if any]` (email). Apple and Google distribute the app as independent controllers; Paddle is a separate controller as merchant of record; GitHub's privacy statement covers issues and advisories. Where data leaves the EEA, under the EU–US Data Privacy Framework or standard contractual clauses.
-9. **Legal bases.** Contract (relay service, licence), legal obligation (tax records), legitimate interest (delivering and securing the website and relay, abuse limit, the request to pay and anonymous daily counts, answering email).
+9. **Legal bases.** Contract (relay service, licence, including a free year for feedback), legal obligation (tax records), legitimate interest (delivering and securing the website and relay, abuse limit, the request to pay and anonymous daily counts, learning from the feedback and "I'd buy it" answers you choose to send, answering email).
 10. **Your rights.** Access, correction, deletion, restriction, portability, objection; complaint to the Polish supervisory authority, the President of the Personal Data Protection Office (UODO), or your own. How to delete: in the app, Settings, Delete my relay data, or Leave sealctl (when available), or by email with your phone's identity fingerprint; machines unpair from the phone or the CLI.
 11. **Children.** Not meant for people under 16.
 12. **Changes.** Dated versions; material changes announced on this page 30 days ahead.

@@ -58,10 +58,11 @@ committed).
   certifications or audits; no "military-grade" or "unbreakable". Approval is per work session
   or on every use: "one tap per use" is wrong. When summarising sealctl, encrypted volumes and
   backups are named alongside API and SSH keys. Level 3 waits two hours away from a trusted
-  place; a place added by hand lifts that wait only after 24 hours. Where a page states a fact
-  from another repository (CLI flags, protocol steps, relay data kept), check it against that
-  repository's public docs (`sealctl/sealctl` README, SPEC.md, `docs/protocol.md`) and say "I
-  could not verify" when you cannot.
+  place; a trusted place, learned or added by hand, lifts the two-hour wait two hours after it
+  is trusted, and trusting it is announced to every paired computer and can be cancelled. Where
+  a page states a fact from another repository (CLI flags, protocol steps, relay data kept),
+  check it against that repository's public docs (`sealctl/sealctl` README, SPEC.md,
+  `docs/protocol.md`) and say "I could not verify" when you cannot.
 - **Current product only.** No Ledger, OpenPGP-on-Ledger, 0.5 or 0.6 history. The site reads
   as a shipping product: no "in development", "coming soon", status strips or "planned" pills;
   the only placeholders are in `site.config.mjs`. No version numbers in prose (the protocol

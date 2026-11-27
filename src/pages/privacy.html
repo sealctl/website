@@ -18,7 +18,7 @@ bodyClass: legal
 
     <section aria-labelledby="short-h">
       <h2 id="short-h">2. The short version</h2>
-      <p>No accounts, no analytics, no trackers, no advertising. The website sets no cookies. The relay stores public keys, machine names and an encrypted backup it cannot open. The relay's code stores and logs no IP address.</p>
+      <p>No accounts, no analytics, no trackers, no advertising. The website sets no cookies. The relay stores public keys, machine names and an encrypted backup it cannot open. The relay's code stores and logs no IP address. If you give feedback or say you would buy in <code>sealctl buy</code>, it keeps those answers with your phone's id, never a name or email.</p>
     </section>
 
     <section aria-labelledby="web-h">
@@ -37,7 +37,7 @@ bodyClass: legal
           <caption class="sr-only">What the relay keeps, why, and for how long</caption>
           <thead><tr><th scope="col">Item</th><th scope="col">Why</th><th scope="col">Kept</th></tr></thead>
           <tbody>
-            <tr><td>Phone identity public key</td><td>Identifies your phone; holds the licence</td><td>Until you delete your data; a phone that has or had a licence keeps it inside the licence record below</td></tr>
+            <tr><td>Phone identity public key</td><td>Identifies your phone; holds the licence</td><td>Until you delete your data; a phone that has or had a licence, bought or a free year, keeps it inside the licence record below</td></tr>
             <tr><td>Machine pairing public keys; machine name (<code>user@host</code>), OS and model; pairing time</td><td>Routes requests; shows your machines on your phone</td><td>Until unpaired</td></tr>
             <tr><td>When each machine last called the relay, to the hour</td><td>Shows "seen 2 h ago" on your phone</td><td>Until unpaired</td></tr>
             <tr><td>Pairing proof</td><td>Lets the machine confirm the pairing</td><td>Until unpaired</td></tr>
@@ -49,11 +49,18 @@ bodyClass: legal
             <tr><td>Network address of phone and machine</td><td>Says whether the phone is near the machine; flood limits</td><td>Used in memory while serving the call, as a keyed hash; the relay's code never stores or logs it</td></tr>
             <tr><td>Days with use (count), the last week the phone was seen, daily call count</td><td>The request to pay; deleting data after 2 years without use; the abuse limit</td><td>Count and week kept; daily counter in memory</td></tr>
             <tr><td>Licence state, seat codes, Paddle transaction ids (last 100), and the phone key a bought licence moved to (last 100)</td><td>Your licence</td><td>As long as the licence exists, also after you delete your other data, so that restoring from your words keeps it. Ask us to erase it too</td></tr>
+            <tr><td>Feedback, if you give it: what you use sealctl for, whether the price is fair, what is missing, one optional line of at most 280 characters, and when you sent it</td><td>What to build and what to charge; it earns a free year (<a href="#feedback">below</a>)</td><td>Until your next feedback replaces it, or you delete your data</td></tr>
+            <tr><td>"I'd buy it", if you choose it: that you would buy, and when (the relay also takes a short note, which <code>sealctl buy</code> never sends)</td><td>Knowing who would buy; one line at your terminal about paying</td><td>Until a later one replaces it, or you delete your data</td></tr>
+            <tr><td>Free year for feedback: that it was given, and until when</td><td>Your licence; one free year per phone</td><td>Like a bought licence: also after you delete your other data, so that restoring from your words keeps the rest of the year and no second one is given. Ask us to erase it too</td></tr>
           </tbody>
         </table>
       </div>
       <p>Your location never leaves the phone in readable form: places travel only inside the encrypted backup. The relay never learns which key was used, which command ran or what the agent did.</p>
       <p>Cloudflare, which runs the relay, sees network addresses to deliver traffic and keeps the addresses of requests it blocks as attacks in its security log. Operational logs hold no keys, addresses or identifiers and are kept 7 days; daily counts with no identifier are kept 3 months. A phone that makes no call for 2 years has its data deleted; a licence record and its usage count stay.</p>
+
+      <h3 id="feedback">Feedback and "I'd buy it"</h3>
+      <p><code>sealctl buy</code> lets you give feedback instead of paying: four questions, for a year's licence. Where its menu shows "I'd buy it", you can also say that you would buy. Both are your choice, and neither asks for a name or email. The relay keeps what you send with your phone's id and the time: your answers (what you use sealctl for, whether the price is fair, what is missing, and one optional line of at most 280 characters), or that you would buy. Only we read them, on a private admin page.</p>
+      <p>Deleting your relay data deletes the answers and the "I'd buy it" record. The record that a free year was given, and until when, stays, as a bought licence record does: a phone restored from your words keeps the rest of its year and is not given a second one. Ask us to erase that record too.</p>
     </section>
 
     <section aria-labelledby="pay-h">
@@ -80,9 +87,9 @@ bodyClass: legal
     <section aria-labelledby="bases-h">
       <h2 id="bases-h">9. Legal bases</h2>
       <ul>
-        <li>Contract: the relay service and the licence.</li>
+        <li>Contract: the relay service and the licence, including a free year for feedback.</li>
         <li>Legal obligation: tax records.</li>
-        <li>Legitimate interest: delivering and securing the website and relay, the abuse limit, the request to pay and anonymous daily counts, answering email.</li>
+        <li>Legitimate interest: delivering and securing the website and relay, the abuse limit, the request to pay and anonymous daily counts, learning from the feedback and "I'd buy it" answers you choose to send, answering email.</li>
       </ul>
     </section>
 
